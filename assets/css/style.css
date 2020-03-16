@@ -37,7 +37,7 @@
 body {
     font-family: "Roboto Mono", sans-serif; 
     height: 100%;
-    color: #444;
+    color: #ffffff;
 }
 
 a, a:hover, a:visited, a:active, a:focus {
@@ -50,10 +50,10 @@ a:hover {
     font-weight: 700;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6,p {
     font-family: 'Lato', sans-serif;
     margin: 20px 0;
-    color: #101010; 
+    color: #ffffff; 
 }
 
 section {
@@ -96,18 +96,17 @@ section {
 
 .i-size-big {
     font-size: 60px;
+	color: #25254f;
 }
 
 .i-size-med {
     font-size: 40px;
+	color: #00ffec;
 }
 
 .i-size-small {
     font-size: 30px;
-}
-
-.i-size-big, .i-size-med, .i-size-small {
-    color: #101010;
+	color: #00ffec;
 }
 
 .icon-holder:after {
@@ -162,7 +161,7 @@ section {
     font-weight: 700;
     z-index: -1;
     margin: 0;
-    color: #ececec;
+    color: #000828;
 }
 
 
@@ -404,7 +403,7 @@ section {
 .skillbar-title {
     position: relative;
     font-size: 14px;
-    color: #101010;
+    color: #00ff97;
     z-index: 100;
     display: block;
     width: 100%;
@@ -415,6 +414,7 @@ section {
     height: 35px;
     line-height: 35px;
     text-align: right;
+	color: #00ff97;
 }
 
 .skillbar-bar {
@@ -552,7 +552,7 @@ section {
 }
 
 .box-it {
-    border: 1px solid #aaa;
+    border: .2px solid #aaa;
     position: relative;
     margin-bottom: 30px;
 }
@@ -1059,7 +1059,7 @@ section {
 }
 
 .line-art-top div, .line-art-bottom div, .line-art-left div, .line-art-right div{
-    background: #101010;
+    background: #ffffff;
     width: 10px;
     height: 1px;
     -webkit-transform: rotate(45deg);
