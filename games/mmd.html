@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Demography Lab: Ghana (university edition)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#F2F4F6; --panel:#FFFFFF; --panel2:#F7F9FA; --ink:#0F1B26; --muted:#556574; --line:#D3DBE2;
+  --green:#006B3F; --green-ink:#FFFFFF; --gold:#F5B800; --gold-soft:#FFF3C6; --red:#CE1126; --blue:#1F5FAE;
+  --good:#0E7A45; --bad:#B4162A; --code:#0F1B26; --code-ink:#E6EDF3;
+  --c1:#006B3F; --c2:#E0A800; --c3:#CE1126; --c4:#1F5FAE; --c5:#7A4FB5; --c6:#2A9DA8;
+  --shadow:0 1px 2px rgba(15,27,38,.06),0 6px 20px rgba(15,27,38,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0A1218; --panel:#111C26; --panel2:#0E1822; --ink:#E8EEF3; --muted:#9FB0BE; --line:#223342;
+    --green:#2FBF7A; --green-ink:#06210F; --gold:#F5C518; --gold-soft:#2B2508; --red:#FF6B7A; --blue:#6FA8F0;
+    --good:#4ADE80; --bad:#FF7A8A; --code:#070D12; --code-ink:#DDE6EE;
+    --c1:#2FBF7A; --c2:#F5C518; --c3:#FF6B7A; --c4:#6FA8F0; --c5:#B38CF0; --c6:#4CC9D6;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0A1218; --panel:#111C26; --panel2:#0E1822; --ink:#E8EEF3; --muted:#9FB0BE; --line:#223342;
+  --green:#2FBF7A; --green-ink:#06210F; --gold:#F5C518; --gold-soft:#2B2508; --red:#FF6B7A; --blue:#6FA8F0;
+  --good:#4ADE80; --bad:#FF7A8A; --code:#070D12; --code-ink:#DDE6EE;
+  --c1:#2FBF7A; --c2:#F5C518; --c3:#FF6B7A; --c4:#6FA8F0; --c5:#B38CF0; --c6:#4CC9D6;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.35);
+}
+html{height:100%;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:16px;line-height:1.6}
+h1,h2,h3,h4{font-family:'Newsreader',Georgia,'Times New Roman',serif;font-weight:600;line-height:1.2;margin:0 0 .5em;letter-spacing:-.01em}
+h1{font-size:clamp(1.9rem,4.5vw,2.8rem)} h2{font-size:clamp(1.4rem,3vw,1.9rem)} h3{font-size:1.25rem} h4{font-size:1.05rem;font-family:'IBM Plex Sans',sans-serif;font-weight:600;letter-spacing:0}
+p{margin:.5em 0 .9em} a{color:var(--blue)}
+code,pre,.mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:6px}
+button{font:inherit;color:inherit}
+.flag{height:5px;background:linear-gradient(90deg,var(--red) 0 33.3%,var(--gold) 33.3% 66.6%,var(--green) 66.6%)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--panel);border-bottom:1px solid var(--line)}
+.top .in{display:flex;align-items:center;gap:14px;padding:10px 18px;max-width:1280px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:10px;background:none;border:0;cursor:pointer;padding:0;text-align:left}
+.brand .star{width:30px;height:30px;border-radius:8px;background:var(--ink);color:var(--gold);display:grid;place-items:center;font-size:18px;line-height:1}
+.brand b{font-family:'Newsreader',serif;font-size:1.2rem;font-weight:700}
+.brand small{display:block;color:var(--muted);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;margin-top:-2px}
+.top .sp{flex:1}
+.prog{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--muted)}
+.bar{width:120px;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--green);width:0;transition:width .4s}
+.iconbtn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:.85rem}
+.iconbtn:hover{background:var(--panel2)}
+.shell{display:grid;grid-template-columns:300px minmax(0,1fr);gap:0;max-width:1280px;margin:0 auto}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 56px);align-self:start;height:calc(100vh - 62px);overflow:auto;padding:18px 14px 40px 18px;border-right:1px solid var(--line)}
+.side h5{margin:18px 0 6px;font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.side button.nav{display:flex;gap:8px;align-items:flex-start;width:100%;text-align:left;border:0;background:none;cursor:pointer;padding:7px 8px;border-radius:8px;font-size:.92rem;color:var(--ink)}
+.side button.nav:hover{background:var(--panel2)}
+.side button.nav.on{background:var(--gold-soft);box-shadow:inset 3px 0 0 var(--gold)}
+.side .n{font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--muted);min-width:22px;padding-top:2px}
+.side .ck{margin-left:auto;color:var(--good);font-weight:700}
+.main{padding:26px 28px 80px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:22px}
+.card+.card{margin-top:18px}
+.eyebrow{font-size:.75rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:6px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:14px 0 20px;flex-wrap:wrap}
+.tab{border:0;background:none;padding:9px 16px;cursor:pointer;font-weight:500;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--ink);border-bottom-color:var(--gold);font-weight:600}
+.brief p,.brief li{max-width:78ch}
+.brief ul{padding-left:1.2em}
+.formula{font-family:'IBM Plex Mono',monospace;background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--green);border-radius:8px;padding:10px 14px;margin:10px 0;overflow-x:auto;font-size:.92rem;white-space:pre-wrap}
+.callout{border-radius:10px;padding:12px 16px;margin:14px 0;border:1px solid var(--line);background:var(--panel2)}
+.callout.warn{border-left:4px solid var(--red)} .callout.info{border-left:4px solid var(--blue)} .callout.key{border-left:4px solid var(--gold);background:var(--gold-soft)}
+.callout b.t{display:block;font-size:.78rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.kpi{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kpi b{display:block;font-family:'IBM Plex Mono',monospace;font-size:1.3rem;font-weight:600;line-height:1.2}
+.kpi span{font-size:.78rem;color:var(--muted)}
+.ctrls{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:6px 22px;margin:8px 0 14px}
+.ctrl{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
+.ctrl label{font-size:.88rem;font-weight:500}
+.ctrl output{font-family:'IBM Plex Mono',monospace;font-size:.88rem;text-align:right;min-width:3.4em}
+.ctrl input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--green)}
+.ctrl select,.ctrl input[type=number],input.num,select.sel,textarea.ta{font:inherit;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);max-width:100%}
+.ctrl input[type=number]{width:9.5em;text-align:right;font-family:'IBM Plex Mono',monospace}
+textarea.ta{width:100%;min-height:260px;font-family:'IBM Plex Mono',monospace;font-size:.88rem;line-height:1.5}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;align-items:center}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:7px 14px;cursor:pointer;font-weight:500;font-size:.92rem}
+.btn:hover{background:var(--panel2)}
+.btn.pri{background:var(--green);color:var(--green-ink);border-color:var(--green)}
+.btn.pri:hover{filter:brightness(1.1)}
+.btn.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.sm{padding:3px 10px;font-size:.82rem}
+.chart{width:100%;height:auto;display:block;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.chart text{fill:var(--ink);font-family:'IBM Plex Sans',sans-serif;font-size:11px}
+.chart .mut{fill:var(--muted)}
+.chart .gl{stroke:var(--line);stroke-width:1}
+.chart .ax{stroke:var(--muted);stroke-width:1}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tbl{width:100%;border-collapse:collapse;font-size:.88rem;margin:10px 0}
+.tbl th,.tbl td{padding:5px 9px;border-bottom:1px solid var(--line);text-align:right}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl th{font-weight:600;background:var(--panel2);position:sticky;top:0}
+.tbl td.num,.tbl .mono{font-family:'IBM Plex Mono',monospace}
+.tblwrap{overflow:auto;max-height:420px;border:1px solid var(--line);border-radius:8px}
+.tbl tr.hl td{background:var(--gold-soft)}
+.tbl input{width:6.5em;font-family:'IBM Plex Mono',monospace;font-size:.85rem;padding:2px 5px;border:1px solid var(--line);border-radius:5px;background:var(--panel);color:var(--ink);text-align:right}
+.code{position:relative;background:var(--code);color:var(--code-ink);border-radius:10px;margin:12px 0;overflow:hidden}
+.code pre{margin:0;padding:14px 16px;overflow:auto;font-size:.84rem;line-height:1.55}
+.code button{position:absolute;top:8px;right:8px;background:#ffffff1a;color:var(--code-ink);border:1px solid #ffffff33;border-radius:6px;padding:2px 9px;font-size:.75rem;cursor:pointer}
+.q{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0;background:var(--panel)}
+.q.ok{border-left:5px solid var(--good)} .q.no{border-left:5px solid var(--bad)}
+.q .qn{font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:var(--muted)}
+.q .fb{margin-top:8px;font-size:.92rem}
+.q .fb.good{color:var(--good)} .q .fb.bad{color:var(--bad)}
+.q .opts{display:grid;gap:6px;margin:8px 0}
+.q .opt{display:flex;gap:8px;align-items:flex-start;padding:7px 10px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--panel2)}
+.q .opt input{margin-top:5px}
+.sol{margin-top:8px;font-size:.9rem;background:var(--panel2);border-radius:8px;padding:10px 12px;border:1px dashed var(--line)}
+.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:26px;align-items:center}
+.hero .stat{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.units{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:16px}
+.unit{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--panel)}
+.unit h4{margin-bottom:4px} .unit ol{margin:6px 0 0;padding-left:1.3em;font-size:.9rem;color:var(--muted)}
+.pill{display:inline-block;padding:1px 9px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);font-size:.75rem;color:var(--muted);margin-right:4px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.8rem;margin:6px 0;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+details.d{border:1px solid var(--line);border-radius:10px;margin:10px 0;background:var(--panel)}
+details.d summary{cursor:pointer;padding:10px 14px;font-weight:600}
+details.d>div{padding:0 14px 12px}
+.menu{display:none}
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .side{position:fixed;inset:calc(env(safe-area-inset-top,0px) + 56px) 0 0 0;z-index:25;background:var(--panel);height:auto;display:none;border-right:0}
+  .side.open{display:block}
+  .menu{display:inline-block}
+  .main{padding:18px 14px 70px}
+  .hero,.twocol{grid-template-columns:1fr}
+  .bar{width:70px}
+  .brand small{display:none}
+}
+@media print{.top,.side,.tabs,.btn,.noprint{display:none!important}.shell{display:block}.card{box-shadow:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app"><noscript><p style="padding:24px">This course needs JavaScript. Please enable it and reload.</p></noscript></div>
+<script>
+(function(){
+'use strict';
+const A=window.A={mods:[],units:[],labs:{},D:{},calc:{}};
+const NS='http://www.w3.org/2000/svg';
+const el=A.el=function(tag,attrs,...kids){
+  const e=document.createElement(tag);
+  if(attrs)for(const k in attrs){const v=attrs[k];
+    if(k==='class')e.className=v;else if(k==='html')e.innerHTML=v;
+    else if(k.slice(0,2)==='on')e.addEventListener(k.slice(2),v);
+    else if(v!==false&&v!=null)e.setAttribute(k,v);}
+  for(const c of kids.flat(2)){if(c==null||c===false)continue;e.append(c.nodeType?c:document.createTextNode(String(c)));}
+  return e;
+};
+const sv=A.sv=function(tag,attrs,...kids){
+  const e=document.createElementNS(NS,tag);
+  for(const k in attrs||{})e.setAttribute(k,attrs[k]);
+  for(const c of kids.flat(2)){if(c==null)continue;e.append(c.nodeType?c:document.createTextNode(String(c)));}
+  return e;
+};
+const fmt=A.fmt=(n,d)=>{d=d==null?0:d;if(n==null||isNaN(n))return '–';return Number(n).toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d});};
+A.sum=a=>a.reduce((s,x)=>s+x,0);
+A.abbr=n=>{const a=Math.abs(n);return a>=1e6?(n/1e6).toFixed(a>=1e7?0:1).replace(/\.0$/,'')+'M':a>=1e3?(n/1e3).toFixed(a>=1e4?0:1).replace(/\.0$/,'')+'k':String(Math.round(n*100)/100);};
+A.cp=async function(t,btn){try{await navigator.clipboard.writeText(t);if(btn){const o=btn.textContent;btn.textContent='Copied';setTimeout(()=>btn.textContent=o,1200);}}catch(e){if(btn){btn.textContent='Select + copy';}}};
+
+/* ---------- UI atoms ---------- */
+A.slider=function(parent,o){
+  const out=el('output',null,'');const id='s'+Math.random().toString(36).slice(2,8);
+  const inp=el('input',{type:'range',id,min:o.min,max:o.max,step:o.step||1,value:o.value,'aria-label':o.label});
+  const show=()=>{out.textContent=(o.pre||'')+fmt(inp.value,o.dec||0)+(o.suf||'');};
+  inp.addEventListener('input',()=>{show();o.on&&o.on(+inp.value);});show();
+  const w=el('div',{class:'ctrl'},el('label',{for:id},o.label),out,inp);parent.append(w);
+  return {get:()=>+inp.value,set:v=>{inp.value=v;show();},el:w};
+};
+A.num=function(parent,o){
+  const id='n'+Math.random().toString(36).slice(2,8);
+  const inp=el('input',{type:'number',id,value:o.value,step:o.step||'any',min:o.min,max:o.max,'aria-label':o.label});
+  inp.addEventListener('input',()=>o.on&&o.on(+inp.value));
+  parent.append(el('div',{class:'ctrl'},el('label',{for:id},o.label),inp));
+  return {get:()=>+inp.value,set:v=>{inp.value=v;}};
+};
+A.select=function(parent,o){
+  const id='z'+Math.random().toString(36).slice(2,8);
+  const s=el('select',{id,class:'sel','aria-label':o.label},o.options.map(x=>el('option',{value:x[0]},x[1])));
+  s.value=o.value!=null?o.value:o.options[0][0];
+  s.addEventListener('change',()=>o.on&&o.on(s.value));
+  parent.append(el('div',{class:'ctrl'},el('label',{for:id},o.label),s));
+  return {get:()=>s.value,set:v=>{s.value=v;},el:s};
+};
+A.toggle=function(parent,items,cur,on){
+  const w=el('div',{class:'row',role:'group'});const bs=[];
+  items.forEach(it=>{const b=el('button',{class:'btn'+(it[0]===cur?' on':''),onclick:()=>{bs.forEach(x=>x.classList.remove('on'));b.classList.add('on');on(it[0]);}},it[1]);bs.push(b);w.append(b);});
+  parent.append(w);return w;
+};
+A.kpis=function(items){return el('div',{class:'kpis'},items.map(i=>el('div',{class:'kpi'},el('b',null,i[0]),el('span',null,i[1]))));};
+A.callout=(kind,title,html)=>el('div',{class:'callout '+kind},title?el('b',{class:'t'},title):null,el('div',{html}));
+A.code=function(text){const b=el('button',{onclick:()=>A.cp(text,b)},'Copy');return el('div',{class:'code'},b,el('pre',null,el('code',null,text)));};
+A.table=function(head,rows,o){
+  o=o||{};
+  return el('div',{class:'tblwrap',style:o.h?('max-height:'+o.h+'px'):''},el('table',{class:'tbl'},
+    el('thead',null,el('tr',null,head.map(h=>el('th',null,h)))),
+    el('tbody',null,rows.map(r=>el('tr',{class:r.hl?'hl':''},(r.c||r).map((c,i)=>el('td',{class:(typeof c==='number'||(typeof c==='string'&&/^[-+0-9.,%\s]+$/.test(c)))?'num':''},c))))))); 
+};
+A.legend=items=>el('div',{class:'legend'},items.map(i=>el('span',null,el('i',{style:'background:'+i[1]}),i[0])));
+
+/* ---------- chart helpers ---------- */
+function niceTicks(lo,hi,n){
+  n=n||5;if(hi===lo){hi=lo+1;}
+  const span=hi-lo,raw=span/n,mag=Math.pow(10,Math.floor(Math.log10(raw))),r=raw/mag;
+  const step=(r<1.5?1:r<3?2:r<7?5:10)*mag;
+  const t=[];for(let v=Math.ceil(lo/step-1e-9)*step;v<=hi+1e-9;v+=step)t.push(Math.round(v/step)*step);
+  return t;
+}
+A.niceTicks=niceTicks;
+function mkSvg(W,H,label){return sv('svg',{viewBox:'0 0 '+W+' '+H,class:'chart',role:'img','aria-label':label||'Chart'});}
+A.ch={};
+A.ch.line=function(series,o){
+  o=o||{};const W=o.W||680,H=o.H||320,pad={l:o.padl||58,r:18,t:o.legend===false?14:34,b:o.xl?46:32};
+  const svg=mkSvg(W,H,o.label||'Line chart');
+  let xs=[],ys=[];series.forEach(s=>s.pts.forEach(p=>{xs.push(p[0]);ys.push(p[1]);}));
+  const x0=o.xmin!=null?o.xmin:Math.min(...xs),x1=o.xmax!=null?o.xmax:Math.max(...xs);
+  let y0=o.ymin!=null?o.ymin:Math.min(0,...ys),y1=o.ymax!=null?o.ymax:Math.max(...ys)*1.06;if(y1===y0)y1=y0+1;
+  const X=x=>pad.l+(x-x0)/(x1-x0||1)*(W-pad.l-pad.r),Y=y=>H-pad.b-(y-y0)/(y1-y0)*(H-pad.t-pad.b);
+  niceTicks(y0,y1,5).forEach(v=>{svg.append(sv('line',{class:'gl',x1:pad.l,x2:W-pad.r,y1:Y(v),y2:Y(v)}),sv('text',{class:'mut',x:pad.l-7,y:Y(v)+4,'text-anchor':'end'},o.yfmt?o.yfmt(v):A.abbr(v)));});
+  const xt=o.xticks||niceTicks(x0,x1,7);
+  xt.forEach(v=>{svg.append(sv('line',{class:'ax',x1:X(v),x2:X(v),y1:H-pad.b,y2:H-pad.b+4}),sv('text',{class:'mut',x:X(v),y:H-pad.b+17,'text-anchor':'middle'},o.xfmt?o.xfmt(v):String(v)));});
+  svg.append(sv('line',{class:'ax',x1:pad.l,x2:W-pad.r,y1:H-pad.b,y2:H-pad.b}));
+  if(o.xl)svg.append(sv('text',{x:(pad.l+W-pad.r)/2,y:H-6,'text-anchor':'middle'},o.xl));
+  if(o.yl)svg.append(sv('text',{x:13,y:(pad.t+H-pad.b)/2,'text-anchor':'middle',transform:'rotate(-90 13 '+(pad.t+H-pad.b)/2+')'},o.yl));
+  (o.vlines||[]).forEach(v=>{svg.append(sv('line',{x1:X(v[0]),x2:X(v[0]),y1:pad.t,y2:H-pad.b,stroke:'var(--muted)','stroke-dasharray':'4 4'}),sv('text',{class:'mut',x:X(v[0])+4,y:pad.t+11},v[1]));});
+  series.forEach((s,k)=>{
+    const col=s.color||'var(--c'+(k%6+1)+')';
+    svg.append(sv('polyline',{points:s.pts.map(p=>X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':s.w||2.5,'stroke-linejoin':'round','stroke-linecap':'round','stroke-dasharray':s.dash||''}));
+    if(s.dots)s.pts.forEach(p=>svg.append(sv('circle',{cx:X(p[0]),cy:Y(p[1]),r:3.4,fill:col,stroke:'var(--panel)','stroke-width':1.2})));
+    if(o.legend!==false&&s.name){const lx=pad.l+4+k*(o.legw||140);svg.append(sv('rect',{x:lx,y:9,width:12,height:12,rx:3,fill:col}),sv('text',{x:lx+17,y:19},s.name));}
+  });
+  return svg;
+};
+A.ch.bars=function(data,o){
+  o=o||{};const W=o.W||680,H=o.H||300,pad={l:o.padl||54,r:12,t:16,b:o.b||36};
+  const svg=mkSvg(W,H,o.label||'Bar chart');
+  const ymax=o.ymax||Math.max(...data.map(d=>d.v))*1.08||1,ymin=o.ymin||0;
+  const bw=(W-pad.l-pad.r)/data.length,Y=y=>H-pad.b-(y-ymin)/(ymax-ymin)*(H-pad.t-pad.b);
+  niceTicks(ymin,ymax,5).forEach(v=>{svg.append(sv('line',{class:'gl',x1:pad.l,x2:W-pad.r,y1:Y(v),y2:Y(v)}),sv('text',{class:'mut',x:pad.l-7,y:Y(v)+4,'text-anchor':'end'},o.yfmt?o.yfmt(v):A.abbr(v)));});
+  const gap=o.gap!=null?o.gap:0.2;
+  data.forEach((d,i)=>{
+    const x=pad.l+i*bw+bw*gap/2,w=bw*(1-gap),y=Y(Math.max(d.v,ymin));
+    const r=sv('rect',{x,y,width:w,height:Math.max(0,Y(ymin)-y),rx:o.rx!=null?o.rx:2,fill:d.c||'var(--c1)'});
+    if(d.t)r.append(sv('title',{},d.t));
+    if(d.on){r.style.cursor='pointer';r.addEventListener('click',d.on);}
+    svg.append(r);
+    if(!o.every||i%o.every===0){const tx=sv('text',{class:'mut',x:x+w/2,y:H-pad.b+14,'text-anchor':o.rot?'end':'middle','font-size':o.fs||11},d.l);if(o.rot)tx.setAttribute('transform','rotate(-40 '+(x+w/2)+' '+(H-pad.b+14)+')');svg.append(tx);}
+    if(o.vals)svg.append(sv('text',{x:x+w/2,y:y-4,'text-anchor':'middle','font-size':10.5},o.vf?o.vf(d.v):A.abbr(d.v)));
+  });
+  svg.append(sv('line',{class:'ax',x1:pad.l,x2:W-pad.r,y1:Y(ymin),y2:Y(ymin)}));
+  if(o.yl)svg.append(sv('text',{x:13,y:(pad.t+H-pad.b)/2,'text-anchor':'middle',transform:'rotate(-90 13 '+(pad.t+H-pad.b)/2+')'},o.yl));
+  return svg;
+};
+A.ch.hbars=function(data,o){
+  o=o||{};const W=o.W||680,rowH=o.rowH||22,pad={l:o.padl||130,r:70,t:10,b:24};const H=pad.t+pad.b+data.length*rowH;
+  const svg=mkSvg(W,H,o.label||'Bar chart');
+  const lo=o.min!=null?o.min:Math.min(0,...data.map(d=>d.v)),hi=o.max!=null?o.max:Math.max(...data.map(d=>d.v))*1.05;
+  const X=v=>pad.l+(v-lo)/(hi-lo||1)*(W-pad.l-pad.r);
+  niceTicks(lo,hi,5).forEach(v=>{svg.append(sv('line',{class:'gl',x1:X(v),x2:X(v),y1:pad.t,y2:H-pad.b}),sv('text',{class:'mut',x:X(v),y:H-8,'text-anchor':'middle'},o.xfmt?o.xfmt(v):A.abbr(v)));});
+  data.forEach((d,i)=>{const y=pad.t+i*rowH+3,x0=X(Math.min(0,d.v)),x1=X(Math.max(0,d.v));
+    svg.append(sv('text',{x:pad.l-8,y:y+rowH/2-1,'text-anchor':'end'},d.l),sv('rect',{x:x0,y,width:Math.max(1,x1-x0),height:rowH-8,rx:2,fill:d.c||'var(--c1)'}),
+      sv('text',{x:(d.v>=0?x1+5:x0-5),y:y+rowH/2-1,'text-anchor':d.v>=0?'start':'end',class:'mut'},o.vf?o.vf(d.v):A.abbr(d.v)));});
+  svg.append(sv('line',{class:'ax',x1:X(0),x2:X(0),y1:pad.t,y2:H-pad.b}));
+  return svg;
+};
+/* population pyramid: series=[{name,M[],F[],fill?}] each array is counts per age group; plotted as % of series total */
+A.ch.pyramid=function(labels,series,o){
+  o=o||{};const W=o.W||680,H=o.H||Math.max(320,labels.length*17+60),pad={t:22,b:30};
+  const svg=mkSvg(W,H,o.label||'Population pyramid');
+  const pct=series.map(s=>{const t=A.sum(s.M)+A.sum(s.F);return {M:s.M.map(v=>100*v/t),F:s.F.map(v=>100*v/t)};});
+  const mx=o.max||Math.max(...pct.flatMap(p=>p.M.concat(p.F)))*1.1;
+  const mid=W/2,sc=(mid-62)/mx,n=labels.length,bh=(H-pad.t-pad.b)/n;
+  niceTicks(0,mx,4).forEach(v=>{[-1,1].forEach(sg=>{svg.append(sv('line',{class:'gl',x1:mid+sg*v*sc,x2:mid+sg*v*sc,y1:pad.t,y2:H-pad.b}),sv('text',{class:'mut',x:mid+sg*v*sc,y:H-14,'text-anchor':'middle'},v+'%'));});});
+  for(let i=0;i<n;i++){const y=H-pad.b-(i+1)*bh;
+    pct.forEach((p,k)=>{const base=k===0;const col=series[k].color;
+      const mA={x:mid-p.M[i]*sc,y:y+(base?1.5:0),width:p.M[i]*sc,height:bh-(base?3:0)};
+      const fA={x:mid,y:y+(base?1.5:0),width:p.F[i]*sc,height:bh-(base?3:0)};
+      if(base){svg.append(sv('rect',{...mA,fill:'var(--c4)',opacity:.85}),sv('rect',{...fA,fill:'var(--c3)',opacity:.85}));}
+      else{const st={fill:'none',stroke:col||'var(--ink)','stroke-width':1.8};svg.append(sv('rect',{...mA,...st}),sv('rect',{...fA,...st}));}});
+    if(i%(o.lstep||1)===0)svg.append(sv('text',{class:'mut',x:mid,y:y+bh/2+3.5,'text-anchor':'middle','font-size':9.5,style:'paint-order:stroke;stroke:var(--panel);stroke-width:3px'},labels[i]));}
+  svg.append(sv('text',{x:mid-70,y:14,'text-anchor':'end'},'Male ←'),sv('text',{x:mid+70,y:14},'→ Female'));
+  return svg;
+};
+A.ch.scatter=function(pts,o){
+  o=o||{};const W=o.W||600,H=o.H||340,pad={l:56,r:16,t:16,b:44};const svg=mkSvg(W,H,o.label||'Scatter plot');
+  const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
+  const x0=o.xmin!=null?o.xmin:Math.min(...xs),x1=o.xmax!=null?o.xmax:Math.max(...xs),y0=o.ymin!=null?o.ymin:Math.min(...ys),y1=o.ymax!=null?o.ymax:Math.max(...ys);
+  const X=x=>pad.l+(x-x0)/(x1-x0||1)*(W-pad.l-pad.r),Y=y=>H-pad.b-(y-y0)/(y1-y0||1)*(H-pad.t-pad.b);
+  niceTicks(y0,y1,5).forEach(v=>svg.append(sv('line',{class:'gl',x1:pad.l,x2:W-pad.r,y1:Y(v),y2:Y(v)}),sv('text',{class:'mut',x:pad.l-6,y:Y(v)+4,'text-anchor':'end'},o.yfmt?o.yfmt(v):String(v))));
+  niceTicks(x0,x1,6).forEach(v=>svg.append(sv('line',{class:'gl',x1:X(v),x2:X(v),y1:pad.t,y2:H-pad.b}),sv('text',{class:'mut',x:X(v),y:H-pad.b+16,'text-anchor':'middle'},o.xfmt?o.xfmt(v):String(v))));
+  if(o.diag)svg.append(sv('line',{x1:X(Math.max(x0,y0)),y1:Y(Math.max(x0,y0)),x2:X(Math.min(x1,y1)),y2:Y(Math.min(x1,y1)),stroke:'var(--muted)','stroke-dasharray':'5 4'}));
+  pts.forEach(p=>{svg.append(sv('circle',{cx:X(p.x),cy:Y(p.y),r:p.r||5,fill:p.c||'var(--c1)',opacity:.85,stroke:'var(--panel)'},p.t?sv('title',{},p.t):null));if(p.l)svg.append(sv('text',{x:X(p.x)+7,y:Y(p.y)+4,'font-size':10.5},p.l));});
+  if(o.xl)svg.append(sv('text',{x:(pad.l+W-pad.r)/2,y:H-6,'text-anchor':'middle'},o.xl));
+  if(o.yl)svg.append(sv('text',{x:13,y:(pad.t+H-pad.b)/2,'text-anchor':'middle',transform:'rotate(-90 13 '+(pad.t+H-pad.b)/2+')'},o.yl));
+  return svg;
+};
+/* tile map: tiles=[{id,name,ab,c,r,v}] palette array of colors, breaks array of class upper bounds */
+A.ch.tiles=function(tiles,colorFn,o){
+  o=o||{};const T=82,gap=6,W=5*T+4*gap+20,H=5*T+4*gap+20;const svg=mkSvg(W,H,o.label||'Schematic tile map of Ghana regions');
+  tiles.forEach(t=>{const x=10+t.c*(T+gap),y=10+t.r*(T+gap);const col=colorFn(t);
+    const g=sv('g',null,sv('rect',{x,y,width:T,height:T,rx:8,fill:col.fill,stroke:'var(--panel)','stroke-width':2},sv('title',{},t.name+': '+(o.tfmt?o.tfmt(t):t.v))),
+      sv('text',{x:x+T/2,y:y+T/2-2,'text-anchor':'middle','font-size':13,'font-weight':600,style:'fill:'+col.ink},t.ab),
+      sv('text',{x:x+T/2,y:y+T/2+14,'text-anchor':'middle','font-size':10.5,style:'fill:'+col.ink},o.tfmt?o.tfmt(t):String(t.v)));
+    svg.append(g);});
+  return svg;
+};
+A.ch.lorenz=function(pts,o){
+  const W=460,H=380,pad={l:50,r:14,t:14,b:44};const svg=mkSvg(W,H,o&&o.label||'Lorenz curve');
+  const X=x=>pad.l+x*(W-pad.l-pad.r),Y=y=>H-pad.b-y*(H-pad.t-pad.b);
+  [0,.25,.5,.75,1].forEach(v=>svg.append(sv('line',{class:'gl',x1:X(v),x2:X(v),y1:pad.t,y2:H-pad.b}),sv('line',{class:'gl',x1:pad.l,x2:W-pad.r,y1:Y(v),y2:Y(v)}),sv('text',{class:'mut',x:X(v),y:H-pad.b+15,'text-anchor':'middle'},(v*100)+'%'),sv('text',{class:'mut',x:pad.l-6,y:Y(v)+4,'text-anchor':'end'},(v*100)+'%')));
+  svg.append(sv('line',{x1:X(0),y1:Y(0),x2:X(1),y2:Y(1),stroke:'var(--muted)','stroke-dasharray':'5 4'}));
+  svg.append(sv('polygon',{points:[[0,0]].concat(pts).map(p=>X(p[0])+','+Y(p[1])).join(' ')+' '+X(1)+','+Y(1),fill:'var(--c2)',opacity:.25}));
+  svg.append(sv('polyline',{points:[[0,0]].concat(pts).map(p=>X(p[0])+','+Y(p[1])).join(' '),fill:'none',stroke:'var(--c1)','stroke-width':2.6}));
+  svg.append(sv('text',{x:(pad.l+W-pad.r)/2,y:H-6,'text-anchor':'middle'},o&&o.xl||'Cumulative share of regions'),sv('text',{x:13,y:H/2,'text-anchor':'middle',transform:'rotate(-90 13 '+H/2+')'},o&&o.yl||'Cumulative share of population'));
+  return svg;
+};
+})();
+(function(){window.A.D={"census":[[1891,764613],[1901,1549661],[1911,1503911],[1921,2296400],[1931,3160386],[1948,4118459],[1960,6726815],[1970,8559313],[1984,12296081],[2000,18912079],[2010,24658823],[2021,30832019]],"censusYear":{"1960":1960.2,"1970":1970.2,"1984":1984.2,"2000":2000.2,"2010":2010.73,"2021":2021.49},"age21":{"m":[369697,368565,384826,390634,399085,394971,391307,383431,377420,357124,370116,335775,356318,332565,318383,347636,331926,325968,336459,311252,345256,342763,268546,254349,231888,288015,252335,238809,257696,225263,273942,265497,235406,195041,192735,257044,210258,176644,202591,153594,204461,184127,168856,132143,112845,174043,140424,107676,113704,101734,130047,110324,96395,82404,70261,86152,84052,66046,66532,55254,80189,68482,51537,52693,57665,56060,42065,37627,37852,31892,42691,35231,26039,24065,21229,25276,20482,12838,15140,12643,17114,14586,10130,7985,7225,9628,7460,4715,4037,3929,5517,3909,1567,1328,1006,9998],"f":[360895,358144,375128,381024,385725,381217,377418,368552,370015,343555,353979,322886,340643,327253,313802,339985,337460,326918,341723,312119,348035,347989,285260,271347,250104,304783,273905,256473,282961,244062,293952,269824,246267,212311,201740,257570,215244,189702,218078,163313,204929,182032,161448,137472,117590,161478,137047,106722,120829,103811,138982,114509,101051,88814,78939,96549,91216,71056,75241,60597,95718,78360,59949,60358,64240,66010,47776,40935,42639,34931,56890,42433,31369,28368,25685,36925,30419,18908,21988,18550,33825,25446,17787,16535,16272,22037,16426,9660,8061,7606,13280,7556,3383,2669,2248,24664]},"age10":{"M":[1731787,1589632,1477525,1311112,1100727,943213,790301,676768,572620,452975,394600,258582,227050,136244,149512,89149,62357,32937,19004,8750],"F":[1673619,1539320,1438515,1298877,1222764,1106898,888508,744635,613730,485123,438498,265113,248799,157627,201818,116804,96727,50133,32077,14393]},"regions":[{"n":"Ahafo","ab":"AH","p10":484210,"p21":564668,"tfr":null,"wfr":null,"c":1,"r":3},{"n":"Ashanti","ab":"AS","p10":4780380,"p21":5440463,"tfr":3.5,"wfr":3.0,"c":2,"r":3},{"n":"Bono","ab":"BO","p10":922617,"p21":1208649,"tfr":3.7,"wfr":3.4,"c":1,"r":2},{"n":"Bono East","ab":"BE","p10":904156,"p21":1203400,"tfr":4.7,"wfr":4.3,"c":2,"r":2},{"n":"Central","ab":"CE","p10":2201863,"p21":2859821,"tfr":3.6,"wfr":2.8,"c":2,"r":4},{"n":"Eastern","ab":"EA","p10":2633154,"p21":2925653,"tfr":3.5,"wfr":3.0,"c":3,"r":3},{"n":"Greater Accra","ab":"GA","p10":4010054,"p21":5455692,"tfr":2.9,"wfr":2.6,"c":3,"r":4},{"n":"North East","ab":"NE","p10":465005,"p21":658946,"tfr":6.6,"wfr":6.5,"c":3,"r":1},{"n":"Northern","ab":"NO","p10":1544946,"p21":2310939,"tfr":5.6,"wfr":5.1,"c":2,"r":1},{"n":"Oti","ab":"OT","p10":636889,"p21":747248,"tfr":5.2,"wfr":4.6,"c":4,"r":2},{"n":"Savannah","ab":"SA","p10":469510,"p21":653266,"tfr":5.8,"wfr":5.4,"c":1,"r":1},{"n":"Upper East","ab":"UE","p10":1046545,"p21":1301226,"tfr":4.6,"wfr":4.5,"c":3,"r":0},{"n":"Upper West","ab":"UW","p10":702110,"p21":901502,"tfr":4.5,"wfr":4.2,"c":1,"r":0},{"n":"Volta","ab":"VO","p10":1481363,"p21":1659040,"tfr":3.2,"wfr":2.7,"c":4,"r":3},{"n":"Western","ab":"WE","p10":1664586,"p21":2060585,"tfr":3.6,"wfr":3.0,"c":1,"r":4},{"n":"Western North","ab":"WN","p10":711435,"p21":880921,"tfr":3.8,"wfr":3.3,"c":0,"r":3}],"asfr":{"1988":[124,258,278,248,195,117,60],"1993":[119,231,244,215,163,99,29],"1998":[90,192,206,183,143,79,16],"2022":[63,156,190,176,128,53,14],"2022u":[43,121,160,159,110,43,6],"2022r":[88,203,231,199,155,66,23]},"tfrSeries":{"yr":[1988,1993,1998,2003,2008,2014,2017,2022],"tot":[6.4,5.5,4.55,4.4,4.0,4.2,3.9,3.9],"urb":[null,3.99,2.96,3.1,3.1,3.4,3.3,3.2],"rur":[null,6.36,5.41,5.6,4.9,5.2,4.7,4.8]},"un":[{"y":1950,"pop":5078,"b":237,"d":114,"cbr":46.8,"cdr":22.6,"tfr":6.59,"imr":149.2,"e0":43.11},{"y":1955,"pop":5887,"b":298,"d":122,"cbr":50.7,"cdr":20.8,"tfr":6.77,"imr":133.2,"e0":45.5},{"y":1960,"pop":6912,"b":344,"d":131,"cbr":49.8,"cdr":19.0,"tfr":6.85,"imr":123.1,"e0":47.1},{"y":1965,"pop":7828,"b":376,"d":146,"cbr":47.9,"cdr":18.6,"tfr":6.89,"imr":120.0,"e0":47.78},{"y":1970,"pop":8862,"b":418,"d":163,"cbr":47.2,"cdr":18.4,"tfr":6.95,"imr":120.1,"e0":47.81},{"y":1975,"pop":10210,"b":464,"d":168,"cbr":45.4,"cdr":16.4,"tfr":6.77,"imr":112.0,"e0":49.25},{"y":1980,"pop":11865,"b":532,"d":179,"cbr":44.8,"cdr":15.1,"tfr":6.52,"imr":101.6,"e0":51.12},{"y":1985,"pop":13651,"b":608,"d":189,"cbr":44.3,"cdr":13.8,"tfr":6.19,"imr":94.9,"e0":52.42},{"y":1990,"pop":15447,"b":625,"d":178,"cbr":40.4,"cdr":11.5,"tfr":5.71,"imr":79.8,"e0":55.62},{"y":1995,"pop":17439,"b":632,"d":186,"cbr":36.2,"cdr":10.7,"tfr":5.07,"imr":72.6,"e0":56.57},{"y":2000,"pop":19666,"b":706,"d":195,"cbr":35.9,"cdr":9.9,"tfr":4.85,"imr":64.3,"e0":58.2},{"y":2005,"pop":22497,"b":785,"d":208,"cbr":34.9,"cdr":9.2,"tfr":4.54,"imr":54.9,"e0":59.76},{"y":2010,"pop":25575,"b":844,"d":221,"cbr":33.0,"cdr":8.6,"tfr":4.21,"imr":47.0,"e0":61.16},{"y":2015,"pop":28871,"b":916,"d":225,"cbr":31.7,"cdr":7.8,"tfr":4.05,"imr":38.7,"e0":63.18},{"y":2020,"pop":31888,"b":875,"d":237,"cbr":27.4,"cdr":7.4,"tfr":3.54,"imr":33.5,"e0":64.3},{"y":2021,"pop":32519,"b":879,"d":243,"cbr":27.0,"cdr":7.5,"tfr":3.49,"imr":32.5,"e0":64.3},{"y":2022,"pop":33149,"b":882,"d":235,"cbr":26.6,"cdr":7.1,"tfr":3.43,"imr":31.6,"e0":65.2},{"y":2023,"pop":33788,"b":889,"d":238,"cbr":26.3,"cdr":7.0,"tfr":3.4,"imr":30.7,"e0":65.5}],"unB":{"2010":[844,221],"2011":[864,221],"2012":[883,221],"2013":[896,223],"2014":[898,220],"2015":[916,225],"2016":[902,220],"2017":[876,223],"2018":[897,228],"2019":[872,229],"2020":[875,237],"2021":[879,243]},"ethnic":[["Akan",13925576],["Mole-Dagbani",5638881],["Ewe",3902009],["Ga-Dangme",2153562],["Gurma",1959618],["Guan",981747],["Grusi",826901],["Mande",600213],["Other",496029]],"lit":{"yes":16453426,"no":6134584},"urbanShare":[[1960,23.1],[1970,28],[1984,32],[2010,50.9],[2021,56.7]],"urban21":{"u":17472530,"r":13359489},"hh":{"y10":{"all":4.4,"urb":4.1,"rur":5.0},"y21":{"all":3.6,"urb":3.3,"rur":4.0}},"agroup":{"chi2000":41.3,"chi2021":35.3,"yth2000":34.6,"yth2021":38.2},"est2015":{"gss":27670174,"un":28871000},"dhs":{"women":15014,"households":18450,"clusters":618}};})();
+(function(){
+'use strict';
+const A=window.A,D=A.D,C=A.calc,sum=A.sum;
+/* ---------- growth ---------- */
+C.expR=(p1,p2,t)=>Math.log(p2/p1)/t;
+C.geoR=(p1,p2,t)=>Math.pow(p2/p1,1/t)-1;
+C.linR=(p1,p2,t)=>(p2/p1-1)/t;
+C.dbl=r=>Math.log(2)/r;
+C.cy=y=>D.censusYear[String(y)];
+C.census=y=>D.census.find(c=>c[0]===+y)[1];
+/* ---------- age data ---------- */
+C.both21=()=>D.age21.m.map((v,i)=>v+D.age21.f[i]);
+C.grp=(arr,w,n)=>{const g=[];for(let i=0;i<n*w;i+=w)g.push(sum(arr.slice(i,i+w)));return g;};
+C.grp21=(arr)=>{const g=C.grp(arr,5,17);g.push(sum(arr.slice(85)));return g;}; /* 0-4 ... 80-84, 85+ (18 groups) */
+C.whipple=(P,lo,hi)=>{lo=lo||23;hi=hi||62;let s=0;for(let a=25;a<=60;a+=5)s+=P[a];let t=0;for(let a=lo;a<=hi;a++)t+=P[a];return 100*s/(t/5);};
+C.myers=P=>{
+  const bl=[];for(let d=0;d<10;d++){let S1=0,S2=0;for(let k=1;k<=7;k++)S1+=P[10*k+d];for(let k=2;k<=8;k++)S2+=P[10*k+d];bl.push((d+1)*S1+(9-d)*S2);}
+  const t=sum(bl),pct=bl.map(b=>100*b/t);return {pct,idx:0.5*sum(pct.map(p=>Math.abs(p-10)))};
+};
+C.unIndex=(Mg,Fg)=>{
+  const SR=[];for(let i=0;i<15;i++)SR.push(100*Mg[i]/Fg[i]);
+  let s=0;for(let i=0;i<14;i++)s+=Math.abs(SR[i+1]-SR[i]);const SRS=s/14;
+  const ars=G=>{let t=0;for(let i=1;i<14;i++)t+=Math.abs(100*2*G[i]/(G[i-1]+G[i+1])-100);return t/13;};
+  const am=ars(Mg),af=ars(Fg),idx=3*SRS+am+af;
+  return {SR,SRS,am,af,idx,cls:idx<20?'accurate':idx<=40?'inaccurate':'highly inaccurate'};
+};
+C.medianSingle=P=>{const half=sum(P)/2;let c=0;for(let a=0;a<P.length;a++){if(c+P[a]>=half)return a+(half-c)/P[a];c+=P[a];}return NaN;};
+C.medianGrp=(G,w)=>{const half=sum(G)/2;let c=0;for(let i=0;i<G.length;i++){if(c+G[i]>=half)return i*w+(half-c)/G[i]*w;c+=G[i];}return NaN;};
+C.dep=(g)=>{ /* g: 18 groups (0-4..85+) */const y=g[0]+g[1]+g[2],w=sum(g.slice(3,13)),o=sum(g.slice(13));return {y,w,o,yd:100*y/w,od:100*o/w,td:100*(y+o)/w,ai:100*o/y};};
+/* ---------- mortality model: Siler hazard calibrated to UN WPP 2022 indicators (2021) ---------- */
+const SP={a1:0.30863488433993674,b1:10,a2:0.002062271091405915,a3:0.0001106598548361882,b3:0.08494401196198016};
+C.SP=SP;
+const H=(x,k)=>k*(SP.a1/SP.b1*(1-Math.exp(-SP.b1*x))+SP.a2*x+SP.a3/SP.b3*(Math.exp(SP.b3*x)-1));
+C.lx=(x,k)=>Math.exp(-H(x,k));
+const Lint=(a,b,k)=>{const n=Math.max(40,Math.round((b-a)*(a<1?400:20)));const h=(b-a)/n;let s=0;for(let i=0;i<n;i++)s+=C.lx(a+(i+.5)*h,k);return s*h;};
+C.Lint=Lint;
+C.e0k=k=>Lint(0,130,k);
+C.solveK=e=>{let lo=0.03,hi=8;for(let i=0;i<60;i++){const m=(lo+hi)/2;if(C.e0k(m)>e)lo=m;else hi=m;}return (lo+hi)/2;};
+C.AGES19=[0,1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85];
+C.modelMx=k=>{const a=C.AGES19,m=[];for(let i=0;i<a.length;i++){const lo=a[i],hi=i<a.length-1?a[i+1]:130;m.push((C.lx(lo,k)-C.lx(hi,k))/Lint(lo,hi,k));}return m;};
+C.nax=(m0,sex)=>{
+  const f=(s)=>s==='m'?(m0<0.107?[0.045+2.684*m0,1.651-2.816*m0]:[0.330,1.352]):(m0<0.107?[0.053+2.800*m0,1.522-1.518*m0]:[0.350,1.361]);
+  if(sex==='b'){const a=f('m'),b=f('f');return [(a[0]+b[0])/2,(a[1]+b[1])/2];}return f(sex);
+};
+C.lifetable=(mx,sex)=>{
+  const ages=C.AGES19,N=ages.length,n=ages.map((x,i)=>i===N-1?Infinity:ages[i+1]-x);
+  const na=C.nax(mx[0],sex||'b');const ax=n.map((w,i)=>i===0?na[0]:i===1?na[1]:i===N-1?1/mx[i]:w/2);
+  const q=mx.map((m,i)=>i===N-1?1:Math.min(1,n[i]*m/(1+(n[i]-ax[i])*m)));
+  const l=[1e5],d=[],L=[];for(let i=0;i<N;i++){d.push(l[i]*q[i]);if(i<N-1)l.push(l[i]-d[i]);}
+  for(let i=0;i<N;i++)L.push(i===N-1?l[i]/mx[i]:n[i]*l[i+1]+ax[i]*d[i]);
+  const T=new Array(N);let t=0;for(let i=N-1;i>=0;i--){t+=L[i];T[i]=t;}
+  const e=T.map((tt,i)=>tt/l[i]);
+  return {ages,n,ax,m:mx,q,l,d,L,T,e};
+};
+/* Leslie survival ratios for 5-year groups (0-4 ... 80-84, 85+) at hazard multiplier k */
+C.leslie=k=>{
+  const L5=[];for(let i=0;i<17;i++)L5.push(Lint(5*i,5*i+5,k));
+  const T85=Lint(85,130,k),T90=Lint(90,130,k);
+  const S=[];for(let i=0;i<16;i++)S.push(L5[i+1]/L5[i]);S.push(T85/L5[16]);
+  return {S,S85:T90/T85,B0:L5[0]/5,L5};
+};
+/* ---------- fertility measures ---------- */
+C.tfr=a=>5*sum(a)/1000;
+C.macb=a=>{const mid=[17.5,22.5,27.5,32.5,37.5,42.5,47.5];return sum(a.map((x,i)=>x*mid[i]))/sum(a);};
+C.SRB=1.03;
+/* ---------- cohort-component projection ---------- */
+C.base21=()=>({M:C.grp21(D.age21.m),F:C.grp21(D.age21.f)});
+C.project=P=>{
+  const steps=P.tfr.length;let {M,F}=C.base21();M=M.slice();F=F.slice();
+  const pat=P.asfr||D.asfr['2022'],ps=C.tfr(pat);const out=[{yr:2021,M:M.slice(),F:F.slice(),births:null}];
+  for(let s=0;s<steps;s++){
+    const kf=C.solveK(P.e0[s]+(P.gap||0)/2),km=C.solveK(P.e0[s]-(P.gap||0)/2);
+    const Lf=C.leslie(kf),Lm=C.leslie(km);
+    const Fn=new Array(18).fill(0),Mn=new Array(18).fill(0);
+    for(let i=0;i<17;i++){Fn[i+1]+=F[i]*Lf.S[i];Mn[i+1]+=M[i]*Lm.S[i];}
+    Fn[17]+=F[17]*Lf.S85;Mn[17]+=M[17]*Lm.S85;
+    const sc=P.tfr[s]/ps;let births=0;
+    for(let j=0;j<7;j++){const g=3+j;births+=5*pat[j]/1000*sc*(F[g]+Fn[g])/2;}
+    const srb=P.srb||C.SRB;
+    Fn[0]=births/(1+srb)*Lf.B0;Mn[0]=births*srb/(1+srb)*Lm.B0;
+    const mig=(P.nm||0)*5;if(mig){const w=[4,5,6];w.forEach(g=>{Fn[g]=Math.max(0,Fn[g]+mig/6);Mn[g]=Math.max(0,Mn[g]+mig/6);});}
+    M=Mn;F=Fn;out.push({yr:2021+5*(s+1),M:M.slice(),F:F.slice(),births:births/5});
+  }
+  return out;
+};
+C.metrics=st=>{const g=st.M.map((v,i)=>v+st.F[i]);const d=C.dep(g);return {tot:sum(g),y:d.y,w:d.w,o:d.o,td:d.td,yd:d.yd,od:d.od,youth:g[3]+g[4],pw:100*d.w/sum(g),po:100*d.o/sum(g)};};
+C.lerp=(a,b,n)=>Array.from({length:n},(_,i)=>a+(b-a)*(i+1)/n);
+})();
+(function(){
+'use strict';
+const A=window.A,el=A.el,C=A.calc,D=A.D,fmt=A.fmt,sum=A.sum,L=A.labs;
+const ageLab=i=>i===17?'85+':(5*i)+'–'+(5*i+4);
+const grpLabels=Array.from({length:18},(_,i)=>ageLab(i));
+
+/* M1: census explorer */
+L.census=function(root){
+  const yrs=D.census.map(c=>c[0]);
+  let y1=2010,y2=2021,method='exp';
+  const ctr=el('div',{class:'ctrls'});root.append(ctr);
+  const s1=A.select(ctr,{label:'From census',options:yrs.map(y=>[y,y]),value:y1,on:v=>{y1=+v;draw();}});
+  const s2=A.select(ctr,{label:'To census',options:yrs.map(y=>[y,y]),value:y2,on:v=>{y2=+v;draw();}});
+  const d1=A.num(ctr,{label:'Reference date, first census (decimal year)',value:2010.73,step:0.01,on:()=>draw()});
+  const d2=A.num(ctr,{label:'Reference date, second census (decimal year)',value:2021.49,step:0.01,on:()=>draw()});
+  const kp=el('div'),ch=el('div'),tb=el('div');
+  root.append(kp,ch,el('h4',null,'All twelve censuses'),tb);
+  const setDates=()=>{const a=C.cy(y1),b=C.cy(y2);d1.set(a!=null?a:y1+0.2);d2.set(b!=null?b:y2+0.2);};
+  s1.el.addEventListener('change',()=>{setDates();draw();});s2.el.addEventListener('change',()=>{setDates();draw();});
+  function draw(){
+    const p1=C.census(y1),p2=C.census(y2),t=d2.get()-d1.get();
+    kp.innerHTML='';
+    if(!(t>0)){kp.append(A.callout('warn','Check inputs','The second census must be later than the first.'));return;}
+    const r=C.expR(p1,p2,t),g=C.geoR(p1,p2,t),l=C.linR(p1,p2,t);
+    kp.append(A.kpis([[fmt(p2-p1),'absolute change'],[fmt(100*(p2/p1-1),1)+'%','total % change'],[fmt(100*r,2)+'%','exponential r (per year)'],[fmt(100*g,2)+'%','geometric rate'],[fmt(100*l,2)+'%','linear rate (of base)'],[fmt(C.dbl(r),1)+' yrs','doubling time at r']]));
+    ch.innerHTML='';
+    const pts=D.census.map(c=>[c[1]>0?(C.cy(c[0])||c[0]+0.2):0,c[1]]);
+    ch.append(A.ch.line([{name:'Census count',pts,dots:true,color:'var(--c1)'}],{xl:'Year',yl:'Population',label:'Ghana census counts 1891–2021',xfmt:v=>String(Math.round(v)),legend:false,H:300}));
+  }
+  const rows=D.census.map((c,i)=>{const prev=D.census[i-1];const t=prev?(C.cy(c[0])||c[0]+.2)-(C.cy(prev[0])||prev[0]+.2):null;return [c[0]+(c[0]<1960?' (pre-independence)':''),fmt(c[1]),prev?fmt(100*C.expR(prev[1],c[1],t),2)+'%':'–'];});
+  tb.append(A.table(['Census','Count','Exponential r from previous (approx. dates)'],rows));
+  tb.append(A.callout('info','Reading the early series','1901→1911 shows a decline and 1891→1901 a doubling. Early censuses covered changing territories and used very different methods, so pre-1948 growth rates are not comparable with later ones.'));
+  draw();
+};
+
+/* M2: dual-system estimation */
+L.dse=function(root){
+  const ctr=el('div',{class:'ctrls'});root.append(ctr);
+  const kp=el('div'),ch=el('div'),het=el('div');
+  const n1=A.num(ctr,{label:'n₁: persons found in the census (in PES areas)',value:9800,on:()=>draw()});
+  const n2=A.num(ctr,{label:'n₂: persons found by the independent PES',value:9500,on:()=>draw()});
+  const mm=A.num(ctr,{label:'m: persons matched in both',value:9100,on:()=>draw()});
+  root.append(kp,ch,el('h4',null,'When capture is not independent: hard-to-count groups'),
+    el('p',null,'Suppose a share w of the population is hard to count. In that group each source captures people with probability p; elsewhere with probability 0.97 in both sources. People in a group are captured independently, but groups differ. The true population is 1.00; the DSE estimates it from the matched counts.'),het);
+  function draw(){
+    const a=n1.get(),b=n2.get(),m=mm.get();kp.innerHTML='';
+    if(!(m>0&&m<=Math.min(a,b))){kp.append(A.callout('warn','Check inputs','m must be positive and no larger than n₁ or n₂.'));return;}
+    const N=a*b/m,Nc=(a+1)*(b+1)/(m+1)-1,v=(a+1)*(b+1)*(a-m)*(b-m)/((m+1)**2*(m+2));
+    kp.append(A.kpis([[fmt(N,1),'Lincoln–Petersen N̂ = n₁n₂/m'],[fmt(Nc,1),'Chapman estimator'],[fmt(100*a/N,1)+'%','census coverage n₁/N̂'],[fmt(100*(1-a/N),1)+'%','census omission rate'],[fmt(Math.sqrt(v),1),'approx. standard error (Chapman)']]));
+    kp.append(A.callout('key','Scaling to Ghana','If the omission rate shown were the national net coverage error, the census total of 30,832,019 would correspond to about '+fmt(30832019*N/a)+' people. This is a teaching scenario: use the published PES results for real coverage.'));
+  }
+  const w=A.slider(het,{label:'Share of hard-to-count population (w)',min:0,max:40,step:1,value:10,suf:'%',on:()=>hdraw()});
+  const p=A.slider(het,{label:'Capture probability in hard-to-count group (each source)',min:20,max:97,step:1,value:70,suf:'%',on:()=>hdraw()});
+  const out=el('div');het.append(out);
+  function hdraw(){
+    const W=w.get()/100,ph=p.get()/100,pe=0.97;
+    const e1=(1-W)*pe+W*ph,e2=e1,em=(1-W)*pe*pe+W*ph*ph;const Nh=e1*e2/em;
+    out.innerHTML='';out.append(A.kpis([[fmt(100*e1,1)+'%','overall capture per source'],[fmt(100*Nh,1)+'%','DSE estimate as % of truth'],[fmt(100*(1-Nh),1)+'%','relative undercount of the DSE']]));
+    out.append(A.callout('info','Interpretation','Positive correlation between sources (the same people are missed twice) makes m too large relative to n₁n₂, so the DSE is biased downward. This is why coverage studies target hard-to-count populations explicitly.'));
+  }
+  draw();hdraw();
+};
+
+/* M3: age heaping and accuracy indices */
+L.heaping=function(root){
+  let sex='b',view='single';
+  const ctr=el('div');root.append(ctr);
+  A.toggle(ctr,[['b','Both sexes'],['m','Male'],['f','Female']],'b',v=>{sex=v;draw();});
+  const kp=el('div'),ch=el('div'),ch2=el('div'),note=el('div');
+  root.append(kp,ch,el('h4',null,'Terminal-digit distribution (Myers blended method)'),ch2,note);
+  function data(){return sex==='m'?D.age21.m:sex==='f'?D.age21.f:C.both21();}
+  function draw(){
+    const P=data();
+    const w=C.whipple(P),my=C.myers(P);
+    const gm=C.grp21(D.age21.m),gf=C.grp21(D.age21.f),un=C.unIndex(gm,gf);
+    const cls=w<105?'highly accurate':w<110?'fairly accurate':w<125?'approximate':w<175?'rough':'very rough';
+    kp.innerHTML='';kp.append(A.kpis([[fmt(w,1),'Whipple index ('+cls+')'],[fmt(my.idx,2),'Myers blended index (0–90)'],[fmt(un.idx,1),'UN age-sex accuracy index ('+un.cls+')'],[fmt(un.SRS,2),'sex-ratio score'],[fmt(un.am,2)+' / '+fmt(un.af,2),'age-ratio score M / F']]));
+    ch.innerHTML='';
+    ch.append(A.ch.bars(P.slice(0,95).map((v,a)=>({l:String(a),v,c:(a%5===0)?'var(--c3)':'var(--c4)',t:'Age '+a+': '+fmt(v)})),{H:300,every:5,gap:.12,label:'Population by single year of age, 2021 census',yl:'Persons'}));
+    ch.append(A.legend([['Ages ending in 0 or 5','var(--c3)'],['Other ages','var(--c4)']]));
+    ch2.innerHTML='';
+    ch2.append(A.ch.bars(my.pct.map((v,d)=>({l:String(d),v,c:Math.abs(v-10)>1?'var(--c3)':'var(--c1)',t:'Digit '+d+': '+v.toFixed(2)+'%'})),{H:230,ymin:0,ymax:13,vals:true,vf:v=>v.toFixed(1)+'%',yfmt:v=>v+'%',label:'Share of blended population by terminal digit',gap:.3}));
+    note.innerHTML='';note.append(A.callout('info','What the digits say','With no digit preference each terminal digit would hold 10.0%. Here digits 0 and 5 hold '+my.pct[0].toFixed(1)+'% and '+my.pct[5].toFixed(1)+'%, while 4 holds '+my.pct[4].toFixed(1)+'%. The big spikes at ages 35, 40, 45 and 50 are visible in the first chart. Check the sharp drop after age 21 as well: that is not heaping but a cohort pattern worth explaining.'));
+  }
+  draw();
+};
+
+/* M4: age-sex structure 2010 vs 2021 */
+L.structure=function(root){
+  let show='both';
+  A.toggle(root,[['both','2021 filled, 2010 outline'],['21','2021 only'],['10','2010 only']],'both',v=>{show=v;draw();});
+  const kp=el('div'),ch=el('div'),ch2=el('div');root.append(kp,ch,el('h4',null,'Age structure over time'),ch2);
+  const M21=C.grp21(D.age21.m),F21=C.grp21(D.age21.f);
+  const M10=D.age10.M.slice(0,17).concat([sum(D.age10.M.slice(17))]),F10=D.age10.F.slice(0,17).concat([sum(D.age10.F.slice(17))]);
+  function draw(){
+    const g21=M21.map((v,i)=>v+F21[i]),g10=M10.map((v,i)=>v+F10[i]);
+    const d21=C.dep(g21),d10=C.dep(g10);
+    const m21=C.medianSingle(C.both21()),m10=C.medianGrp(g10.slice(0,17).concat(g10[17]),5);
+    kp.innerHTML='';kp.append(A.kpis([[fmt(d21.td,1)+' vs '+fmt(d10.td,1),'total dependency ratio 2021 vs 2010'],[fmt(d21.yd,1)+' vs '+fmt(d10.yd,1),'youth dependency'],[fmt(d21.od,1)+' vs '+fmt(d10.od,1),'old-age dependency'],[fmt(d21.ai,1)+' vs '+fmt(d10.ai,1),'ageing index (65+ per 100 under 15)'],[fmt(m21,1)+' vs '+fmt(m10,1),'median age 2021 (single years) vs 2010 (5-yr groups)'],[fmt(100*sum(M21)/sum(F21),1)+' vs '+fmt(100*sum(M10)/sum(F10),1),'sex ratio']]));
+    ch.innerHTML='';
+    let series;
+    if(show==='both')series=[{name:'2021',M:M21,F:F21},{name:'2010',M:M10,F:F10,color:'var(--ink)'}];
+    else if(show==='21')series=[{name:'2021',M:M21,F:F21}];else series=[{name:'2010',M:M10,F:F10}];
+    ch.append(A.ch.pyramid(grpLabels,series,{label:'Population pyramid, Ghana'}));
+    ch2.innerHTML='';
+    const sh=(g,n)=>[0,1,2].map(i=>g[i]).reduce((a,b)=>a+b)/sum(g)*100;
+    const yrs=[[2000,D.agroup.chi2000],[2010,100*d10.y/sum(g10)],[2021,100*d21.y/sum(g21)]];
+    ch2.append(A.ch.line([{name:'Share aged 0–14 (%)',pts:yrs,dots:true,color:'var(--c2)'}],{xticks:[2000,2010,2021],ymin:30,ymax:45,xfmt:v=>String(v),xl:'Census year',yfmt:v=>v+'%',legend:true,H:230,label:'Child share of the population over time'}));
+    ch2.append(A.callout('key','Demographic window','The child share fell from 41.3% (2000) to 35.3% (2021) while the 15–64 share rose to 60.4%. A falling dependency ratio is an opportunity, not a guarantee: the dividend depends on whether the larger working-age cohort finds productive jobs.'));
+  }
+  draw();
+};
+
+/* M5: regions */
+L.regions=function(root){
+  let metric='rate';
+  const R=D.regions.map(r=>({...r,rate:C.expR(r.p10,r.p21,C.cy(2021)-C.cy(2010))*100,sh10:100*r.p10/24658823,sh21:100*r.p21/30832019}));
+  const nat=C.expR(24658823,30832019,C.cy(2021)-C.cy(2010))*100;
+  R.forEach(r=>{r.expected=r.p10*30832019/24658823;r.transfer=r.p21-r.expected;});
+  A.toggle(root,[['rate','Growth rate (% a year)'],['p21','Population 2021'],['transfer','Relative gain or loss (people)']],'rate',v=>{metric=v;draw();});
+  const ch=el('div'),tb=el('div'),lz=el('div');root.append(ch,el('h4',null,'Concentration of population across regions'),lz,el('h4',null,'Table'),tb);
+  function draw(){
+    ch.innerHTML='';
+    const arr=R.slice().sort((a,b)=>b[metric]-a[metric]);
+    ch.append(A.ch.hbars(arr.map(r=>({l:r.n,v:r[metric],c:metric==='rate'?(r.rate>=nat?'var(--c1)':'var(--c2)'):metric==='transfer'?(r.transfer>=0?'var(--c1)':'var(--c3)'):'var(--c4)'})),{vf:v=>metric==='rate'?v.toFixed(2)+'%':A.abbr(v),label:'Regions by '+metric}));
+    if(metric==='rate')ch.append(el('p',{class:'legend'},'Green: growing faster than the national rate ('+nat.toFixed(2)+'% a year). 2010 counts are re-tabulated to the 16 current regions.'));
+    if(metric==='transfer')ch.append(el('p',{class:'legend'},'Relative gain = actual 2021 population minus the population the region would have if it had grown at the national rate. The 16 values sum to zero; this is a redistribution proxy, not a migration estimate.'));
+  }
+  const sorted=R.slice().sort((a,b)=>a.p21-b.p21);let cum=0;const pts=[];sorted.forEach((r,i)=>{cum+=r.p21;pts.push([(i+1)/sorted.length,cum/30832019]);});
+  let area=0,px=0,py=0;pts.forEach(p=>{area+=(p[0]-px)*(p[1]+py)/2;px=p[0];py=p[1];});const gini=1-2*area;
+  lz.append(el('div',{class:'twocol'},A.ch.lorenz(pts,{xl:'Cumulative share of regions (smallest first)'}),el('div',null,A.kpis([[gini.toFixed(3),'Gini coefficient across regions'],[fmt(100*(R.find(r=>r.n==='Greater Accra').p21+R.find(r=>r.n==='Ashanti').p21)/30832019,1)+'%','population in Greater Accra + Ashanti'],[fmt(Math.max(...R.map(r=>r.p21))/Math.min(...R.map(r=>r.p21)),1)+'×','largest ÷ smallest region']]),A.callout('info','Method','Gini = 1 − 2 × (area under the Lorenz curve), treating regions as equal-weight units. It describes inequality in regional size, not density: Greater Accra is the smallest region by area.'))));
+  tb.append(A.table(['Region','2010','2021','Growth %/yr','Share 2021 %','Relative gain/loss'],R.slice().sort((a,b)=>b.p21-a.p21).map(r=>[r.n,fmt(r.p10),fmt(r.p21),fmt(r.rate,2),fmt(r.sh21,1),(r.transfer>=0?'+':'')+fmt(r.transfer)])));
+  draw();
+};
+
+/* M6: urbanisation */
+L.urban=function(root){
+  const t10=C.cy(2010),t21=C.cy(2021);
+  const u21=D.urban21.u,r21=D.urban21.r,u10=0.509*24658823,r10=24658823-u10;
+  const ru=C.expR(u10,u21,t21-t10),rr=C.expR(r10,r21,t21-t10),urgd=ru-rr;
+  root.append(A.kpis([[fmt(100*ru,2)+'%','urban growth rate, 2010–21'],[fmt(100*rr,2)+'%','rural growth rate'],[fmt(100*urgd,2)+' pp','urban–rural growth differential (URGD)'],[fmt(100*u21/(u21+r21),1)+'%','urban share 2021']]));
+  const ch=el('div'),ctr=el('div',{class:'ctrls'});
+  const adj=A.slider(ctr,{label:'Assumed URGD for projection (percentage points a year)',min:0.5,max:4,step:0.05,value:+(100*urgd).toFixed(2),dec:2,on:()=>draw()});
+  const tgt=A.slider(ctr,{label:'Target urban share',min:60,max:90,step:1,value:70,suf:'%',on:()=>draw()});
+  const out=el('div');root.append(ctr,ch,out,A.callout('warn','Data note','The 2010 urban population is approximated from the published 50.9% urban share applied to the 24,658,823 total. Ghana classifies localities with 5,000 or more people as urban, so results depend on the threshold and on reclassification of growing localities.'));
+  function draw(){
+    const d=adj.get()/100;const logit=p=>Math.log(p/(1-p));
+    const s21=u21/(u21+r21);const t=(logit(tgt.get()/100)-logit(s21))/d;
+    const series=[{name:'Observed',pts:D.urbanShare.map(p=>[p[0],p[1]]),dots:true,color:'var(--c1)'}];
+    const proj=[];for(let y=2021;y<=2071;y+=2){const ts=y-t21;const lg=logit(s21)+d*ts;proj.push([y,100/(1+Math.exp(-lg))]);}
+    series.push({name:'Projection (constant URGD)',pts:proj,color:'var(--c2)',dash:'6 4'});
+    ch.innerHTML='';ch.append(A.ch.line(series,{xmin:1960,xmax:2071,ymin:0,ymax:100,yfmt:v=>v+'%',xfmt:v=>String(Math.round(v)),xl:'Year',legw:190,label:'Urban share of population'}));
+    out.innerHTML='';out.append(A.kpis([[String(Math.round(t21+t)),'year the urban share reaches '+tgt.get()+'%']]));
+  }
+  draw();
+};
+})();
+(function(){
+'use strict';
+const A=window.A,el=A.el,C=A.calc,D=A.D,fmt=A.fmt,sum=A.sum,L=A.labs;
+const ALAB=['15–19','20–24','25–29','30–34','35–39','40–44','45–49'];
+
+/* M7: ethnic composition and diversity indices */
+L.ethnic=function(root){
+  const ctr=el('div',{class:'ctrls'});root.append(ctr);
+  const thr=A.slider(ctr,{label:'Merge groups below this share into “Other”',min:0,max:12,step:0.5,value:0,dec:1,suf:'%',on:()=>draw()});
+  const incl=A.select(ctr,{label:'Denominator',options:[['tab','Sum of tabulated groups (30,484,536)'],['tot','National total (30,832,019), remainder as “Not tabulated”']],value:'tab',on:()=>draw()});
+  const kp=el('div'),ch=el('div'),tb=el('div');root.append(kp,ch,tb);
+  function draw(){
+    let rows=D.ethnic.map(e=>({n:e[0],v:e[1]}));const T=sum(rows.map(r=>r.v));
+    const useTot=incl.get()==='tot';const den=useTot?30832019:T;
+    let main=rows.filter(r=>r.n==='Other'||100*r.v/den>=thr.get()||false);
+    let merged=0;const keep=[];rows.forEach(r=>{if(r.n!=='Other'&&100*r.v/den<thr.get())merged+=r.v;else keep.push({...r});});
+    const o=keep.find(r=>r.n==='Other');if(o)o.v+=merged;else if(merged)keep.push({n:'Other',v:merged});
+    if(useTot)keep.push({n:'Not tabulated',v:30832019-T});
+    const p=keep.map(r=>r.v/den);const hhi=sum(p.map(x=>x*x));
+    const eff=1/hhi;
+    kp.innerHTML='';kp.append(A.kpis([[keep.length,'categories used'],[hhi.toFixed(3),'Herfindahl index Σp²'],[(1-hhi).toFixed(3),'diversity index 1 − Σp²'],[eff.toFixed(2),'effective number of groups 1/Σp²']]));
+    ch.innerHTML='';ch.append(A.ch.hbars(keep.sort((a,b)=>b.v-a.v).map(r=>({l:r.n,v:100*r.v/den,c:r.n==='Not tabulated'?'var(--muted)':'var(--c1)'})),{vf:v=>v.toFixed(1)+'%',xfmt:v=>v+'%',label:'Shares by ethnic group, 2021'}));
+    tb.innerHTML='';tb.append(A.table(['Group','Persons','Share %'],keep.map(r=>[r.n,fmt(r.v),fmt(100*r.v/den,1)])));
+    tb.append(A.callout('warn','Classification effects','The same population gives different diversity scores as categories are merged or split. “Groups” are census categories chosen by statisticians and used for self-identification, not natural units. Treat indices as descriptions of a classification, and be cautious about using them as explanatory variables.'));
+  }
+  draw();
+};
+
+/* M8: indicator builder */
+L.indicators=function(root){
+  const g=C.grp21(C.both21());const lit=D.lit;
+  const pool=[['Total population 2021',30832019],['Males',15200440],['Females',15631579],['Aged 0–14',10890453],['Aged 15–64',18619021],['Aged 65+',1322545],['Urban population',D.urban21.u],['Rural population',D.urban21.r],['Literate (aged 11+)',lit.yes],['Not literate (aged 11+)',lit.no],['Literate + not literate (aged 11+)',lit.yes+lit.no],['Aged 18+',17931673],['Population 2010',24658823],['Households (if size 3.6)',30832019/3.6]];
+  const ctr=el('div',{class:'ctrls'});root.append(ctr);
+  const a=A.select(ctr,{label:'Numerator',options:pool.map((p,i)=>[i,p[0]]),value:8,on:()=>draw()});
+  const b=A.select(ctr,{label:'Denominator',options:pool.map((p,i)=>[i,p[0]]),value:10,on:()=>draw()});
+  const sc=A.select(ctr,{label:'Scale',options:[['1','ratio'],['100','per 100 (%)'],['1000','per 1,000']],value:'100',on:()=>draw()});
+  const out=el('div');root.append(out);
+  root.append(el('h4',null,'Household size'),A.table(['','2010','2021'],[['All households','4.4','3.6'],['Urban','4.1','3.3'],['Rural','5.0','4.0']]),
+    A.callout('info','Typology of measures','A proportion has the numerator inside the denominator (literate ÷ aged 11+). A ratio compares two disjoint groups (males ÷ females). A rate has exposure in the denominator (events per person-year). Choose the measure that matches the question.'));
+  function draw(){
+    const n=pool[+a.get()][1],d=pool[+b.get()][1],s=+sc.get();const v=s*n/d;
+    out.innerHTML='';out.append(A.kpis([[fmt(v,s===1?4:2),pool[+a.get()][0]+' ÷ '+pool[+b.get()][0]],[fmt(n),'numerator'],[fmt(d),'denominator']]));
+  }
+  draw();
+};
+
+/* M9: demographic transition */
+L.transition=function(root){
+  let view='birth';const U=D.un;
+  A.toggle(root,[['birth','Birth and death rates'],['tfr','Total fertility rate'],['mort','Life expectancy and infant mortality'],['rni','Natural increase']],'birth',v=>{view=v;draw();});
+  const ch=el('div'),kp=el('div');root.append(ch,kp);
+  const P=k=>U.map(u=>[u.y,u[k]]);
+  function draw(){
+    ch.innerHTML='';
+    if(view==='birth')ch.append(A.ch.line([{name:'Crude birth rate',pts:P('cbr'),color:'var(--c2)',dots:true},{name:'Crude death rate',pts:P('cdr'),color:'var(--c3)',dots:true}],{ymin:0,ymax:55,xl:'Year (UN WPP 2022 estimates)',yl:'per 1,000',xfmt:v=>String(Math.round(v)),label:'CBR and CDR'}));
+    if(view==='tfr')ch.append(A.ch.line([{name:'UN WPP 2022',pts:P('tfr'),color:'var(--c4)',dots:true},{name:'DHS surveys',pts:D.tfrSeries.yr.map((y,i)=>[y,D.tfrSeries.tot[i]]),color:'var(--c1)',dots:true}],{ymin:2,ymax:7.5,xl:'Year',yl:'children per woman',xfmt:v=>String(Math.round(v)),label:'TFR series from two sources'}));
+    if(view==='mort')ch.append(A.ch.line([{name:'Life expectancy at birth',pts:P('e0'),color:'var(--c1)',dots:true},{name:'Infant deaths per 1,000',pts:P('imr'),color:'var(--c3)',dots:true}],{ymin:0,ymax:160,xl:'Year',xfmt:v=>String(Math.round(v)),label:'Mortality indicators'}));
+    if(view==='rni')ch.append(A.ch.line([{name:'Natural increase (CBR − CDR)',pts:U.map(u=>[u.y,u.cbr-u.cdr]),color:'var(--c1)',dots:true}],{ymin:0,ymax:35,xl:'Year',yl:'per 1,000',xfmt:v=>String(Math.round(v)),label:'Rate of natural increase'}));
+  }
+  draw();
+  const r21=U.find(u=>u.y===2021),rni=r21.cbr-r21.cdr;
+  const nat=U.filter(u=>u.y>=2010&&u.y<=2021).map(u=>u.cbr-u.cdr);const mean=sum(nat)/nat.length;
+  const cen=C.expR(24658823,30832019,C.cy(2021)-C.cy(2010))*1000;
+  kp.append(el('h4',null,'Reconciling the UN series with the census'),A.kpis([[fmt(rni,1),'natural increase 2021 (CBR − CDR, per 1,000)'],[fmt(C.dbl(rni/1000),1)+' yrs','doubling time at that rate'],[fmt(cen,1),'census-based growth 2010–21 (per 1,000)'],[fmt(mean,1),'avg. UN natural increase (selected years, 2010–21)'],[fmt(mean-cen,1),'gap = implied net emigration or data inconsistency']]),
+    A.callout('warn','Why the numbers disagree','The UN series starts from a mid-2010 population of 25.6 million, about 0.9 million above the 2010 census count, and ends 2021 at 32.5 million against a census count of 30.8 million. A residual of this size is not credible as net migration: it signals that WPP and the census use different bases.'));
+};
+
+/* M10: fertility measures and decomposition */
+L.fertility=function(root){
+  const keys=[['1988','GDHS 1988'],['1993','GDHS 1993'],['1998','GDHS 1998'],['2022','GDHS 2022, national'],['2022u','GDHS 2022, urban'],['2022r','GDHS 2022, rural']];
+  let a='2022',b='1988',vals=D.asfr[a].slice();
+  const ctr=el('div',{class:'ctrls'});root.append(ctr);
+  const sa=A.select(ctr,{label:'Schedule A (editable)',options:keys,value:a,on:v=>{a=v;vals=D.asfr[a].slice();sync();draw();}});
+  const sb=A.select(ctr,{label:'Compare with schedule B',options:keys,value:b,on:v=>{b=v;draw();}});
+  const sl=el('div',{class:'ctrls'});root.append(sl);
+  const sls=ALAB.map((l,i)=>A.slider(sl,{label:'ASFR '+l,min:0,max:320,step:1,value:vals[i],on:v=>{vals[i]=v;draw();}}));
+  function sync(){sls.forEach((s,i)=>s.set(vals[i]));}
+  const kp=el('div'),ch=el('div'),dec=el('div'),rg=el('div');root.append(kp,ch,dec,el('h4',null,'Regional fertility, 2022 (GDHS)'),rg);
+  function draw(){
+    const B=D.asfr[b],tf=C.tfr(vals),tb=C.tfr(B);
+    kp.innerHTML='';kp.append(A.kpis([[fmt(tf,2),'TFR of schedule A'],[fmt(C.macb(vals),1),'mean age at childbearing (years)'],[fmt(tf/(1+C.SRB),2),'GRR (daughters per woman, SRB 1.03)'],[fmt(tb,2),'TFR of schedule B'],[fmt(tf-tb,2),'difference A − B']]));
+    ch.innerHTML='';ch.append(A.ch.line([{name:'A',pts:vals.map((v,i)=>[17.5+5*i,v]),color:'var(--c1)',dots:true},{name:'B',pts:B.map((v,i)=>[17.5+5*i,v]),color:'var(--c2)',dots:true,dash:'6 4'}],{xmin:15,xmax:50,ymin:0,ymax:320,xticks:[17.5,22.5,27.5,32.5,37.5,42.5,47.5],xfmt:v=>String(v),xl:'Age of mother (midpoints)',yl:'births per 1,000 women',label:'Age-specific fertility rates'}));
+    dec.innerHTML='';
+    const rows=ALAB.map((l,i)=>[l,fmt(vals[i]),fmt(B[i]),(5*(vals[i]-B[i])/1000>=0?'+':'')+fmt(5*(vals[i]-B[i])/1000,2),fmt(100*(vals[i]-B[i])/(sum(vals)-sum(B)||1),0)+'%']);
+    dec.append(el('h4',null,'Where does the difference come from?'),A.table(['Age','ASFR A','ASFR B','Contribution to ΔTFR','Share of Δ'],rows),A.callout('info','Method','Because TFR = 5 × Σ ASFR ÷ 1000, the TFR difference decomposes exactly into age-group contributions 5 × (ASFR_A − ASFR_B) ÷ 1000.'));
+  }
+  const R=D.regions.filter(r=>r.tfr!=null).sort((x,y)=>y.tfr-x.tfr);
+  rg.append(A.ch.hbars(R.map(r=>({l:r.n,v:r.tfr,c:'var(--c2)'})),{vf:v=>v.toFixed(1),xfmt:v=>String(v),label:'TFR by region'}),
+    A.table(['Region','TFR','Wanted TFR','Unwanted (TFR − wanted)'],R.map(r=>[r.n,fmt(r.tfr,1),fmt(r.wfr,1),fmt(r.tfr-r.wfr,1)])),
+    A.callout('info','Note','The 2022 GDHS reports Ahafo within the former Brong Ahafo area, so Ahafo is omitted here. Wanted fertility rates exclude births a woman reported as unwanted.'));
+  draw();
+};
+
+/* M11: life table builder */
+L.lifetable=function(root){
+  const ctr=el('div',{class:'ctrls'});root.append(ctr);
+  let sex='b';
+  const e0s=A.slider(ctr,{label:'Target life expectancy at birth (both sexes), model schedule',min:45,max:85,step:0.1,value:64.3,dec:1,suf:' yrs',on:()=>{model();}});
+  const sx=A.select(ctr,{label:'Sex (affects separation factors a₀ and a₁)',options:[['b','Both (average)'],['m','Male'],['f','Female']],value:'b',on:v=>{sex=v;draw();}});
+  let mx=C.modelMx(C.solveK(64.3));
+  const kp=el('div'),ch=el('div'),tbl=el('div'),ed=el('div');root.append(kp,ch,tbl,el('details',{class:'d'},el('summary',null,'Edit the age-specific death rates mₓ (advanced)'),ed));
+  const labs=['0','1–4','5–9','10–14','15–19','20–24','25–29','30–34','35–39','40–44','45–49','50–54','55–59','60–64','65–69','70–74','75–79','80–84','85+'];
+  function model(){mx=C.modelMx(C.solveK(e0s.get()));build();draw();}
+  const inputs=[];
+  function build(){ed.innerHTML='';inputs.length=0;const t=el('table',{class:'tbl'},el('tr',null,el('th',null,'Age'),el('th',null,'mₓ')));labs.forEach((l,i)=>{const inp=el('input',{type:'number',step:'0.0001',value:mx[i].toFixed(5)});inp.addEventListener('input',()=>{const v=+inp.value;if(v>0){mx[i]=v;draw(true);}});inputs.push(inp);t.append(el('tr',null,el('td',null,l),el('td',null,inp)));});ed.append(t);}
+  function draw(keep){
+    const lt=C.lifetable(mx,sex);
+    kp.innerHTML='';kp.append(A.kpis([[fmt(lt.e[0],1),'e₀ life expectancy at birth'],[fmt(1000*lt.q[0],1),'infant mortality (₁q₀ per 1,000)'],[fmt(1000*(1-lt.l[2]/1e5),1),'under-five mortality (₅q₀ per 1,000)'],[fmt(1000*(1-lt.l[13]/lt.l[4]),0),'adult mortality ₄₅q₁₅ per 1,000'],[fmt(lt.e[4],1),'e₁₅'],[fmt(lt.e[13],1),'e₆₀']]));
+    ch.innerHTML='';ch.append(A.ch.line([{name:'Survivors lₓ (of 100,000)',pts:lt.ages.map((a,i)=>[a,lt.l[i]]),color:'var(--c1)',dots:true}],{xmin:0,xmax:85,ymin:0,ymax:100000,xl:'Exact age x',label:'Survivorship curve'}));
+    tbl.innerHTML='';tbl.append(A.table(['Age','mₓ','aₓ','qₓ','lₓ','dₓ','Lₓ','Tₓ','eₓ'],lt.ages.map((a,i)=>[labs[i],fmt(lt.m[i],5),fmt(lt.ax[i],2),fmt(lt.q[i],5),fmt(lt.l[i]),fmt(lt.d[i]),fmt(lt.L[i]),fmt(lt.T[i]),fmt(lt.e[i],1)]),{h:360}));
+    if(!keep){}
+  }
+  root.append(A.callout('warn','About the default schedule','Ghana has no published single life table in the sources used here. The default mₓ come from a Siler-type model hazard calibrated to UN World Population Prospects 2022 indicators for 2021 (e₀ 64.3, infant mortality 32.5 per 1,000; adult mortality ₄₅q₁₅ ≈ 0.26 is a teaching assumption). Estimates of e₀ differ by source: the CIA World Factbook reported about 69 years for 2021. Discuss why.'));
+  model();
+};
+
+/* M12: reproductivity and stable population */
+L.stable=function(root){
+  const ctr=el('div',{class:'ctrls'});root.append(ctr);
+  const sch=A.select(ctr,{label:'Fertility schedule',options:[['2022','GDHS 2022'],['1988','GDHS 1988'],['2022u','GDHS 2022 urban'],['2022r','GDHS 2022 rural']],value:'2022',on:()=>draw()});
+  const e0=A.slider(ctr,{label:'Life expectancy at birth (both sexes)',min:45,max:85,step:0.5,value:64.3,dec:1,on:()=>draw()});
+  const kp=el('div'),ch=el('div');root.append(kp,ch);
+  function draw(){
+    const asfr=D.asfr[sch.get()],k=C.solveK(e0.get());
+    const mid=[17.5,22.5,27.5,32.5,37.5,42.5,47.5];
+    const lf=mid.map(a=>C.lx(a,k)),mf=asfr.map(v=>v/1000/(1+C.SRB));
+    const R0=sum(mf.map((m,i)=>5*m*lf[i]));
+    const solve=()=>{let lo=-0.1,hi=0.15;for(let i=0;i<60;i++){const r=(lo+hi)/2;const f=sum(mf.map((m,i)=>5*m*lf[i]*Math.exp(-r*mid[i])));if(f>1)lo=r;else hi=r;}return (lo+hi)/2;};
+    const r=solve();const T=Math.log(R0)/r;
+    const GRR=C.tfr(asfr)/(1+C.SRB);
+    kp.innerHTML='';kp.append(A.kpis([[fmt(C.tfr(asfr),2),'TFR'],[fmt(GRR,2),'GRR'],[fmt(R0,2),'NRR = Σ 5·m·ℓ'],[fmt(100*r,2)+'%','intrinsic growth rate r'],[isFinite(T)?fmt(T,1)+' yrs':'–','mean generation length T ≈ ln(NRR)/r'],[fmt(100*C.expR(24658823,30832019,C.cy(2021)-C.cy(2010)),2)+'%','observed census growth 2010–21']]));
+    const G=C.grp21(C.both21()).slice(0,17),tot=sum(G);
+    const Lk=Array.from({length:17},(_,i)=>C.Lint(5*i,5*i+5,k));
+    const st=Lk.map((L,i)=>L*Math.exp(-r*(5*i+2.5)));const ts=sum(st);
+    ch.innerHTML='';ch.append(A.ch.bars(G.map((g,i)=>({l:i%2===0?(5*i)+'':'',v:100*g/tot,c:'var(--c4)'})),{H:240,yfmt:v=>v+'%',yl:'% of population (ages 0–84)',label:'Observed 2021 age distribution',gap:.12}));
+    ch.append(el('p',{class:'legend'},'Bars: observed 2021 distribution (ages 0–84). The table compares it with the stable distribution implied by the chosen fertility and mortality.'));
+    const rows=st.map((s,i)=>[(5*i)+'–'+(5*i+4),fmt(100*G[i]/tot,2),fmt(100*s/ts,2)]);
+    ch.append(A.table(['Age','Observed %','Stable %'],rows,{h:260}));
+    ch.append(A.callout('info','Reading the comparison','If the observed distribution is younger than the stable one, fertility or the age pattern recently fell relative to the schedule chosen; if it is older, the reverse. Stable-population theory assumes fertility and mortality are fixed for a long time, which Ghana has not experienced.'));
+  }
+  draw();
+};
+})();
+(function(){
+'use strict';
+const A=window.A,el=A.el,C=A.calc,D=A.D,fmt=A.fmt,sum=A.sum,L=A.labs;
+const T0=C.cy(2010),T1=C.cy(2021);
+
+/* M13: residual migration */
+L.residual=function(root){
+  const U=D.unB;
+  const frac10=(2011-T0)>0?(2011-T0):0,frac21=T1-2021;/* fraction of 2010 after census night, and of 2021 before census night */
+  const B=frac10*U['2010'][0]+sum(['2011','2012','2013','2014','2015','2016','2017','2018','2019','2020'].map(y=>U[y][0]))+frac21*U['2021'][0];
+  const Dd=frac10*U['2010'][1]+sum(['2011','2012','2013','2014','2015','2016','2017','2018','2019','2020'].map(y=>U[y][1]))+frac21*U['2021'][1];
+  const ctr=el('div',{class:'ctrls'});root.append(ctr);
+  const bc=A.slider(ctr,{label:'Completeness / scaling applied to UN births',min:70,max:110,step:1,value:100,suf:'%',on:()=>draw()});
+  const dc=A.slider(ctr,{label:'Completeness / scaling applied to UN deaths',min:70,max:130,step:1,value:100,suf:'%',on:()=>draw()});
+  const kp=el('div');root.append(kp);
+  function draw(){
+    const b=1000*B*bc.get()/100,d=1000*Dd*dc.get()/100,ni=b-d,dP=30832019-24658823,nm=dP-ni;
+    kp.innerHTML='';kp.append(A.kpis([[fmt(b),'births, 26 Sep 2010 – 27 Jun 2021 (UN annual figures, pro-rated)'],[fmt(d),'deaths, same period'],[fmt(ni),'natural increase B − D'],[fmt(dP),'census change P₂₀₂₁ − P₂₀₁₀'],[fmt(nm),'residual net migration M = ΔP − (B − D)'],[fmt(nm/(T1-T0)),'per year']]));
+    kp.append(A.callout('info','Benchmarks','UN WPP 2022 reports a net migration rate of about −0.16 per 1,000 around 2022, roughly −5,000 people a year, and an immigrant stock of about 1.5% of the population (2024). Compare with the residual above.'));
+    kp.append(A.callout('warn','The residual absorbs every error','Any error in the two census counts, in births or in deaths lands in M. Slide the completeness controls: a few percentage points of births change the implied migration by hundreds of thousands. A large residual is evidence of inconsistent inputs more often than of real migration.'));
+  }
+  draw();
+};
+
+/* M14: estimates lab */
+L.estimates=function(root){
+  const P1=24658823,P2=30832019;let method='exp';
+  const ctr=el('div',{class:'ctrls'});root.append(ctr);
+  A.toggle(root,[['lin','Linear'],['geo','Geometric'],['exp','Exponential']],'exp',v=>{method=v;draw();});
+  const kp=el('div'),ch=el('div'),tb=el('div');root.append(kp,ch,tb);
+  const est=(y)=>{const t=y-T0;const tot=T1-T0;
+    if(method==='lin')return P1+(P2-P1)*t/tot;
+    if(method==='geo')return P1*Math.pow(P2/P1,t/tot);
+    return P1*Math.exp(C.expR(P1,P2,tot)*t);};
+  const bench=[['Official 2010-based estimate, 1 Jul 2015',2015.5,27670174],['UN WPP 2022, 2015',2015.5,28871000],['UN WPP 2022, 2020',2020.5,31888000],['UN WPP 2022, 2021',2021.5,32519000],['UN WPP 2022, 2022',2022.5,33149000],['UN WPP 2022, 2023',2023.5,33788000]];
+  function draw(){
+    const pts=[];for(let y=2010;y<=2024;y+=.25)pts.push([y,est(y)]);
+    ch.innerHTML='';
+    ch.append(A.ch.line([{name:'Interpolation / extrapolation',pts,color:'var(--c1)'},{name:'Census',pts:[[T0,P1],[T1,P2]],color:'var(--ink)',dots:true,dash:'1 0',w:0.01},{name:'UN WPP 2022',pts:D.un.filter(u=>u.y>=2010).map(u=>[u.y+.5,u.pop*1000]),color:'var(--c3)',dots:true,dash:'5 4'}],{xmin:2010,xmax:2024,ymin:22e6,ymax:35e6,xfmt:v=>String(Math.round(v)),xl:'Year',label:'Estimates against UN series',legw:190}));
+    tb.innerHTML='';
+    const rows=bench.map(b=>{const e=est(b[1]);return [b[0],fmt(b[2]),fmt(e),(100*(b[2]-e)/e>=0?'+':'')+fmt(100*(b[2]-e)/e,1)+'%'];});
+    tb.append(el('h4',null,'Benchmarks against your estimate'),A.table(['Benchmark','Value','Your estimate','Benchmark vs estimate'],rows));
+    const ex=est(2025.5);
+    kp.innerHTML='';kp.append(A.kpis([[fmt(est(2015.5)),'estimate for 1 July 2015'],[fmt(ex),'extrapolation to 1 July 2025'],[fmt(100*(32519000-30832019)/30832019,1)+'%','UN 2021 vs census 2021']]));
+    tb.append(A.callout('key','Evaluating estimates','Percent error = (estimate − benchmark) ÷ benchmark. Averaging absolute errors over many dates gives MAPE; keeping the signs gives MALPE, which exposes bias. UN WPP 2022 runs above the census-based interpolation for every date shown, and the official 2010-based estimate for 2015 sits between them.'));
+  }
+  draw();
+};
+
+/* M15: cohort-component projection */
+const PRESETS={
+  const:{n:'Constant: TFR 3.9, e₀ 64.3',t0:3.9,t1:3.9,e0:64.3,e1:64.3,nm:0},
+  stall:{n:'Fertility stall, mortality improves',t0:3.9,t1:3.9,e0:64.3,e1:72,nm:0},
+  slow:{n:'Slow fertility decline (TFR 3.0 by 2046–51)',t0:3.9,t1:3.0,e0:64.3,e1:70,nm:0},
+  med:{n:'Medium (TFR 2.4, e₀ 72)',t0:3.9,t1:2.4,e0:64.3,e1:72,nm:0},
+  fast:{n:'Fast decline (TFR 2.1, e₀ 75)',t0:3.9,t1:2.1,e0:64.3,e1:75,nm:0}
+};
+A.PRESETS=PRESETS;
+A.runScenario=function(p){
+  const tfr=Array.from({length:6},(_,s)=>p.t0+(p.t1-p.t0)*s/5),e0=Array.from({length:6},(_,s)=>p.e0+(p.e1-p.e0)*s/5);
+  return C.project({tfr,e0,gap:p.gap!=null?p.gap:4,nm:p.nm||0,asfr:p.asfr||D.asfr['2022'],srb:p.srb});
+};
+L.projection=function(root){
+  const ctr=el('div',{class:'ctrls'});root.append(ctr);
+  const pre=A.select(ctr,{label:'Scenario preset',options:Object.keys(PRESETS).map(k=>[k,PRESETS[k].n]),value:'med',on:v=>{const p=PRESETS[v];t0.set(p.t0);t1.set(p.t1);e0.set(p.e0);e1.set(p.e1);nm.set(p.nm);draw();}});
+  const pat=A.select(ctr,{label:'Age pattern of fertility',options:[['2022','GDHS 2022 national'],['1988','GDHS 1988 (earlier, higher at young ages)'],['2022u','GDHS 2022 urban'],['2022r','GDHS 2022 rural']],value:'2022',on:()=>draw()});
+  const t0=A.slider(ctr,{label:'TFR, 2021–26',min:1.5,max:6,step:0.1,value:3.9,dec:1,on:()=>draw()});
+  const t1=A.slider(ctr,{label:'TFR, 2046–51',min:1.5,max:6,step:0.1,value:2.4,dec:1,on:()=>draw()});
+  const e0=A.slider(ctr,{label:'Life expectancy at birth, 2021–26',min:50,max:80,step:0.5,value:64.3,dec:1,on:()=>draw()});
+  const e1=A.slider(ctr,{label:'Life expectancy at birth, 2046–51',min:50,max:85,step:0.5,value:72,dec:1,on:()=>draw()});
+  const gap=A.slider(ctr,{label:'Female advantage in e₀ (years)',min:0,max:8,step:0.5,value:4,dec:1,on:()=>draw()});
+  const nm=A.slider(ctr,{label:'Net migration (thousand per year)',min:-100,max:100,step:5,value:0,on:()=>draw()});
+  const yr=A.slider(ctr,{label:'Year shown in pyramid',min:2021,max:2051,step:5,value:2051,on:()=>draw()});
+  const kp=el('div'),ch=el('div'),ch2=el('div'),ch3=el('div'),tb=el('div');root.append(kp,el('div',{class:'twocol'},ch,ch2),ch3,tb,
+    A.callout('warn','This is a teaching model, not an official projection','Base population: 2021 census by single year of age (0–4 … 85+). Mortality: Siler-type model hazard rescaled to the chosen e₀. Fertility: the chosen GDHS age pattern scaled to the TFR path. Sex ratio at birth 1.03. Five-year steps. Official projections use richer assumptions, so expect differences.'));
+  function params(){return {t0:t0.get(),t1:t1.get(),e0:e0.get(),e1:e1.get(),gap:gap.get(),nm:nm.get()*1000,asfr:D.asfr[pat.get()]};}
+  const lab=Array.from({length:18},(_,i)=>i===17?'85+':(5*i)+'–'+(5*i+4));
+  function draw(){
+    const p=params(),run=A.runScenario(p),base=A.runScenario({...PRESETS.const,gap:gap.get(),asfr:D.asfr[pat.get()]});
+    const y=Math.min(2051,Math.max(2021,2021+5*Math.round((yr.get()-2021)/5))),st=run.find(s=>s.yr===y),m=C.metrics(st);
+    const r0=Math.log(C.metrics(run[1]).tot/C.metrics(run[0]).tot)/5;
+    kp.innerHTML='';kp.append(A.kpis([[fmt(m.tot/1e6,1)+'M','population '+y],[fmt(100*r0,2)+'%','growth rate in the first step (observed 2010–21: 2.08%)'],[fmt(m.td,1),'total dependency ratio '+y],[fmt(m.w/1e6,1)+'M','aged 15–64'],[fmt(m.youth/1e6,1)+'M','aged 15–24'],[fmt(m.po,1)+'%','aged 65+ share']]));
+    ch.innerHTML='';ch.append(A.ch.line([{name:'Scenario',pts:run.map(s=>[s.yr,C.metrics(s).tot]),color:'var(--c1)',dots:true},{name:'Constant',pts:base.map(s=>[s.yr,C.metrics(s).tot]),color:'var(--c3)',dash:'6 4'}],{xmin:2021,xmax:2051,ymin:25e6,xticks:[2021,2031,2041,2051],xfmt:v=>String(v),label:'Projected population',H:300,W:560,legw:120}));
+    ch2.innerHTML='';ch2.append(A.ch.line([{name:'Total dependency ratio',pts:run.map(s=>[s.yr,C.metrics(s).td]),color:'var(--c2)',dots:true},{name:'Constant',pts:base.map(s=>[s.yr,C.metrics(s).td]),color:'var(--c3)',dash:'6 4'}],{xmin:2021,xmax:2051,ymin:30,ymax:80,xticks:[2021,2031,2041,2051],xfmt:v=>String(v),label:'Projected dependency ratio',H:300,W:560,legw:150}));
+    ch3.innerHTML='';ch3.append(A.ch.pyramid(lab,[{name:String(y),M:st.M,F:st.F},{name:'2021',M:run[0].M,F:run[0].F,color:'var(--ink)'}],{label:'Projected pyramid '+y+' (filled) versus 2021 (outline)'}));
+    tb.innerHTML='';tb.append(A.table(['Year','Population','Births a year','Aged 0–14','Aged 15–64','Aged 65+','Dependency','Aged 15–24'],run.map(s=>{const mm=C.metrics(s);return [s.yr,fmt(mm.tot),s.births?fmt(s.births):'–',fmt(mm.y),fmt(mm.w),fmt(mm.o),fmt(mm.td,1),fmt(mm.youth)];})));
+  }
+  draw();
+};
+
+/* M16: census survival ratios and reverse survival */
+L.csr=function(root){
+  const ctr=el('div',{class:'ctrls'});root.append(ctr);
+  let sex='b';
+  A.toggle(root,[['b','Both sexes'],['m','Male'],['f','Female']],'b',v=>{sex=v;draw();});
+  const e0=A.slider(ctr,{label:'Model life expectancy for comparison (e₀)',min:50,max:80,step:0.5,value:64.3,dec:1,on:()=>draw()});
+  const kp=el('div'),ch=el('div'),tb=el('div'),rv=el('div');root.append(kp,ch,tb,el('h4',null,'Reverse survival: births implied by the 2021 counts of children'),rv);
+  const g10={b:D.age10.M.map((v,i)=>v+D.age10.F[i]),m:D.age10.M,f:D.age10.F};
+  const a21={b:C.both21(),m:D.age21.m,f:D.age21.f};
+  function draw(){
+    const k=C.solveK(e0.get()),dt=T1-T0;
+    const G10=g10[sex],G21=C.grp21(a21[sex]);
+    const rows=[],obs=[],mod=[];
+    for(let i=0;i<=13;i++){
+      const o=G21[i+2]/G10[i],m=C.Lint(5*i+dt,5*i+5+dt,k)/C.Lint(5*i,5*i+5,k);
+      rows.push([(5*i)+'–'+(5*i+4)+' → '+(5*i+10)+'–'+(5*i+14),fmt(G10[i]),fmt(G21[i+2]),fmt(o,3),fmt(m,3),fmt(o/m,2)]);
+      obs.push([5*i+2.5,o]);mod.push([5*i+2.5,m]);
+    }
+    ch.innerHTML='';ch.append(A.ch.line([{name:'Census survival ratio (2021 ÷ 2010)',pts:obs,color:'var(--c1)',dots:true},{name:'Model survival over 10.75 years',pts:mod,color:'var(--c3)',dash:'6 4'}],{xmin:0,xmax:70,ymin:0.3,ymax:1.15,xl:'Age in 2010 (group midpoint)',xfmt:v=>String(v),yfmt:v=>v.toFixed(1),label:'Census survival ratios',legw:240}));
+    tb.innerHTML='';tb.append(A.table(['Cohort (2010 → 2021)','2010 count','2021 count','Observed ratio','Model ratio','Observed ÷ model'],rows));
+    tb.append(A.callout('info','Reading ratios above the model','A ratio above the model value means the 2021 cohort is larger than mortality alone allows: net in-migration, under-coverage of the cohort in 2010, over-coverage in 2021, or age misreporting. A ratio below the model implies net out-migration or the reverse coverage problems. Because the interval is 10.75 years, the age groups do not align exactly with the cohorts; the comparison is approximate.'));
+    rv.innerHTML='';
+    const rows2=[];let tot=0,totUN=0;const UNB=D.unB;
+    for(let a=0;a<=4;a++){
+      const yr=2021-a;const b=a21.b[a]/C.lx(a+0.5,k);const un=UNB[String(yr)][0]*1000;tot+=b;totUN+=un;
+      rows2.push([a+' (born ≈ '+yr+')',fmt(a21.b[a]),fmt(b),fmt(un),(100*(b-un)/un>=0?'+':'')+fmt(100*(b-un)/un,1)+'%']);
+    }
+    rv.append(A.table(['Age at census','Counted','Implied births (÷ survival to age a+½)','UN WPP births','Implied vs UN'],rows2));
+    rv.append(A.kpis([[fmt(tot),'implied births 2017–21 (sum)'],[fmt(totUN),'UN WPP births 2017–21 (sum)'],[fmt(100*(tot-totUN)/totUN,1)+'%','difference']]));
+    rv.append(A.callout('key','A puzzle worth discussing','The census counts rise with age from 0 to 4 although annual births were roughly flat. That pattern points to under-coverage of the youngest children (or age misreporting), and it is one reason implied births fall short of UN estimates. The GDHS 2022 crude birth rate (27.9 per 1,000) implies roughly 860,000 births a year.'));
+  }
+  draw();
+};
+
+/* M17: survey precision */
+L.survey=function(root){
+  const ctr=el('div',{class:'ctrls'});root.append(ctr);
+  const n=A.slider(ctr,{label:'Women interviewed (n)',min:300,max:20000,step:100,value:D.dhs.women,on:()=>draw()});
+  const m=A.slider(ctr,{label:'Number of clusters',min:20,max:700,step:2,value:D.dhs.clusters,on:()=>draw()});
+  const rho=A.slider(ctr,{label:'Intra-cluster correlation ρ (assumed)',min:0,max:0.3,step:0.005,value:0.05,dec:3,on:()=>draw()});
+  const p=A.slider(ctr,{label:'Estimated proportion p',min:1,max:99,step:1,value:50,suf:'%',on:()=>draw()});
+  const dom=A.slider(ctr,{label:'Share of sample in the domain of interest (e.g. a region)',min:2,max:100,step:1,value:100,suf:'%',on:()=>draw()});
+  const kp=el('div');root.append(kp,A.callout('info','Context','The 2022 GDHS interviewed 15,014 women aged 15–49 in 618 clusters (18,450 households selected). Design effects of 2 or more are common for clustered demographic surveys; ρ here is an assumption you can vary.'));
+  function draw(){
+    const nn=n.get()*dom.get()/100,mm=Math.max(1,m.get()*dom.get()/100),b=nn/mm,pp=p.get()/100;
+    const deff=1+(b-1)*rho.get(),se0=Math.sqrt(pp*(1-pp)/nn),se=se0*Math.sqrt(deff);
+    const need=Math.ceil(1.96*1.96*pp*(1-pp)*deff/(0.02*0.02));
+    kp.innerHTML='';kp.append(A.kpis([[fmt(b,1),'average cluster take b = n ÷ clusters'],[fmt(deff,2),'design effect 1 + (b − 1)ρ'],[fmt(nn/deff),'effective sample size n ÷ deff'],[fmt(100*se0,2)+' pp','standard error, simple random sample'],[fmt(100*se,2)+' pp','standard error with clustering'],[fmt(196*se,2)+' pp','95% margin of error (±)'],[fmt(need),'women needed for ±2 pp at 95%']]));
+  }
+  draw();
+};
+
+/* M18: tile map */
+L.tilemap=function(root){
+  const R=D.regions.map(r=>({...r,rate:C.expR(r.p10,r.p21,T1-T0)*100,sh:100*r.p21/30832019}));
+  R.forEach(r=>{r.tr=r.p21-r.p10*30832019/24658823;});
+  const VARS={rate:['Growth rate 2010–21 (% a year)',r=>r.rate,v=>v.toFixed(1)],tfr:['TFR 2022 (GDHS)',r=>r.tfr,v=>v.toFixed(1)],sh:['Share of national population 2021 (%)',r=>r.sh,v=>v.toFixed(1)],p:['Population 2021 (count)',r=>r.p21,v=>A.abbr(v)],unw:['Unwanted fertility 2022 (TFR − wanted)',r=>r.tfr==null?null:r.tfr-r.wfr,v=>v.toFixed(1)]};
+  let vk='rate',method='eq',k=5;
+  const ctr=el('div',{class:'ctrls'});root.append(ctr);
+  A.select(ctr,{label:'Variable',options:Object.keys(VARS).map(x=>[x,VARS[x][0]]),value:'rate',on:v=>{vk=v;draw();}});
+  A.select(ctr,{label:'Classification',options:[['eq','Equal interval'],['qt','Quantile (equal counts)']],value:'eq',on:v=>{method=v;draw();}});
+  A.slider(ctr,{label:'Number of classes',min:2,max:7,step:1,value:5,on:v=>{k=v;draw();}});
+  const ch=el('div'),lg=el('div');root.append(el('div',{class:'twocol'},ch,lg));
+  const PAL=['#E6F2EA','#C3E3CF','#97D0AE','#66B987','#33A064','#0A7B47','#004F2C'];
+  const inkFor=i=>i>=3?'#FFFFFF':'#0F1B26';
+  function draw(){
+    const fn=VARS[vk][1];const vals=R.map(fn).filter(v=>v!=null).sort((a,b)=>a-b);
+    let br=[];
+    if(method==='eq'){const lo=vals[0],hi=vals[vals.length-1];for(let i=1;i<=k;i++)br.push(lo+(hi-lo)*i/k);}
+    else for(let i=1;i<=k;i++)br.push(vals[Math.min(vals.length-1,Math.ceil(vals.length*i/k)-1)]);
+    const cls=v=>{for(let i=0;i<br.length;i++)if(v<=br[i]+1e-9)return i;return k-1;};
+    const pal=Array.from({length:k},(_,i)=>PAL[Math.round(i*(PAL.length-1)/(k-1||1))]);
+    const tiles=R.map(r=>({...r,v:fn(r)}));
+    ch.innerHTML='';ch.append(A.ch.tiles(tiles,t=>{if(t.v==null)return {fill:'var(--line)',ink:'var(--ink)'};const c=cls(t.v);return {fill:pal[c],ink:(Math.round(c*(PAL.length-1)/(k-1||1)))>=3?'#FFFFFF':'#0F1B26'};},{tfmt:t=>t.v==null?'n/a':VARS[vk][2](t.v)}));
+    lg.innerHTML='';
+    const counts=Array(k).fill(0);vals.forEach(v=>counts[cls(v)]++);
+    let lo=vals[0];const rows=br.map((b,i)=>{const r=[ '■ '+VARS[vk][2](lo)+' to '+VARS[vk][2](b),counts[i]];lo=b;return r;});
+    lg.innerHTML='';
+    const t2=A.table(['Class','Regions'],rows.map((r,i)=>[el('span',null,el('i',{style:'display:inline-block;width:14px;height:14px;background:'+pal[i]+';border-radius:3px;margin-right:6px;vertical-align:-2px'}),r[0].slice(2)),r[1]]));
+    lg.append(el('h4',null,VARS[vk][0]),t2,el('p',{class:'legend'},'Schematic tile map: tiles are arranged roughly north to south, not to scale. Areas are equal, so a very large region and a small one look alike.'));
+    lg.append(A.callout('warn','Map design is analysis','Changing the number of classes or the break method changes which regions look “high”. Mapping raw counts (population) mostly shows where people live; mapping rates (growth, TFR) removes the size effect. Always state the classification you used.'));
+  }
+  draw();
+};
+
+/* M19: capstone brief */
+L.brief=function(root){
+  const ctr=el('div',{class:'ctrls'});root.append(ctr);
+  const tp=A.select(ctr,{label:'Policy question',options:[['edu','Basic education: how many school-age children?'],['health','Health services: women of reproductive age and ageing'],['labour','Labour market: youth entering the working-age population']],value:'edu',on:()=>gen()});
+  const sc=A.select(ctr,{label:'Scenario',options:Object.keys(PRESETS).map(k=>[k,PRESETS[k].n]),value:'med',on:()=>gen()});
+  const ta=el('textarea',{class:'ta','aria-label':'Evidence brief text'});
+  const cp=el('button',{class:'btn pri',onclick:()=>A.cp(ta.value,cp)},'Copy brief');
+  root.append(el('div',{class:'row'},cp,el('button',{class:'btn',onclick:()=>gen()},'Regenerate')),ta);
+  function gen(){
+    const run=A.runScenario(PRESETS[sc.get()]),b=C.both21();
+    const w=C.whipple(b),un=C.unIndex(C.grp21(D.age21.m),C.grp21(D.age21.f));
+    const g=(s)=>s.M.map((v,i)=>v+s.F[i]);const s21=run[0],s31=run.find(s=>s.yr===2031),s41=run.find(s=>s.yr===2041),s51=run.find(s=>s.yr===2051);
+    const m=s=>C.metrics(s);
+    let body='';
+    if(tp.get()==='edu'){
+      const c21=sum(b.slice(6,12));const kids=s=>g(s)[1]+g(s)[2];
+      body='**Question.** How large is the school-age population likely to be over the next decades, and where is the pressure?\n\n**Evidence.**\n- The 2021 census counted '+fmt(c21)+' children aged 6–11 (single-year data).\n- Children aged 5–14 (a proxy for basic-school ages): '+fmt(kids(s21))+' in 2021; '+fmt(kids(s31))+' in 2031; '+fmt(kids(s41))+' in 2041; '+fmt(kids(s51))+' in 2051 under the “'+PRESETS[sc.get()].n+'” scenario.\n- The share aged 0–14 fell from 41.3% (2000) to 35.3% (2021), so growth in the school-age group slows even while it still rises in absolute numbers.\n\n**Implication.** Facilities and teachers must still expand over the next decade; planning for a plateau requires the fertility decline to continue.';
+    }else if(tp.get()==='health'){
+      const wra=s=>sum(s.F.slice(3,10));
+      body='**Question.** How will demand for maternal, child and elderly services change?\n\n**Evidence.**\n- Women aged 15–49: '+fmt(wra(s21))+' in 2021; '+fmt(wra(s31))+' in 2031; '+fmt(wra(s51))+' in 2051.\n- Annual births under the scenario: '+fmt(run[1].births)+' (2021–26) and '+fmt(run[6].births)+' (2046–51).\n- Population aged 65+: '+fmt(m(s21).o)+' in 2021; '+fmt(m(s41).o)+' in 2041; '+fmt(m(s51).o)+' in 2051 ('+fmt(m(s51).po,1)+'% of the population).\n- Under-five mortality was 40 per 1,000 live births in the 2022 GDHS, and the national TFR was 3.9 (2.9 in Greater Accra, 6.6 in the North East Region).\n\n**Implication.** Maternal and child services remain a priority in high-fertility regions, while geriatric and chronic-disease services need to grow fastest in percentage terms.';
+    }else{
+      body='**Question.** How many young people will enter working ages, and how favourable is the age structure?\n\n**Evidence.**\n- Aged 15–24: '+fmt(m(s21).youth)+' in 2021; '+fmt(m(s31).youth)+' in 2031; '+fmt(m(s41).youth)+' in 2041.\n- Population aged 15–64: '+fmt(m(s21).w)+' in 2021 ('+fmt(m(s21).pw,1)+'% of the total) and '+fmt(m(s51).w)+' in 2051 ('+fmt(m(s51).pw,1)+'%).\n- Total dependency ratio: '+fmt(m(s21).td,1)+' (2021), '+fmt(m(s41).td,1)+' (2041), '+fmt(m(s51).td,1)+' (2051).\n\n**Implication.** The working-age share keeps rising only if fertility keeps falling. The dividend is realised only if productive jobs are created for each new cohort.';
+    }
+    ta.value='# Evidence brief: '+({edu:'Education',health:'Health',labour:'Labour'}[tp.get()])+'\n\n'+body+'\n\n**Evidence quality.** Age data show moderate digit preference (Whipple index '+w.toFixed(1)+'; UN age-sex accuracy index '+un.idx.toFixed(1)+', '+un.cls+'). Census counts of children under five rise with age, suggesting under-coverage of the youngest. Projections come from a teaching cohort-component model with the stated scenario, not an official forecast.\n\n**Sources.** Ghana Statistical Service: 2021 Population and Housing Census (Volume 3B and 3A); 2022 Ghana Demographic and Health Survey; UN World Population Prospects 2022.\n\n**Questions for the reader / next steps.** (1) Which regions drive the totals? (2) What would a different fertility path change? (3) Which data would reduce the main uncertainty?';
+  }
+  gen();
+};
+})();
+(function(){
+'use strict';
+const A=window.A,C=A.calc,D=A.D,fmt=A.fmt,sum=A.sum;
+const T0=C.cy(2010),T1=C.cy(2021);
+A.units=[
+ {id:1,n:'Measurement and data quality',d:'How Ghana counts itself, how we check the count, and how to detect errors.'},
+ {id:2,n:'Composition and distribution',d:'Age, sex, region, urbanisation, ethnicity, households and human capital.'},
+ {id:3,n:'Fertility, mortality and migration',d:'The components of change, measured with Ghanaian data.'},
+ {id:4,n:'Estimation and projection',d:'Filling the gaps between censuses and looking ahead.'},
+ {id:5,n:'Methods and professional practice',d:'Survey precision, map design and communicating evidence.'}
+];
+/* helper question builders */
+const N=(q,ans,tol,sol,unit)=>({t:'num',q,ans,tol,sol,unit});
+const Q=(q,o,a,w)=>({t:'mcq',q,o,a,w});
+const sd=(x,d)=>fmt(x,d==null?1:d);
+/* shared computations */
+const popB=C.both21(),g21=C.grp21(popB),g10=D.age10.M.map((v,i)=>v+D.age10.F[i]).slice(0,17).concat([sum(D.age10.M.slice(17))+sum(D.age10.F.slice(17))]);
+const dep21=()=>C.dep(g21),dep10=()=>C.dep(g10);
+const R=D.regions.map(r=>({...r,rate:100*C.expR(r.p10,r.p21,T1-T0),tr:r.p21-r.p10*30832019/24658823}));
+const giniR=()=>{const s=R.slice().sort((a,b)=>a.p21-b.p21);let cum=0,area=0,px=0,py=0;s.forEach((r,i)=>{cum+=r.p21;const x=(i+1)/s.length,y=cum/30832019;area+=(x-px)*(y+py)/2;px=x;py=y;});return 1-2*area;};
+const urb=()=>{const u10=0.509*24658823,r10=24658823-u10,ru=C.expR(u10,D.urban21.u,T1-T0),rr=C.expR(r10,D.urban21.r,T1-T0);return {ru,rr,urgd:ru-rr,s21:D.urban21.u/(D.urban21.u+D.urban21.r)};};
+const hhi=()=>{const T=sum(D.ethnic.map(e=>e[1]));return sum(D.ethnic.map(e=>(e[1]/T)**2));};
+const nrr=(asfr,e0)=>{const k=C.solveK(e0),mid=[17.5,22.5,27.5,32.5,37.5,42.5,47.5];const mf=asfr.map(v=>v/1000/(1+C.SRB));const R0=sum(mf.map((m,i)=>5*m*C.lx(mid[i],k)));let lo=-0.1,hi=0.15;for(let i=0;i<60;i++){const r=(lo+hi)/2;const f=sum(mf.map((m,i)=>5*m*C.lx(mid[i],k)*Math.exp(-r*mid[i])));if(f>1)lo=r;else hi=r;}return {R0,r:(lo+hi)/2};};
+const resid=(bs,ds)=>{const U=D.unB;const f10=2011-T0,f21=T1-2021;const ys=['2011','2012','2013','2014','2015','2016','2017','2018','2019','2020'];const B=f10*U['2010'][0]+sum(ys.map(y=>U[y][0]))+f21*U['2021'][0],Dd=f10*U['2010'][1]+sum(ys.map(y=>U[y][1]))+f21*U['2021'][1];return (30832019-24658823)-(1000*B*bs-1000*Dd*ds);};
+const estExp=y=>24658823*Math.exp(C.expR(24658823,30832019,T1-T0)*(y-T0));
+const tot=(sc,yr)=>C.metrics(A.runScenario(A.PRESETS[sc]).find(s=>s.yr===yr)).tot;
+A.giniR=giniR;
+
+const M=A.mods;
+M.push({id:1,unit:1,title:'The census system and intercensal growth',ch:'Siegel & Swanson, Chapters 1–3 and 11',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Describe Ghana’s census history and the features that define a census.</li><li>Compute and compare linear, geometric and exponential growth rates using exact reference dates.</li><li>Explain why early and recent census counts are not directly comparable.</li></ul>
+<h3>Ghana’s census history</h3>
+<p>Ghana has conducted twelve censuses since 1891: six before independence (1891, 1901, 1911, 1921, 1931, 1948) and six after (1960, 1970, 1984, 2000, 2010, 2021). The ten-year rhythm was broken in 1941 (the Second World War), in 1980 and 1990 (economic and political instability), and in 2020 (COVID-19 moved the census from March 2020 to June 2021). The Statistical Service Act, 2019 (Act 1003) requires a census every ten years in March.</p>
+<p>The 2021 Population and Housing Census was Ghana’s first fully digital census and a <b>de facto</b> count of everyone present on census night, 27 June 2021. The operation used tablets (computer-assisted personal interviewing), about 51,913 enumeration areas, 272 statistical districts and some 70,000 field officers, followed by a post-enumeration survey (PES).</p>
+<p>The classic features of a census (Siegel &amp; Swanson, Ch. 2–3) are <i>individual enumeration</i>, <i>universality</i>, <i>simultaneity</i> and <i>periodicity</i>. Each has a practical meaning here: a unique record per person, no one excluded, one reference night, and a fixed cycle.</p>
+<h3>Measuring growth between censuses</h3>
+<div class="formula">Linear:       P₂ = P₁ (1 + r·t)        r = (P₂/P₁ − 1) / t
+Geometric:    P₂ = P₁ (1 + r)ᵗ         r = (P₂/P₁)^(1/t) − 1
+Exponential:  P₂ = P₁ e^(r·t)          r = ln(P₂/P₁) / t
+Doubling time = ln 2 / r  ≈ 70 / (100·r)</div>
+<p>The exponential rate is the standard for intercensal comparison because it treats growth as continuous. The time <i>t</i> must be measured between the actual census dates, not the nominal years.</p>
+<div class="callout warn"><b class="t">Common error</b>Using 11 years for 2010–2021 instead of 10.76 (26 September 2010 to 27 June 2021) understates the growth rate by about 2%.</div>`,
+lab:'census',
+practice:[
+ N('Using reference dates 2010.73 and 2021.49, compute the <b>exponential growth rate</b> 2010–2021 (% a year, 2 d.p.).',()=>100*C.expR(24658823,30832019,T1-T0),0.02,()=>`r = ln(30,832,019 / 24,658,823) ÷ 10.76 = ${sd(100*C.expR(24658823,30832019,T1-T0),3)}% a year.`,'%'),
+ N('At that rate, how many years would the population take to double?',()=>C.dbl(C.expR(24658823,30832019,T1-T0)),0.2,()=>`t = ln 2 ÷ r = 0.6931 ÷ ${sd(C.expR(24658823,30832019,T1-T0),5)} = ${sd(C.dbl(C.expR(24658823,30832019,T1-T0)),1)} years.`,'years'),
+ N('Compute the <b>geometric</b> annual growth rate between the 1960 census (date 1960.2) and the 2021 census (date 2021.49), in % a year.',()=>100*C.geoR(6726815,30832019,T1-C.cy(1960)),0.03,()=>`r = (30,832,019 / 6,726,815)^(1/61.29) − 1 = ${sd(100*C.geoR(6726815,30832019,T1-C.cy(1960)),3)}%.`,'%'),
+ Q('Ghana’s count fell from 1,549,661 in 1901 to 1,503,911 in 1911. The most defensible reading is…',['A real fall of about 3% in the population','Changes in territory covered and in census methods make the counts non-comparable','The 1911 census over-counted','Emigration of most of the population'],1,'Early censuses covered changing territory and used very different procedures. A fall like this is a data-comparability warning, not evidence of demographic decline.'),
+ Q('A student uses t = 11 years for 2010–2021. The growth rate will be…',['Overstated','Understated','Unchanged','Negative'],1,'The true interval is 10.76 years. A longer t in the denominator gives a smaller r.')
+],
+reflect:['Why might the 2021 census count differ from a count taken in March as the Act specifies? What does the shift of date do to intercensal rates?','Which of the four census features is hardest to achieve in Ghana, and what operational design choices address it?'],
+r:`census <- data.frame(year = c(1960.2, 1970.2, 1984.2, 2000.2, 2010.73, 2021.49),
+                     pop  = c(6726815, 8559313, 12296081, 18912079, 24658823, 30832019))
+r <- diff(log(census$pop)) / diff(census$year)   # exponential rates
+round(100 * r, 2)
+round(log(2) / r, 1)                              # doubling times`});
+
+M.push({id:2,unit:1,title:'Coverage evaluation: PES and dual-system estimation',ch:'Siegel & Swanson, Chapter 4',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Explain how a post-enumeration survey evaluates census coverage.</li><li>Apply the dual-system (capture–recapture) estimator and its Chapman correction.</li><li>Predict the direction of bias when the independence assumption fails.</li></ul>
+<h3>Why evaluate coverage?</h3>
+<p>Every census omits some people and counts others twice. Coverage evaluation estimates net coverage error by comparing the census with an independent source. In Ghana, a PES followed the 2021 enumeration. The estimates of net error are used to understand data quality, not to replace the published counts.</p>
+<h3>The dual-system estimator</h3>
+<div class="formula">Lincoln–Petersen:  N̂ = n₁ · n₂ / m
+Chapman:           N̂ = (n₁+1)(n₂+1)/(m+1) − 1
+Census coverage rate = n₁ / N̂      Omission rate = 1 − n₁/N̂</div>
+<p>n₁ is the number counted by the census in the PES areas, n₂ the number counted by the PES, and m the number matched in both. The method assumes the two counts are <i>independent</i> and that the match is exact.</p>
+<div class="callout key"><b class="t">Correlation bias</b>People who are hard to reach in the census (informal settlements, mobile populations, young children) tend to be hard for the PES too. Positive dependence makes m too large, so N̂ is biased <b>downward</b>. The GRID3 hard-to-count index used with the 2021 census is designed to target this problem.</div>`,
+lab:'dse',
+practice:[
+ N('A PES area has n₁ = 9,800, n₂ = 9,500 and m = 9,100. Compute the Lincoln–Petersen estimate N̂.',()=>9800*9500/9100,1,()=>`N̂ = 9,800 × 9,500 ÷ 9,100 = ${sd(9800*9500/9100,1)}.`),
+ N('What is the census <b>coverage rate</b> (n₁ ÷ N̂, in %)?',()=>100*9800/(9800*9500/9100),0.1,()=>`9,800 ÷ ${sd(9800*9500/9100,1)} = ${sd(100*9800/(9800*9500/9100),2)}%.`,'%'),
+ N('Hard-to-count share 15%; capture probability 60% in each source in that group and 97% elsewhere. The DSE estimate as a percentage of the true population is…',()=>{const W=.15,ph=.6,pe=.97,e1=(1-W)*pe+W*ph,em=(1-W)*pe*pe+W*ph*ph;return 100*e1*e1/em;},0.2,()=>`n₁=n₂=0.9145; m = 0.85·0.97² + 0.15·0.6² = 0.8538; N̂ = 0.9145²/0.8538 = 0.9795, so 97.9% of truth.`,'%'),
+ Q('If the same hard-to-reach people are missed by both the census and the PES, the DSE will…',['Overestimate the population','Underestimate the population','Be unbiased','Give a negative count'],1,'Positive correlation inflates m, shrinking n₁n₂/m.')
+],
+reflect:['Which groups in Ghana are most likely to be missed twice? How could the PES design reduce dependence between the two counts?','What would a census undercount of 2% imply for regional allocation formulas if it is concentrated in a few regions?'],
+r:`dse <- function(n1, n2, m) {
+  c(LP = n1*n2/m,
+    Chapman = (n1+1)*(n2+1)/(m+1) - 1,
+    coverage = n1/(n1*n2/m))
+}
+dse(9800, 9500, 9100)`});
+
+M.push({id:3,unit:1,title:'Age and sex data quality: heaping and accuracy indices',ch:'Siegel & Swanson, Chapter 7',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Detect digit preference with Whipple’s and Myers' indices.</li><li>Compute the UN age-sex accuracy index and interpret its components.</li><li>Distinguish heaping from genuine cohort effects.</li></ul>
+<h3>Why age data are fragile</h3>
+<p>Age is reported by respondents, often without documents. People round to ages ending in 0 or 5, avoid some digits, or misreport ages of women and the elderly. Almost every demographic measure uses age, so errors spread.</p>
+<h3>Indices</h3>
+<div class="formula">Whipple = 100 · (P₂₅ + P₃₀ + … + P₆₀) / ( ⅕ · Σ P₂₃…P₆₂ )     100 = no preference, 500 = all at 0 or 5
+Myers: for each terminal digit d, blend two sums of ages ending in d (weights d+1 and 9−d);
+       index = ½ Σ |share_d − 10%|, range 0–90.
+UN joint index = 3·SRS + ARS_male + ARS_female
+  SRS = mean |change in sex ratio between successive 5-year groups|
+  ARS = mean |100·2·Pₐ/(Pₐ₋₁ + Pₐ₊₁) − 100|     &lt;20 accurate · 20–40 inaccurate · &gt;40 highly inaccurate</div>
+<p>Whipple classes: below 105 highly accurate; 105–110 fairly accurate; 110–125 approximate; 125–175 rough; above 175 very rough.</p>
+<div class="callout info"><b class="t">Implementation note</b>This lab computes Myers' index on ages 10–89 using ages 10+d … 70+d in the first sum and 20+d … 80+d in the second. Other software uses slightly different conventions, so values are comparable only within one definition.</div>`,
+lab:'heaping',
+practice:[
+ N('Compute Whipple’s index for <b>both sexes</b> (ages 23–62) from the 2021 single-year counts.',()=>C.whipple(popB),0.2,()=>`Σ(ages 25,30,…,60) ÷ (⅕ × Σ ages 23–62) × 100 = ${sd(C.whipple(popB),2)}.`),
+ N('What percentage of the blended population (Myers) falls on terminal digit 0?',()=>C.myers(popB).pct[0],0.05,()=>`Digit 0 holds ${sd(C.myers(popB).pct[0],2)}% against an expected 10%.`,'%'),
+ N('Compute the UN age-sex accuracy index (joint score).',()=>C.unIndex(C.grp21(D.age21.m),C.grp21(D.age21.f)).idx,0.2,()=>{const u=C.unIndex(C.grp21(D.age21.m),C.grp21(D.age21.f));return `3 × ${sd(u.SRS,2)} + ${sd(u.am,2)} + ${sd(u.af,2)} = ${sd(u.idx,2)}.`;}),
+ Q('A Whipple index of about 116 is best described as…',['Highly accurate','Fairly accurate','Approximate','Very rough'],2,'110–125 is the “approximate” class.'),
+ Q('The UN index is just under 20 here. The best interpretation is…',['The data are perfect','The data are accurate by the UN rule but close to the boundary, with visible heaping','The data must be discarded','The data are highly inaccurate'],1,'An index below 20 is classed “accurate”, but the lab shows clear digit preference, so a score near the boundary deserves care.')
+],
+reflect:['Whipple and Myers both flag heaping but disagree about its size on some definitions. Which would you report in a methods note and why?','The 2021 counts fall sharply between ages 21 and 22. List three hypotheses (coverage, migration, cohort size, reporting) and the data needed to test each.'],
+r:`whipple <- function(P, ages = 0:95) {            # P indexed by single year of age 0..95
+  num <- sum(P[ages %in% seq(25, 60, 5) + 1])    # careful: R is 1-indexed
+  den <- sum(P[24:63]) / 5                        # ages 23..62
+  100 * num / den
+}`});
+
+M.push({id:4,unit:2,title:'Age–sex structure, dependency and the demographic window',ch:'Siegel & Swanson, Chapter 7',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Read a population pyramid and compute dependency, ageing and sex-ratio indicators.</li><li>Compare measures computed from single years and from grouped data.</li><li>Link the age structure to the idea of a demographic dividend.</li></ul>
+<h3>Ghana’s age structure</h3>
+<p>In 2021, 35.3% of Ghanaians were aged 0–14 (down from 41.3% in 2000), 60.4% were 15–64 and 4.3% were 65 or older. The Ghana Statistical Service reports an age-dependency ratio of 66. Young people aged 15–35 now outnumber children: 38.2% of the population.</p>
+<div class="formula">Total dependency ratio = 100 · (P₀₋₁₄ + P₆₅₊) / P₁₅₋₆₄
+Youth dependency      = 100 · P₀₋₁₄ / P₁₅₋₆₄       Old-age dependency = 100 · P₆₅₊ / P₁₅₋₆₄
+Ageing index          = 100 · P₆₅₊ / P₀₋₁₄            Sex ratio = 100 · males / females
+Median age: the age that splits the population in two; interpolate within the median group.</div>
+<div class="callout key"><b class="t">Dividend or dilemma?</b>A falling dependency ratio raises the share of potential workers. The first demographic dividend appears only when those people are productively employed; the second depends on saving and human-capital investment over the life course.</div>`,
+lab:'structure',
+practice:[
+ N('Compute the 2021 <b>total dependency ratio</b> from the single-year data.',()=>dep21().td,0.1,()=>`(${fmt(dep21().y)} + ${fmt(dep21().o)}) ÷ ${fmt(dep21().w)} × 100 = ${sd(dep21().td,2)}.`),
+ N('Compute the 2010 total dependency ratio from the 2010 age groups.',()=>dep10().td,0.1,()=>`(${fmt(dep10().y)} + ${fmt(dep10().o)}) ÷ ${fmt(dep10().w)} × 100 = ${sd(dep10().td,2)}.`),
+ N('Compute the 2021 <b>median age</b> from single years (1 d.p.).',()=>C.medianSingle(popB),0.1,()=>`The cumulative count reaches half of 30,832,019 inside age ${Math.floor(C.medianSingle(popB))}; interpolating gives ${sd(C.medianSingle(popB),2)} years.`,'years'),
+ N('Compute the 2021 <b>ageing index</b> (persons 65+ per 100 children under 15).',()=>dep21().ai,0.1,()=>`${fmt(dep21().o)} ÷ ${fmt(dep21().y)} × 100 = ${sd(dep21().ai,2)}.`),
+ Q('Why do medians from single years and from 5-year groups differ slightly?',['Grouped data assume a uniform distribution within the group, so interpolation differs','Single-year data are wrong','Grouped data include more people','They never differ'],0,'Linear interpolation inside a 5-year group is an approximation; single-year ages need less interpolation.')
+],
+reflect:['Is a falling dependency ratio in Ghana mainly due to fewer children, more working-age adults, or both? Decompose the change from 75.6 to 65.6.','What data beyond age structure are needed to claim that Ghana is capturing a demographic dividend?'],
+r:`ages_g <- c(sum(P[1:15]), sum(P[16:65]), sum(P[66:96]))   # 0-14, 15-64, 65+
+dep <- (ages_g[1] + ages_g[3]) / ages_g[2] * 100
+median_age <- approx(cumsum(P)/sum(P), 0:95, xout = 0.5)$y`});
+
+M.push({id:5,unit:2,title:'Regions: growth, concentration and redistribution',ch:'Siegel & Swanson, Chapters 5 and 19',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Compute regional growth rates, shares and concentration measures.</li><li>Use a Lorenz curve and Gini coefficient for a regional distribution.</li><li>Recognise the limits of a redistribution proxy and of boundary-dependent comparisons.</li></ul>
+<h3>Ghana’s regions</h3>
+<p>Ghana has 16 regions (10 before the 2019 creation of six new regions) and 261 district assemblies. In 2021 Greater Accra, the smallest region by area, became the most populous (5,455,692), just ahead of Ashanti (5,440,463). The two together hold about 35% of the population.</p>
+<p>Comparisons across 2010 and 2021 require 2010 counts re-tabulated to the current boundaries, which is what this lab uses. District comparisons are much riskier: many districts were split or merged, so a raw difference can reflect redrawn borders, not population change.</p>
+<div class="formula">Growth rate rᵣ = ln(P₂₀₂₁ / P₂₀₁₀) / t
+Relative gain = P₂₀₂₁ − P₂₀₁₀ · (P_Ghana,2021 / P_Ghana,2010)       (sums to zero across regions)
+Gini = 1 − 2 · (area under the Lorenz curve)</div>
+<div class="callout warn"><b class="t">Not a migration estimate</b>Relative gain mixes net migration with differences in natural increase (regional TFR ranges from 2.9 to 6.6). It shows where growth beat or trailed the national pace, not who moved.</div>`,
+lab:'regions',
+practice:[
+ N('Compute the exponential growth rate 2010–2021 for <b>Greater Accra</b> (% a year).',()=>R.find(r=>r.n==='Greater Accra').rate,0.02,()=>`ln(5,455,692 / 4,010,054) ÷ 10.76 = ${sd(R.find(r=>r.n==='Greater Accra').rate,3)}%.`,'%'),
+ Q('Which region grew fastest between 2010 and 2021?',['Greater Accra','Northern','Savannah','North East'],1,'Northern grew at about 3.7% a year, faster than North East (3.2%), Savannah (3.1%) and Greater Accra (2.9%).'),
+ N('Compute Greater Accra’s <b>relative gain</b> (people) compared with growing at the national pace.',()=>R.find(r=>r.n==='Greater Accra').tr,2000,()=>`5,455,692 − 4,010,054 × (30,832,019/24,658,823) = ${fmt(R.find(r=>r.n==='Greater Accra').tr)}.`),
+ N('Compute the Gini coefficient of the 2021 regional population distribution (3 d.p.).',()=>giniR(),0.003,()=>`Sort regions by size, cumulate population shares, integrate the Lorenz curve: Gini = ${sd(giniR(),3)}.`),
+ Q('A district shows a 40% fall in population between two censuses. Before concluding anything you should…',['Check whether its boundaries changed between the censuses','Assume mass out-migration','Ignore the district','Multiply by the national growth rate'],0,'Splits and merges of districts are common; comparisons need a consistent geography.')
+],
+reflect:['Greater Accra grew by 36% in 11 years while its TFR (2.9) is the lowest in Ghana. What does that imply about the role of migration, and what data would test it?','Why might the Gini of regional size fall even while Greater Accra grows faster than the rest?'],
+r:`reg <- read.csv("regions.csv")   # columns: region, p2010, p2021
+t <- 2021.49 - 2010.73
+reg$r <- log(reg$p2021 / reg$p2010) / t
+reg$gain <- reg$p2021 - reg$p2010 * sum(reg$p2021) / sum(reg$p2010)
+# Gini: install.packages("DescTools"); DescTools::Gini(reg$p2021)`});
+
+M.push({id:6,unit:2,title:'Urbanisation and the urban–rural growth differential',ch:'Siegel & Swanson, Chapter 6',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Define urban population using Ghana’s classification and explain how definitions affect comparisons.</li><li>Compute the urban–rural growth differential (URGD) and use it to project the urban share.</li></ul>
+<h3>Urbanisation in Ghana</h3>
+<p>Ghana classifies localities with 5,000 or more people as urban, a rule used since 1960. The urban share rose from 23.1% (1960) to 28% (1970), 32% (1984), 50.9% (2010) and 56.7% (2021: 17,472,530 urban and 13,359,489 rural residents). Almost half (47.8%) of the 2010–2021 growth in the urban population occurred in Greater Accra and Ashanti.</p>
+<div class="formula">URGD = r_urban − r_rural                          (exponential rates)
+logit(share) = ln( U / (1 − U) )     increases at rate URGD if the differential is constant
+Time to reach target share U*:  t = [ logit(U*) − logit(U₂₀₂₁) ] / URGD</div>
+<div class="callout info"><b class="t">Reclassification</b>A locality that crosses 5,000 people becomes urban, moving its whole population from the rural to the urban count. Part of the measured URGD is reclassification, not migration or natural increase.</div>`,
+lab:'urban',
+practice:[
+ N('Compute the <b>URGD</b> for 2010–2021 in percentage points a year (use 50.9% urban in 2010).',()=>100*urb().urgd,0.03,()=>`r_urban = ${sd(100*urb().ru,2)}%, r_rural = ${sd(100*urb().rr,2)}%; difference ${sd(100*urb().urgd,2)} pp.`,'pp'),
+ N('If the URGD stays constant, in what year does the urban share reach 70%? (nearest year)',()=>{const lg=p=>Math.log(p/(1-p));return T1+(lg(.7)-lg(urb().s21))/urb().urgd;},1.5,()=>{const lg=p=>Math.log(p/(1-p));return `t = [logit(0.70) − logit(${sd(urb().s21,3)})] ÷ ${sd(urb().urgd,4)} = ${sd((lg(.7)-lg(urb().s21))/urb().urgd,1)} years after 2021.`;},'year'),
+ Q('Why is the 2010 urban population only approximate here?',['It was computed from a rounded published share','The census did not count urban areas','2010 had no census','Urban means 50,000 people'],0,'The published 50.9% was applied to the total count.'),
+ Q('If Ghana lowered its urban threshold from 5,000 to 2,500, the measured urban share would…',['Fall','Rise','Stay the same','Become negative'],1,'More localities qualify as urban.')
+],
+reflect:['How much of Ghana’s rising urban share might be reclassification? How would you separate it from migration using locality-level census data?','Compare Ghana’s 5,000 threshold with other countries. What are the consequences for cross-country urbanisation rankings?'],
+r:`u10 <- 0.509 * 24658823; r10 <- 24658823 - u10
+ru <- log(17472530 / u10) / (2021.49 - 2010.73)
+rr <- log(13359489 / r10) / (2021.49 - 2010.73)
+urgd <- ru - rr
+logit <- function(p) log(p / (1 - p))
+(logit(.70) - logit(17472530 / 30832019)) / urgd`});
+
+M.push({id:7,unit:2,title:'Ethnic composition, diversity indices and classification',ch:'Siegel & Swanson, Chapter 8',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Explain self-identification and why ethnic categories depend on the classification used.</li><li>Compute a Herfindahl index, a diversity index and the effective number of groups.</li><li>Evaluate how merging or splitting categories changes diversity measures.</li></ul>
+<h3>Ethnicity in a census</h3>
+<p>The 2021 census recorded ethnic group as reported by respondents, with the groups tabulated by the Ghana Statistical Service shown in the lab. Ghana has more than seventy ethnic groups; census tables use broader groupings such as Akan, Mole-Dagbani, Ewe, Ga-Dangme, Gurma, Guan, Grusi and Mande. Categories are an instrument of measurement: they can be merged or split, and persons may identify differently over time and by context.</p>
+<div class="formula">Shares pᵢ = nᵢ / N          Herfindahl index H = Σ pᵢ²
+Diversity (ethnolinguistic fractionalisation) = 1 − H       Effective number of groups = 1 / H</div>
+<div class="callout warn"><b class="t">Ethical note</b>Ethnic statistics can inform equitable planning and can also be misused. Report categories exactly as collected, avoid inferring individuals from tables, and state limits when diversity indices are used in analysis.</div>`,
+lab:'ethnic',
+practice:[
+ N('Compute the Herfindahl index H for the tabulated groups (3 d.p.).',()=>hhi(),0.003,()=>`H = Σ pᵢ² = ${sd(hhi(),4)}, with shares based on the tabulated total of 30,484,536.`),
+ N('Compute the effective number of groups 1/H.',()=>1/hhi(),0.05,()=>`1 ÷ ${sd(hhi(),4)} = ${sd(1/hhi(),2)}: the population is as diverse as about ${sd(1/hhi(),1)} equal-sized groups.`),
+ N('How many people in the national total of 30,832,019 are <b>not</b> in the tabulated ethnic groups?',()=>30832019-sum(D.ethnic.map(e=>e[1])),1,()=>`30,832,019 − 30,484,536 = ${fmt(30832019-sum(D.ethnic.map(e=>e[1])))}.`),
+ Q('If you merge Gurma, Guan, Grusi and Mande into one category, the diversity index will…',['Fall','Rise','Stay unchanged','Become undefined'],0,'Merging groups concentrates shares and raises H, so diversity (1 − H) falls.')
+],
+reflect:['Who should decide the categories on a census form? How should communities be consulted?','Would you use an ethnic fractionalisation index as a regressor in a model of development outcomes? What would you worry about?'],
+r:`eth <- c(Akan = 13925576, MoleDagbani = 5638881, Ewe = 3902009, GaDangme = 2153562,
+         Gurma = 1959618, Guan = 981747, Grusi = 826901, Mande = 600213, Other = 496029)
+p <- eth / sum(eth)
+c(H = sum(p^2), diversity = 1 - sum(p^2), effective = 1 / sum(p^2))`});
+
+M.push({id:8,unit:2,title:'Households, literacy and human-capital indicators',ch:'Siegel & Swanson, Chapters 9–10',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Distinguish proportions, ratios and rates, and build indicators from census counts.</li><li>Interpret changes in household size and literacy.</li></ul>
+<h3>Households and literacy</h3>
+<p>Average household size in Ghana fell from 4.4 in 2010 to 3.6 in 2021 (urban 4.1 to 3.3; rural 5.0 to 4.0). Smaller households mean more households for the same population, with implications for housing demand. For literacy, 16,453,426 persons aged 11 and over were literate and 6,134,584 were not.</p>
+<div class="formula">Proportion = a / (a + b)         Ratio = a / b         Rate = events / person-years of exposure
+Literacy rate = literate / (literate + not literate)     Households ≈ population / average household size</div>
+<div class="callout info"><b class="t">Check the denominator</b>A literacy rate with “all persons” in the denominator would be wrong: the question applies to persons aged 11 and over. Many errors in published indicators are denominator errors.</div>`,
+lab:'indicators',
+practice:[
+ N('Compute the literacy rate (% of persons aged 11+).',()=>100*D.lit.yes/(D.lit.yes+D.lit.no),0.05,()=>`16,453,426 ÷ (16,453,426 + 6,134,584) × 100 = ${sd(100*D.lit.yes/(D.lit.yes+D.lit.no),2)}%.`,'%'),
+ N('Using an average size of 3.6, approximately how many households (millions) does 30,832,019 imply?',()=>30832019/3.6/1e6,0.05,()=>`30,832,019 ÷ 3.6 = ${sd(30832019/3.6/1e6,2)} million. This ignores people in group quarters, so it is approximate.`,'million'),
+ N('By what percentage did average household size change between 2010 (4.4) and 2021 (3.6)?',()=>100*(3.6-4.4)/4.4,0.1,()=>`(3.6 − 4.4) ÷ 4.4 × 100 = ${sd(100*(3.6-4.4)/4.4,1)}%.`,'%'),
+ Q('The number of males divided by the number of females is a…',['Rate','Proportion','Ratio','Percentage of the population'],2,'Males and females are disjoint groups; the quotient is a ratio.')
+],
+reflect:['If household size falls while population grows by 25%, what happens to the number of households? What does this imply for housing policy?','What are the limits of a literacy question in a census compared with a tested measure?'],
+r:`lit <- c(yes = 16453426, no = 6134584)
+round(100 * lit["yes"] / sum(lit), 2)
+households <- 30832019 / 3.6`});
+
+M.push({id:9,unit:3,title:'Growth and the demographic transition',ch:'Siegel & Swanson, Chapter 11',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Describe Ghana’s demographic transition using birth, death, fertility and mortality series.</li><li>Compute the rate of natural increase and implied doubling time.</li><li>Reconcile growth between sources and identify inconsistencies.</li></ul>
+<h3>A century-long transition</h3>
+<p>In the UN World Population Prospects (2022) estimates, Ghana’s crude death rate fell from about 22.6 per 1,000 in 1950 to 7.5 in 2021 and life expectancy rose from 43 to about 64 years, while the crude birth rate fell more slowly, from about 47 to 27. The result is a long period of rapid natural increase that is now narrowing. DHS surveys show the total fertility rate falling from 6.4 (1988) to 3.9 (2022).</p>
+<div class="formula">Balancing equation:   P₂ = P₁ + B − D + I − E
+Rate of natural increase RNI = CBR − CDR   (per 1,000)
+Net migration residual   M = (P₂ − P₁) − (B − D)</div>
+<div class="callout warn"><b class="t">Sources disagree</b>WPP estimates for 2021 (32.5 million) exceed the census count (30.8 million). When two sources use different population bases, a residual is meaningless: the reconciliation panel shows how large the mismatch is.</div>`,
+lab:'transition',
+practice:[
+ N('Using the 2021 UN CBR (27.0) and CDR (7.5), compute the rate of natural increase per 1,000.',()=>27.0-7.5,0.05,()=>`27.0 − 7.5 = 19.5 per 1,000.`),
+ N('At that rate, what is the doubling time (years)?',()=>C.dbl(0.0195),0.3,()=>`ln 2 ÷ 0.0195 = ${sd(C.dbl(0.0195),1)} years.`,'years'),
+ N('By what percentage did the UN TFR estimate fall between 1970 (6.95) and 2021 (3.49)?',()=>100*(6.95-3.49)/6.95,0.1,()=>`(6.95 − 3.49) ÷ 6.95 × 100 = ${sd(100*(6.95-3.49)/6.95,1)}%.`,'%'),
+ Q('Which description fits Ghana in 2021?',['Pre-transition: high birth and death rates','Mid-to-late transition: low death rate, falling but still high birth rate','Post-transition: low birth and death rates','Reverse transition'],1,'CDR is low (7.5) while CBR is 27 and falling.')
+],
+reflect:['Why does the UN series differ from the census-based growth rate? List data and method reasons.','Ghana’s fertility decline stalled in some DHS rounds (4.0 in 2008, 4.2 in 2014). Is that a real stall or sampling variation? How would you test?'],
+r:`un <- data.frame(year = c(2010, 2015, 2020, 2021), cbr = c(33.0, 31.7, 27.4, 27.0), cdr = c(8.6, 7.8, 7.4, 7.5))
+transform(un, rni = cbr - cdr, doubling = log(2) / ((cbr - cdr) / 1000))`});
+
+M.push({id:10,unit:3,title:'Fertility: measures, trends and decomposition',ch:'Siegel & Swanson, Chapters 15–16',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Compute TFR, mean age at childbearing and GRR from age-specific rates.</li><li>Decompose a TFR difference exactly by age group.</li><li>Interpret urban–rural and regional fertility and unwanted fertility.</li></ul>
+<h3>Ghana’s fertility</h3>
+<p>The 2022 Ghana Demographic and Health Survey (GDHS) estimates a TFR of 3.9 (urban 3.2, rural 4.8), down from 6.4 in 1988. Fertility peaks at 190 births per 1,000 women aged 25–29. The median age at first birth among women 25–49 is 22.1. Regionally, TFR ranges from 2.9 in Greater Accra to 6.6 in the North East Region.</p>
+<div class="formula">TFR = 5 · Σ ASFRₐ / 1000          Mean age at childbearing = Σ (m_a · ASFRₐ) / Σ ASFRₐ     (m_a = age-group midpoint)
+GRR = TFR · (female births / all births)     ΔTFR by age = 5 · (ASFRₐ − ASFR′ₐ) / 1000
+Unwanted fertility = TFR − wanted fertility rate</div>
+<div class="callout info"><b class="t">Period versus cohort</b>The TFR is a period measure built from one time window. It can differ from completed cohort fertility when the timing of births is changing.</div>`,
+lab:'fertility',
+practice:[
+ N('Compute the 2022 national TFR from the age-specific rates.',()=>C.tfr(D.asfr['2022']),0.01,()=>`5 × (63 + 156 + 190 + 176 + 128 + 53 + 14) ÷ 1000 = ${sd(C.tfr(D.asfr['2022']),2)}.`),
+ N('How much did the 20–24 age group contribute to the change in TFR between 1988 and 2022? (negative = decline)',()=>5*(D.asfr['2022'][1]-D.asfr['1988'][1])/1000,0.01,()=>`5 × (156 − 258) ÷ 1000 = ${sd(5*(156-258)/1000,2)}.`),
+ N('Compute the rural − urban TFR gap from the 2022 age-specific rates.',()=>C.tfr(D.asfr['2022r'])-C.tfr(D.asfr['2022u']),0.02,()=>`${sd(C.tfr(D.asfr['2022r']),2)} − ${sd(C.tfr(D.asfr['2022u']),2)} = ${sd(C.tfr(D.asfr['2022r'])-C.tfr(D.asfr['2022u']),2)}.`),
+ N('Compute the national mean age at childbearing for 2022 (years, 1 d.p.).',()=>C.macb(D.asfr['2022']),0.1,()=>`Σ(midpoint × ASFR) ÷ Σ ASFR = ${sd(C.macb(D.asfr['2022']),2)} years.`,'years'),
+ Q('Which region has the largest gap between actual and wanted TFR in 2022?',['Greater Accra','Central','North East','Upper East'],1,'Central: 3.6 actual against 2.8 wanted (0.8). North East and Upper East have gaps of only 0.1.')
+],
+reflect:['Wanted fertility is higher than replacement in every northern region. What does that imply for policies that focus on family planning supply alone?','The 2022 ASFR for age 45–49 is based on very few births. How should it be treated?'],
+r:`asfr <- c(63, 156, 190, 176, 128, 53, 14)
+tfr <- 5 * sum(asfr) / 1000
+mid <- seq(17.5, 47.5, by = 5)
+macb <- sum(mid * asfr) / sum(asfr)`});
+
+M.push({id:11,unit:3,title:'Mortality, life tables and the life-expectancy puzzle',ch:'Siegel & Swanson, Chapters 12–13',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Construct an abridged life table from age-specific death rates.</li><li>Interpret qₓ, lₓ, dₓ, Lₓ, Tₓ and eₓ.</li><li>Explain why published life expectancy estimates for the same country differ.</li></ul>
+<h3>From rates to a table</h3>
+<div class="formula">qₓ = n·mₓ / (1 + (n − aₓ)·mₓ)         lₓ₊ₙ = lₓ (1 − qₓ)         dₓ = lₓ · qₓ
+Lₓ = n·lₓ₊ₙ + aₓ·dₓ          Tₓ = Σ L_y (y ≥ x)          eₓ = Tₓ / lₓ     open interval: L = l / m
+Separation factors (Coale–Demeny West): a₀ = 0.053 + 2.800·m₀ (female), 0.045 + 2.684·m₀ (male)</div>
+<p>Ghana’s child survival has improved: under-five mortality fell from 155 per 1,000 (1988) to 40 (2022 GDHS). Adult mortality is harder to measure because registration of deaths is incomplete, so life tables rely on models, surveys and census-based indirect methods.</p>
+<div class="callout key"><b class="t">The e₀ puzzle</b>UN WPP 2022 puts Ghana’s 2021 life expectancy at 64.3 years, while the CIA World Factbook reported about 69. Differences arise from the data used (death registration, census age, survey-based child mortality), model life tables chosen, and treatment of AIDS and conflict mortality. Always cite the source, vintage and method.</div>`,
+lab:'lifetable',
+practice:[
+ N('For the default model schedule (e₀ = 64.3), what is life expectancy at birth in your table?',()=>C.lifetable(C.modelMx(C.solveK(64.3)),'b').e[0],0.1,()=>`T₀ ÷ l₀ = ${sd(C.lifetable(C.modelMx(C.solveK(64.3)),'b').e[0],2)} years.`,'years'),
+ N('What is the under-five mortality rate (₅q₀) per 1,000 in that table?',()=>1000*(1-C.lifetable(C.modelMx(C.solveK(64.3)),'b').l[2]/1e5),0.5,()=>`1,000 × (1 − l₅/l₀) = ${sd(1000*(1-C.lifetable(C.modelMx(C.solveK(64.3)),'b').l[2]/1e5),1)}. The 2022 GDHS estimate was 40.`),
+ N('What is the probability (per 1,000) that a 15-year-old dies before age 60 (₄₅q₁₅)?',()=>{const t=C.lifetable(C.modelMx(C.solveK(64.3)),'b');return 1000*(1-t.l[13]/t.l[4]);},3,()=>{const t=C.lifetable(C.modelMx(C.solveK(64.3)),'b');return `1,000 × (1 − l₆₀/l₁₅) = ${sd(1000*(1-t.l[13]/t.l[4]),0)}.`;}),
+ N('What is life expectancy at age 60 (e₆₀)?',()=>C.lifetable(C.modelMx(C.solveK(64.3)),'b').e[13],0.2,()=>`T₆₀ ÷ l₆₀ = ${sd(C.lifetable(C.modelMx(C.solveK(64.3)),'b').e[13],2)} years.`,'years'),
+ Q('Two agencies publish different e₀ for Ghana in the same year. The most useful first step is to…',['Average them','Check the data sources, model life tables and vintage each used','Pick the higher value','Ignore both'],1,'Differences are explained by inputs and methods, so you must compare those before choosing or combining.')
+],
+reflect:['Why does e₀ move so much with infant mortality while e₆₀ is less sensitive?','What data would you need to construct a Ghana life table without borrowing a model schedule?'],
+r:`lifetable <- function(m, n, a) {
+  q <- n*m/(1 + (n - a)*m); q[length(q)] <- 1
+  l <- c(1e5, 1e5*cumprod(1 - q))[seq_along(q)]
+  d <- l*q; L <- n*c(l[-1], 0) + a*d; L[length(L)] <- l[length(l)]/m[length(m)]
+  T <- rev(cumsum(rev(L))); data.frame(q, l, d, L, T, e = T/l)
+}`});
+
+M.push({id:12,unit:3,title:'Reproductivity, stable populations and the intrinsic growth rate',ch:'Siegel & Swanson, Chapter 17',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Compute GRR and NRR from fertility and survivorship.</li><li>Solve Lotka’s equation for the intrinsic growth rate.</li><li>Compare a stable age distribution with an observed one.</li></ul>
+<h3>Replacement and stability</h3>
+<div class="formula">NRR = Σ 5 · mₐ · ℓₐ        where mₐ = female births per woman of age a, ℓₐ = survival to age a
+Lotka:    Σ 5 · mₐ · ℓₐ · e^(−r·a) = 1       r = intrinsic growth rate
+Mean generation length T ≈ ln(NRR) / r
+Stable age structure   c(a) ∝ e^(−r·a) · L(a)</div>
+<p>With the GDHS 2022 schedule and a life expectancy near 64, the net reproduction rate is about 1.7 and the intrinsic growth rate is about 1.9% a year. The observed census growth of 2.08% is <i>higher</i> than the intrinsic rate. That gap is population momentum: Ghana’s age structure is still young because of past high fertility, so many women are entering childbearing ages and growth continues above what today’s rates alone would give.</p>
+<div class="callout info"><b class="t">Why stable models still matter</b>Stable and quasi-stable populations give indirect estimation tools when data are poor (Chapter 22) and a baseline for “what if rates stopped changing”.</div>`,
+lab:'stable',
+practice:[
+ N('With the 2022 national schedule and e₀ = 64.3, compute the NRR.',()=>nrr(D.asfr['2022'],64.3).R0,0.02,()=>`NRR = Σ 5·m·ℓ = ${sd(nrr(D.asfr['2022'],64.3).R0,3)}.`),
+ N('Solve for the intrinsic growth rate r (% a year).',()=>100*nrr(D.asfr['2022'],64.3).r,0.05,()=>`Solving Σ 5·m·ℓ·e^(−r·a) = 1 gives r = ${sd(100*nrr(D.asfr['2022'],64.3).r,2)}% a year.`,'%'),
+ N('Using the 1988 schedule instead (same mortality), what is the NRR?',()=>nrr(D.asfr['1988'],64.3).R0,0.03,()=>`NRR(1988 schedule) = ${sd(nrr(D.asfr['1988'],64.3).R0,3)}.`),
+ Q('An NRR above 1 with constant rates implies…',['Eventual population decline','Long-run population growth','Zero growth','No change in age structure'],1,'Each generation of mothers is replaced by a larger generation of daughters.')
+],
+reflect:['The intrinsic rate (about 1.9%) is below the observed growth rate (2.08%). Explain this with population momentum, and say what else (migration, data errors) could contribute and how you would test it.','What does a young observed age structure imply about a stable population’s age pattern?'],
+r:`mid <- seq(17.5, 47.5, 5); m <- c(63,156,190,176,128,53,14)/1000/2.03
+l <- function(a, k = 1) exp(-k*(0.3086/10*(1 - exp(-10*a)) + 0.002062*a + 0.0001107/0.08494*(exp(0.08494*a) - 1)))
+nrr <- sum(5 * m * l(mid))
+r <- uniroot(function(r) sum(5*m*l(mid)*exp(-r*mid)) - 1, c(-0.1, 0.15))$root`});
+
+M.push({id:13,unit:3,title:'Migration and the residual method',ch:'Siegel & Swanson, Chapters 18–19',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Estimate net migration as a residual and quantify its sensitivity to input errors.</li><li>Separate genuine migration signals from data inconsistencies.</li></ul>
+<h3>Residual estimates</h3>
+<div class="formula">M = (P₂ − P₁) − (B − D)         (net migration as a residual)
+Rate of net migration = M / (mid-period population · t)</div>
+<p>International migration data for Ghana are limited: UN estimates give a small negative net migration rate (about −0.16 per 1,000) and an immigrant stock around 1.5% of the population (2024). The 2021 census data include records for emigrants and for people absent from households, and ask about place of birth. Internal migration is large: Greater Accra’s population grew by 36% between 2010 and 2021.</p>
+<div class="callout warn"><b class="t">The residual is an error sink</b>Because M equals the difference of totals, any error in P₁, P₂, B or D lands in M. When births are scaled by a few percentage points the implied migration changes by hundreds of thousands: the lab lets you see this.</div>`,
+lab:'residual',
+practice:[
+ N('Using the UN births and deaths pro-rated to 26 Sep 2010 – 27 Jun 2021 and the census change, compute the residual net migration (people).',()=>resid(1,1),30000,()=>`M = 6,173,196 − (B − D) = ${fmt(resid(1,1))}. A negative value implies more natural increase than the census change can explain.`),
+ N('If births were only 90% of the UN figure (deaths unchanged), what is the residual?',()=>resid(.9,1),30000,()=>`With births × 0.90 the residual becomes ${fmt(resid(.9,1))}.`),
+ Q('A large negative residual most plausibly indicates…',['Mass emigration','Inconsistent inputs (e.g. UN births too high or census undercount) mixed with some migration','Zero migration','A perfect census'],1,'The residual absorbs all errors; here it is far larger than migration estimates from other sources.')
+],
+reflect:['Build a table of other evidence (immigrant stock, emigrant records, remittance flows) to triangulate Ghana’s net migration.','Why is the residual method more defensible for sub-national areas with good vital registration than for Ghana nationally?'],
+r:`B <- sum(c(0.27*844, 864, 883, 896, 898, 916, 902, 876, 897, 872, 875, 0.49*879)) * 1000
+D <- sum(c(0.27*221, 221, 221, 223, 220, 225, 220, 223, 228, 229, 237, 0.49*243)) * 1000
+M <- (30832019 - 24658823) - (B - D)`});
+
+M.push({id:14,unit:4,title:'Intercensal and postcensal estimates, and evaluating projections',ch:'Siegel & Swanson, Chapter 20',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Distinguish intercensal, postcensal and projected figures.</li><li>Interpolate and extrapolate using three mathematical models.</li><li>Evaluate estimates against benchmarks with percent error.</li></ul>
+<h3>Estimates between and after censuses</h3>
+<p>Between the 2010 and 2021 censuses, official users still need annual figures. An <b>intercensal</b> estimate lies between two censuses (interpolation); a <b>postcensal</b> estimate follows the latest census (extrapolation or component methods). Component and housing-unit methods use births, deaths, migration or dwelling counts. The official 2010-based estimate for 1 July 2015 (UN Demographic Yearbook) was 27,670,174, while UN WPP 2022 gives about 28.9 million for the same year.</p>
+<div class="formula">Percent error = 100 · (estimate − benchmark) / benchmark
+MAPE = mean |percent error|        MALPE = mean percent error (shows bias)</div>
+<div class="callout key"><b class="t">Lesson from 2021</b>UN WPP 2022 estimated 32.5 million for 2021, about 5.5% above the census count of 30.8 million. A projection from one census can drift substantially in a decade: the next census is the best test of any estimate.</div>`,
+lab:'estimates',
+practice:[
+ N('Using exponential interpolation between 2010.73 and 2021.49, estimate the population on 1 July 2015 (date 2015.5).',()=>estExp(2015.5),5000,()=>`P = 24,658,823 · exp(r · 4.77), r = ${sd(C.expR(24658823,30832019,T1-T0),5)}: ${fmt(estExp(2015.5))}.`),
+ N('By what percent does the UN WPP 2022 estimate for 2015 (28,871,000) exceed your estimate?',()=>100*(28871000-estExp(2015.5))/estExp(2015.5),0.2,()=>`(28,871,000 − ${fmt(estExp(2015.5))}) ÷ ${fmt(estExp(2015.5))} × 100 = ${sd(100*(28871000-estExp(2015.5))/estExp(2015.5),2)}%.`,'%'),
+ N('By what percent does the UN WPP 2022 figure for 2021 (32,519,000) exceed the census count?',()=>100*(32519000-30832019)/30832019,0.1,()=>`(32,519,000 − 30,832,019) ÷ 30,832,019 × 100 = ${sd(100*(32519000-30832019)/30832019,2)}%.`,'%'),
+ Q('Percent errors of +5%, −3% and +4% have a MALPE of about…',['+2%','0%','+4%','−4%'],0,'(5 − 3 + 4)/3 = 2%. MALPE keeps signs and shows bias.')
+],
+reflect:['Why might projections made from the 2010 census overshoot the 2021 count? Consider fertility, mortality, migration and base-population errors.','What evidence would persuade you to revise the 2015 estimate after the 2021 census?'],
+r:`P1 <- 24658823; P2 <- 30832019; t1 <- 2010.73; t2 <- 2021.49
+r  <- log(P2 / P1) / (t2 - t1)
+interp <- function(t) P1 * exp(r * (t - t1))
+interp(2015.5)`});
+
+M.push({id:15,unit:4,title:'Cohort-component projection lab',ch:'Siegel & Swanson, Chapter 21',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Implement the cohort-component method with real 2021 census data.</li><li>Test how fertility, mortality and migration assumptions change future population and dependency.</li><li>Communicate projections as scenarios, not predictions.</li></ul>
+<h3>The method</h3>
+<p>The cohort-component method ages each sex-age group forward, applies survival ratios, adds births from women of childbearing age, and adds net migrants. This lab uses 5-year steps from 2021 to 2051, the census population by age and sex as the base, the GDHS fertility age pattern scaled to a TFR path, and a model mortality schedule scaled to a life-expectancy path.</p>
+<div class="formula">P(a+5, t+5) = P(a, t) · S(a)           S = L(a+5) / L(a)  (open interval: T(90)/T(85))
+Births over 5 years = 5 · Σ ASFRₐ · scale · [F(a,t) + F(a,t+5)] / 2     scale = target TFR / pattern TFR
+Newborns aged 0–4 = births · (5L₀ / 5)     split by sex ratio at birth 1.03</div>
+<div class="callout warn"><b class="t">Calibration check</b>With a TFR of 3.9 and e₀ of 64.3 the model grows faster than the census-observed 2.08% a year. Possible reasons: the TFR from a survey differs from the census-implied fertility, children under five are under-counted, or net emigration. Use the readout to explore, and read the discussion prompts.</div>`,
+lab:'projection',
+practice:[
+ N('Under the <b>Constant</b> preset (TFR 3.9, e₀ 64.3), what is the projected 2051 population (millions)?',()=>tot('const',2051)/1e6,0.3,()=>`The model gives ${sd(tot('const',2051)/1e6,1)} million in 2051.`,'million'),
+ N('Under the <b>Fast decline</b> preset (TFR 2.1, e₀ 75), what is the projected 2051 population (millions)?',()=>tot('fast',2051)/1e6,0.3,()=>`The model gives ${sd(tot('fast',2051)/1e6,1)} million in 2051.`,'million'),
+ N('How many millions fewer people are there in 2051 under fast decline than under the constant scenario?',()=>(tot('const',2051)-tot('fast',2051))/1e6,0.4,()=>`${sd(tot('const',2051)/1e6,1)} − ${sd(tot('fast',2051)/1e6,1)} = ${sd((tot('const',2051)-tot('fast',2051))/1e6,1)} million.`,'million'),
+ N('Under the <b>Medium</b> preset, what is the total dependency ratio in 2051?',()=>C.metrics(A.runScenario(A.PRESETS.med).find(s=>s.yr===2051)).td,0.5,()=>`${sd(C.metrics(A.runScenario(A.PRESETS.med).find(s=>s.yr===2051)).td,1)} dependants per 100 persons aged 15–64.`),
+ Q('Which assumption has the largest effect on the 2051 population in these scenarios?',['Fertility path','The sex ratio at birth','Ordering of age groups','Census night date'],0,'Most people alive in 2051 were not alive in 2021, so the fertility path governs the number of births.')
+],
+reflect:['Compare your scenario with the UN or GSS projections. Which assumptions differ and by how much?','Which parts of the model would you improve first: single-year age detail, regional detail, migration pattern, or mortality by cause?'],
+r:`# Leslie matrix sketch (female-dominant)
+# S[i] survival 5-yr group i -> i+1; asfr scaled to target TFR; births = 5 * sum(asfr * mean(F_t, F_t+5))
+step <- function(F, S, asfr, srb = 1.03, l0 = 0.96) {
+  Fn <- c(0, F[-length(F)] * S)
+  births <- 5 * sum(asfr[1:7] * (F[4:10] + Fn[4:10]) / 2) / 1000
+  Fn[1] <- births / (1 + srb) * l0
+  Fn
+}`});
+
+M.push({id:16,unit:4,title:'Indirect estimation: census survival ratios and reverse survival',ch:'Siegel & Swanson, Chapter 22',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Compute census survival ratios from two censuses and compare with model survival.</li><li>Use reverse survival to infer births from child counts.</li><li>Diagnose coverage and age-reporting problems from the pattern of deviations.</li></ul>
+<h3>When direct data are weak</h3>
+<p>Indirect techniques recover rates from age distributions and other aggregate data. A <b>census survival ratio</b> divides a cohort’s size at the second census by its size at the first. If mortality were the only factor the ratio would equal the cohort’s survival probability. Departures from the model reflect migration, coverage differences or age misreporting. <b>Reverse survival</b> works backward: children aged a at the census were born a to a+1 years earlier, so births ≈ count ÷ survival to age a+½.</p>
+<div class="formula">CSR(x) = P₂(x + t) / P₁(x)         compare with model ratio L(x+t) / L(x)
+Births(t−a) ≈ P(a) / ℓ(a + ½)</div>
+<div class="callout key"><b class="t">What the 2021 data suggest</b>Counts of children rise from age 0 (730,592) to age 4 (784,810), even though annual births were roughly flat. That points to under-coverage or age shifting among the youngest children, and it explains why implied births are well below UN estimates.</div>`,
+lab:'csr',
+practice:[
+ N('Compute the observed census survival ratio for the cohort aged 0–4 in 2010 (both sexes) and aged 10–14 in 2021.',()=>g21[2]/g10[0],0.005,()=>`${fmt(g21[2])} ÷ ${fmt(g10[0])} = ${sd(g21[2]/g10[0],3)}.`),
+ N('Compute the ratio for the cohort aged 5–9 in 2010 and 15–19 in 2021.',()=>g21[3]/g10[1],0.005,()=>`${fmt(g21[3])} ÷ ${fmt(g10[1])} = ${sd(g21[3]/g10[1],3)}. A ratio above 1 cannot be explained by deaths.`),
+ Q('A census survival ratio above 1 for a cohort aged 5–9 in 2010 most plausibly reflects…',['Net in-migration, under-coverage in 2010, or over-coverage / age misreporting in 2021','Deaths exceeding births','A perfect enumeration','Falling mortality'],0,'Without migration or error the ratio cannot exceed one. Any ratio above one signals data or migration effects.'),
+ N('Using e₀ = 64.3, reverse-survive the 730,592 children aged 0 to get implied births, then compute the difference from UN births for 2021 (879,000) in %.',()=>{const b=a=>popB[0]/C.lx(0.5,C.solveK(64.3));return 100*(b()-879000)/879000;},1.5,()=>{const k=C.solveK(64.3);const b=popB[0]/C.lx(0.5,k);return `Implied births ${fmt(b)} versus 879,000: ${sd(100*(b-879000)/879000,1)}%.`;},'%')
+],
+reflect:['Does the rising count with age (0 to 4) reflect true births or undercount of infants? Which data would you consult (health facility records, DHS birth histories)?','How would you use the census survival ratios to adjust the base population of a projection?'],
+r:`csr <- g21[3:17] / g10[1:15]           # 2021 age groups i+2 over 2010 groups i
+births_age0 <- P21[1] / exp(-0.0325*0.5)  # example: scale by survival to 0.5 years`});
+
+M.push({id:17,unit:5,title:'Survey sampling: precision and design effects',ch:'Siegel & Swanson, Appendix C',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Compute standard errors, design effects and effective sample size for cluster surveys.</li><li>Plan sample size for a target margin of error.</li></ul>
+<h3>Precision in complex surveys</h3>
+<p>The 2022 GDHS interviewed 15,014 women aged 15–49 in 618 clusters (18,450 households selected). Because people in a cluster resemble each other, precision is lower than a simple random sample of the same size.</p>
+<div class="formula">SE (SRS) = √( p(1 − p) / n )          deff = 1 + (b − 1)·ρ          b = average cluster take
+SE (cluster) = SE(SRS) · √deff         Effective n = n / deff          95% margin of error = 1.96 · SE
+Required n = 1.96² · p(1 − p) · deff / (margin)²</div>
+<div class="callout info"><b class="t">Domains</b>Estimates for regions use a fraction of the sample. Precision falls with the square root of the domain sample size, which is why subnational estimates of rare events are unstable.</div>`,
+lab:'survey',
+practice:[
+ N('Using n = 15,014, 618 clusters and ρ = 0.05, compute the design effect.',()=>1+(15014/618-1)*0.05,0.02,()=>`b = 15,014 ÷ 618 = ${sd(15014/618,1)}; deff = 1 + (b − 1) × 0.05 = ${sd(1+(15014/618-1)*0.05,3)}.`),
+ N('For p = 50%, compute the clustered standard error (percentage points).',()=>{const d=1+(15014/618-1)*0.05;return 100*Math.sqrt(0.25/15014*d);},0.01,()=>{const d=1+(15014/618-1)*0.05;return `√(0.25/15,014 × ${sd(d,3)}) × 100 = ${sd(100*Math.sqrt(0.25/15014*d),3)} pp.`;},'pp'),
+ N('What is the effective sample size?',()=>15014/(1+(15014/618-1)*0.05),20,()=>`15,014 ÷ ${sd(1+(15014/618-1)*0.05,3)} = ${fmt(15014/(1+(15014/618-1)*0.05))}.`),
+ Q('Doubling the number of clusters while keeping n fixed will…',['Raise deff','Lower deff','Not change deff','Make SE zero'],1,'Fewer women per cluster reduces b and therefore the design effect.')
+],
+reflect:['How would you decide the number of clusters and the cluster size for a new Ghanaian survey with regional estimates?','Why is it risky to compare two regions whose confidence intervals overlap, and what test would you use?'],
+r:`n <- 15014; m <- 618; rho <- 0.05; p <- 0.5
+b <- n/m; deff <- 1 + (b - 1)*rho
+se <- sqrt(p*(1-p)/n * deff); moe <- 1.96*se`});
+
+M.push({id:18,unit:5,title:'Mapping demographic data: classification and the choropleth trap',ch:'Siegel & Swanson, Appendix D',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Choose variables and class breaks for a regional map and justify them.</li><li>Recognise how classification and normalisation change the message.</li></ul>
+<h3>Maps are analyses</h3>
+<p>A geographic information system stores layers of points, lines and polygons. Ghana’s 16 regions and 261 districts are polygons; census results can be shown as thematic (choropleth) maps. The lab uses a schematic tile map so every region has equal visual weight, avoiding the bias of large areas.</p>
+<div class="formula">Equal interval: width = (max − min) / k
+Quantile: each class holds about n / k regions
+Normalise counts: map rates, shares or densities rather than raw totals when areas or populations differ greatly</div>
+<div class="callout warn"><b class="t">Choropleth trap</b>The same data with different breaks tell different stories. Report the method and number of classes, and test the map with a second classification before drawing conclusions.</div>`,
+lab:'tilemap',
+practice:[
+ N('With 5 classes, what is the equal-interval class width for regional growth rates (% a year, 2 d.p.)?',()=>{const v=R.map(r=>r.rate);return (Math.max(...v)-Math.min(...v))/5;},0.02,()=>{const v=R.map(r=>r.rate);return `(${sd(Math.max(...v),2)} − ${sd(Math.min(...v),2)}) ÷ 5 = ${sd((Math.max(...v)-Math.min(...v))/5,3)}.`;},'pp'),
+ Q('A quantile map with 4 classes of 16 regions will show…',['4 regions in each class','Classes of equal width','Only 2 classes','One region per class'],0,'Quantile classes hold equal counts, whatever the spacing of values.'),
+ Q('Mapping total population by region mostly shows…',['Where people live (size), not intensity of change','Fertility','Migration','Poverty'],0,'Raw counts largely reproduce the size ranking. Use rates to show change.')
+],
+reflect:['Create two maps of the same variable that support opposite policy conclusions. What would a responsible caption say?','Why is a tile map better than a conventional map for comparing small and large regions, and what does it hide?'],
+r:`library(classInt)
+x <- reg$r
+classIntervals(x, n = 5, style = "equal")
+classIntervals(x, n = 5, style = "quantile")`});
+
+M.push({id:19,unit:5,title:'Capstone: an evidence brief for Ghana',ch:'All chapters',
+brief:`<div class="eyebrow">Learning objectives</div><ul><li>Combine census, survey and projection evidence into a short policy brief.</li><li>State the quality of the evidence and the limits of the model.</li></ul>
+<h3>Writing for decision makers</h3>
+<p>A good brief states the question, gives a few quantified facts from reliable sources, explains what depends on assumptions, and says what data would reduce uncertainty. The generator below drafts a one-page brief from the course’s data and projection engine for three policy questions: education, health and the labour market. Edit it, replace placeholders with your own analysis, and copy it into your own document.</p>
+<div class="callout key"><b class="t">Evidence-quality checklist</b>1) Name the source and date of every number. 2) State whether it is a count, an estimate or a projection. 3) Report known problems (digit preference, undercount of young children, boundary changes). 4) Give a range, not a single path. 5) Say what would change your conclusion.</div>`,
+lab:'brief',
+practice:[
+ Q('Which sentence best belongs in the evidence-quality section of the brief?',['“The numbers are exact.”','“Counts of children under five rise with age, suggesting under-coverage of the youngest.”','“The projection is a forecast.”','“All sources agree.”'],1,'Name specific limitations that affect interpretation.'),
+ Q('A projection scenario that reaches 58 million in 2051 should be presented as…',['A prediction','A conditional scenario given stated assumptions, alongside alternatives','A census result','A measurement'],1,'Projections are “what if” statements; show alternatives.'),
+ Q('If census and UN figures disagree by 5% for 2021, a careful brief should…',['Use only the larger','State both with their sources and explain the difference','Average them silently','Omit population totals'],1,'Transparency about differing sources is essential.')
+],
+reflect:['Present your brief to a classmate acting as a minister. Which sentence did they challenge, and what evidence would answer them?','Which of the course’s labs would you want to replicate in R for a real report?'],
+r:`# Reproducible brief skeleton (R Markdown)
+# ---
+# title: "Evidence brief"
+# output: html_document
+# ---
+# Include code chunks that read the data, compute indicators and print them inline,
+# so every number in the text is traceable to code.`});
+})();
+(function(){
+'use strict';
+const A=window.A,el=A.el,fmt=A.fmt;
+const KEY='demlab_ghana_v1';
+const S=A.state={done:{},name:'',answers:{}};
+try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);if(o)Object.assign(S,o);}}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
+const app=document.getElementById('app');
+let curView={v:'home'};
+
+const SOURCES=[
+ ['Population counts, 1891–2021','Ghana Statistical Service (GSS), 2021 PHC General Report, Volume 3B, Table 1.1.'],
+ ['2021 age and sex by single year (national)','GSS, 2021 PHC General Report Volume 3B, Table 5.1. Totals verified: 15,200,440 males; 15,631,579 females; 30,832,019 persons.'],
+ ['2010 age and sex by 5-year group','2010 Population and Housing Census, as published in UN Demographic Yearbook tables (via Wikipedia, “Demographics of Ghana”). Totals verified: 24,658,823.'],
+ ['Regional populations 2010 (re-tabulated to 16 regions) and 2021','GSS; compiled in citypopulation.de “Ghana: Administrative Division”. Both columns sum to the national totals.'],
+ ['Urban and rural populations; urban share','GSS 2021 PHC (urban 17,472,530; rural 13,359,489). Earlier shares from Ghana: A Country Study (Library of Congress) and GSS releases. The 2010 urban count is approximated from 50.9%.'],
+ ['Age-specific fertility, TFR, regional TFR, wanted fertility','2022 Ghana Demographic and Health Survey (GSS, GHS, ICF), and earlier GDHS rounds (1988, 1993, 1998). Regional 2022 values as compiled in Wikipedia “Demographics of Ghana”.'],
+ ['Demographic indicators 1950–2023, births and deaths 2010–2021','UN World Population Prospects 2022, as tabulated in Wikipedia “Demographics of Ghana”. Selected years only.'],
+ ['Ethnic groups, literacy (aged 11+)','GSS 2021 PHC, as compiled in citypopulation.de. The ethnic groups total 30,484,536, less than the national total.'],
+ ['Household size','GSS 2021 PHC provisional results and press coverage (4.4 in 2010; 3.6 in 2021; urban 4.1 to 3.3; rural 5.0 to 4.0).'],
+ ['DHS sample','2022 GDHS: 15,014 women aged 15–49; 18,450 households selected in 618 clusters.'],
+ ['Model mortality schedule','Not published data. A Siler-type hazard calibrated by the course author to UN WPP 2022 indicators (e₀ 64.3, infant mortality 32.5 per 1,000) and an adult-mortality assumption (₄₅q₁₅ ≈ 0.26).']
+];
+const FORMULAS=[
+ ['Exponential growth rate','r = ln(P₂/P₁) / t'],['Doubling time','t₂ = ln 2 / r'],['Dual-system estimate','N̂ = n₁n₂ / m'],['Whipple index','100 · ΣP(25,30,…,60) / (⅕ ΣP(23…62))'],
+ ['Total dependency ratio','100 · (P₀₋₁₄ + P₆₅₊) / P₁₅₋₆₄'],['Sex ratio','100 · males / females'],['URGD','r_urban − r_rural'],['Herfindahl / diversity','H = Σp²;  diversity = 1 − H'],
+ ['Rate of natural increase','CBR − CDR'],['Balancing equation','P₂ = P₁ + B − D + I − E'],['TFR','5 · Σ ASFR / 1000'],['GRR','TFR · female share of births'],
+ ['Life table','qₓ = n·mₓ/(1 + (n − aₓ)mₓ);  Lₓ = n·lₓ₊ₙ + aₓ·dₓ;  eₓ = Tₓ/lₓ'],['NRR and Lotka','NRR = Σ 5 mₐ ℓₐ;  Σ 5 mₐ ℓₐ e^(−ra) = 1'],
+ ['Net migration residual','M = (P₂ − P₁) − (B − D)'],['Percent error','100 (estimate − benchmark) / benchmark'],['Cohort-component step','P(a+5,t+5) = P(a,t) · L(a+5)/L(a)'],
+ ['Census survival ratio','P₂(x+t) / P₁(x)'],['Design effect','deff = 1 + (b − 1)ρ;  SE = √(p(1−p)/n · deff)']
+];
+
+function pct(){const n=A.mods.length;return {d:Object.keys(S.done).length,n};}
+function topbar(){
+  const p=pct();const i=el('i');i.style.width=Math.round(100*p.d/p.n)+'%';
+  return el('div',{class:'top'},el('div',{class:'flag'}),el('div',{class:'in'},
+    el('button',{class:'iconbtn menu',onclick:()=>document.querySelector('.side').classList.toggle('open'),'aria-label':'Toggle course menu'},'☰ Menu'),
+    el('button',{class:'brand',onclick:()=>go('home')},el('span',{class:'star','aria-hidden':'true'},'★'),el('span',null,el('b',null,'Demography Lab: Ghana'),el('small',null,'University edition'))),
+    el('span',{class:'sp'}),
+    el('div',{class:'prog'},el('span',null,p.d+' / '+p.n+' modules'),el('div',{class:'bar',role:'img','aria-label':p.d+' of '+p.n+' modules complete'},i))));
+}
+function side(){
+  const cur=curView;
+  const s=el('nav',{class:'side','aria-label':'Course navigation'});
+  s.append(el('button',{class:'nav'+(cur.v==='home'?' on':''),onclick:()=>go('home')},el('span',{class:'n'},'⌂'),'Course overview'));
+  A.units.forEach(u=>{
+    s.append(el('h5',null,'Unit '+u.id+' · '+u.n));
+    A.mods.filter(m=>m.unit===u.id).forEach(m=>{
+      s.append(el('button',{class:'nav'+(cur.v==='mod'&&cur.id===m.id?' on':''),onclick:()=>go('mod',m.id)},el('span',{class:'n'},String(m.id).padStart(2,'0')),el('span',null,m.title),S.done[m.id]?el('span',{class:'ck','aria-label':'complete'},'✓'):null));
+    });
+  });
+  s.append(el('h5',null,'Reference'),
+    el('button',{class:'nav'+(cur.v==='data'?' on':''),onclick:()=>go('data')},el('span',{class:'n'},'§'),'Data and sources'),
+    el('button',{class:'nav'+(cur.v==='formulas'?' on':''),onclick:()=>go('formulas')},el('span',{class:'n'},'∑'),'Formula sheet'),
+    el('button',{class:'nav'+(cur.v==='cert'?' on':''),onclick:()=>go('cert')},el('span',{class:'n'},'✎'),'Transcript'));
+  return s;
+}
+function shell(content){
+  app.innerHTML='';
+  app.append(topbar(),el('div',{class:'shell'},side(),el('main',{class:'main',id:'main'},content)));
+  window.scrollTo(0,0);
+}
+function go(v,id){curView={v,id};
+  if(v==='home')shell(home());else if(v==='mod')shell(module(A.mods.find(m=>m.id===id)));
+  else if(v==='data')shell(dataPage());else if(v==='formulas')shell(formulaPage());else if(v==='cert')shell(transcript());
+}
+A.go=go;
+
+function home(){
+  const w=el('div');
+  const tot=A.mods.length;
+  w.append(el('div',{class:'card hero'},
+    el('div',null,el('div',{class:'eyebrow'},'Applied demography with real Ghana data'),el('h1',null,'Demography Lab: Ghana'),
+      el('p',null,'A university-level course built on Siegel and Swanson, ',el('i',null,'The Methods and Materials of Demography'),' (2nd edition). Each module has a concise brief, an interactive lab using real data from the 2021 Population and Housing Census, the Demographic and Health Surveys and UN estimates, graded practice problems and discussion prompts with R code.'),
+      el('div',{class:'row'},el('button',{class:'btn pri',onclick:()=>go('mod',nextMod().id)},S.done[1]?'Continue':'Start module 1'),el('button',{class:'btn',onclick:()=>go('data')},'Data and sources'))),
+    el('div',{class:'stat'},[['30,832,019','persons counted, 27 June 2021'],['12','censuses since 1891'],['3.9','TFR, 2022 GDHS'],['19','modules, 5 units']].map(x=>el('div',{class:'kpi'},el('b',null,x[0]),el('span',null,x[1]))))));
+  w.append(el('div',{class:'units'},A.units.map(u=>el('div',{class:'unit'},el('h4',null,'Unit '+u.id+': '+u.n),el('p',{style:'font-size:.88rem;color:var(--muted);margin:0 0 4px'},u.d),
+    el('ol',null,A.mods.filter(m=>m.unit===u.id).map(m=>el('li',null,el('button',{class:'linkbtn',style:'background:none;border:0;padding:0;cursor:pointer;color:var(--blue);text-align:left;font:inherit',onclick:()=>go('mod',m.id)},m.title),S.done[m.id]?' ✓':'')))))));
+  w.append(el('div',{class:'card',style:'margin-top:18px'},el('h3',null,'How the course works'),
+    el('div',{class:'brief'},el('ul',null,el('li',null,el('b',null,'Concepts: '),'a short brief with definitions and formulas.'),el('li',null,el('b',null,'Lab: '),'explore real Ghana data; every readout recomputes live.'),el('li',null,el('b',null,'Practice: '),'numeric and conceptual questions with worked solutions. A module counts as complete at 70% correct.'),el('li',null,el('b',null,'Discuss and code: '),'prompts for seminars and an R snippet to replicate the lab.')),
+    el('p',{style:'color:var(--muted);font-size:.9rem'},'Ghana facts come from the Ghana Statistical Service and the sources listed on the Data and sources page. Where a number is approximate, a model, or an assumption, the module says so.'))));
+  return w;
+}
+function nextMod(){return A.mods.find(m=>!S.done[m.id])||A.mods[0];}
+
+function module(m){
+  const w=el('div');
+  const u=A.units.find(x=>x.id===m.unit);
+  w.append(el('div',{class:'eyebrow'},'Unit '+u.id+' · Module '+m.id),el('h1',null,m.title),el('div',{style:'color:var(--muted);font-size:.9rem'},m.ch));
+  const tabs=el('div',{class:'tabs',role:'tablist'}),body=el('div');
+  const names=[['brief','Concepts'],['lab','Lab'],['prac','Practice'],['disc','Discuss and code']];
+  const panes={};let labBuilt=false;
+  names.forEach(n=>{const b=el('button',{class:'tab',role:'tab',onclick:()=>show(n[0])},n[1]);b.dataset.k=n[0];tabs.append(b);});
+  function show(k){
+    tabs.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
+    body.innerHTML='';
+    if(k==='brief')body.append(el('div',{class:'card brief',html:m.brief}));
+    if(k==='lab'){const c=el('div',{class:'card'});body.append(c);try{A.labs[m.lab](c);}catch(e){c.append(el('p',null,'Lab error: '+e.message));console.error(e);}}
+    if(k==='prac')body.append(practice(m));
+    if(k==='disc')body.append(el('div',{class:'card'},el('h3',null,'Discussion prompts'),el('ul',null,m.reflect.map(r=>el('li',null,r))),el('h3',{style:'margin-top:18px'},'Replicate in R'),A.code(m.r),el('p',{style:'font-size:.85rem;color:var(--muted)'},'Snippets are starting points: check them against your data layout. Single-year age data are 0-indexed in the lab but 1-indexed in R.')));
+  }
+  w.append(tabs,body);
+  show('brief');
+  const nav=el('div',{class:'row',style:'margin-top:20px'},m.id>1?el('button',{class:'btn',onclick:()=>go('mod',m.id-1)},'← '+A.mods[m.id-2].title):null,el('span',{class:'sp',style:'flex:1'}),m.id<A.mods.length?el('button',{class:'btn pri',onclick:()=>go('mod',m.id+1)},A.mods[m.id].title+' →'):null);
+  w.append(nav);
+  return w;
+}
+function practice(m){
+  const wrap=el('div');
+  const st=()=>{S.answers[m.id]=S.answers[m.id]||{};return S.answers[m.id];};
+  const status=el('div',{class:'callout key'});
+  const upd=()=>{const a=st();const ok=m.practice.filter((_,i)=>a[i]&&a[i].ok).length;const need=Math.ceil(0.7*m.practice.length);
+    status.innerHTML='<b class="t">Progress</b>'+ok+' of '+m.practice.length+' correct. '+(S.done[m.id]?'This module is complete.':'Get '+need+' right to complete the module.');
+    if(ok>=need&&!S.done[m.id]){S.done[m.id]={ts:Date.now(),score:ok+'/'+m.practice.length};save();const t=document.querySelector('.top');if(t)t.replaceWith(topbar());const sd=document.querySelector('.side');if(sd)sd.replaceWith(side());status.innerHTML='<b class="t">Progress</b>'+ok+' of '+m.practice.length+' correct. Module complete.';}
+    save();};
+  wrap.append(status);
+  m.practice.forEach((q,i)=>{
+    const a=st();const card=el('div',{class:'q'+(a[i]&&a[i].ok?' ok':'')});
+    card.append(el('div',{class:'qn'},'Question '+(i+1)+' of '+m.practice.length),el('div',{html:q.q}));
+    const fb=el('div',{class:'fb',role:'status','aria-live':'polite'});
+    if(q.t==='num'){
+      const inp=el('input',{type:'number',step:'any',class:'num','aria-label':'Your answer',placeholder:q.unit?('answer in '+q.unit):'your answer'});
+      const b=el('button',{class:'btn pri',onclick:()=>{
+        if(inp.value==='')return;const v=+inp.value,ans=q.ans();
+        const ok=Math.abs(v-ans)<=q.tol;a[i]={ok:ok||(a[i]&&a[i].ok)};
+        fb.className='fb '+(ok?'good':'bad');fb.textContent=ok?'Correct.':'Not quite. Check your inputs and rounding; try again or show the solution.';
+        card.classList.toggle('ok',!!a[i].ok);card.classList.toggle('no',!ok&&!(a[i]&&a[i].ok));upd();}},'Check');
+      const sol=el('details',{class:'d'},el('summary',null,'Show worked solution'),el('div',{html:'<p>'+q.sol()+'</p><p><b>Answer:</b> '+fmt(q.ans(),Math.abs(q.ans())<10?3:Math.abs(q.ans())<1000?2:0)+(q.unit?' '+q.unit:'')+'</p>'}));
+      card.append(el('div',{class:'row'},inp,b),fb,sol);
+    }else{
+      const opts=el('div',{class:'opts'});let done=false;
+      q.o.forEach((o,j)=>{const lab=el('label',{class:'opt'},el('input',{type:'radio',name:'q'+m.id+'_'+i}),el('span',null,o));
+        lab.addEventListener('click',ev=>{if(ev.target.tagName==='INPUT'||true){
+          const ok=j===q.a;a[i]={ok:ok||(a[i]&&a[i].ok)};fb.className='fb '+(ok?'good':'bad');fb.textContent=(ok?'Correct. ':'Not quite. ')+q.w;
+          card.classList.toggle('ok',!!a[i].ok);card.classList.toggle('no',!ok&&!(a[i]&&a[i].ok));upd();}});
+        opts.append(lab);});
+      card.append(opts,fb);
+    }
+    wrap.append(card);
+  });
+  upd();
+  return wrap;
+}
+function dataPage(){
+  const w=el('div');
+  w.append(el('h1',null,'Data and sources'),el('p',{style:'max-width:70ch'},'Every number in the labs comes from one of the sources below. Transcriptions were checked against published totals where possible. If you use these numbers in your own work, cite the original publication and check the current version.'));
+  w.append(A.table(['Dataset','Source and notes'],SOURCES.map(s=>[s[0],s[1]])));
+  w.append(A.callout('warn','Known limitations','(1) The 2010 regional counts are re-tabulated to the 16 current regions. (2) UN WPP figures are model-based estimates and differ from census counts. (3) The 2010 urban population is approximate. (4) Single-year age data in 2021 show digit preference. (5) The mortality schedule and projections are teaching models, not official statistics.'));
+  w.append(A.callout('info','Reference book','Siegel, J. S. and Swanson, D. A. (eds.), The Methods and Materials of Demography, 2nd edition. Chapter references in each module point to the relevant sections.'));
+  return w;
+}
+function formulaPage(){
+  const w=el('div');w.append(el('h1',null,'Formula sheet'),A.table(['Concept','Formula'],FORMULAS.map(f=>[f[0],el('code',null,f[1])])));
+  return w;
+}
+function transcript(){
+  const w=el('div');const p=pct();
+  const name=el('input',{type:'text',class:'num',style:'width:260px',placeholder:'Your name',value:S.name||'','aria-label':'Your name'});
+  const nm=el('b',null,S.name||'(your name)');name.addEventListener('input',()=>{S.name=name.value;nm.textContent=name.value||'(your name)';save();});
+  w.append(el('h1',null,'Transcript'),el('div',{class:'card'},el('p',null,'Name: ',nm),name,
+    el('p',null,'Modules completed: ',el('b',null,p.d+' of '+p.n)),
+    A.table(['Module','Status','Score'],A.mods.map(m=>[m.id+'. '+m.title,S.done[m.id]?'Complete':'Not complete',S.done[m.id]?S.done[m.id].score:'–'])),
+    el('div',{class:'row noprint'},el('button',{class:'btn',onclick:()=>{try{window.print();}catch(e){}}},'Print'),el('button',{class:'btn',onclick:()=>{if(confirm('Erase all progress?')){S.done={};S.answers={};save();go('cert');}}},'Reset progress'))));
+  return w;
+}
+A.start=()=>go('home');
+})();
+window.A.start();
+</script>
+</body>
+</html>
