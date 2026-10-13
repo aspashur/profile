@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stats Quest: a game of data, in three levels</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;700;800&family=Outfit:wght@500;700;800&family=Inter:wght@400;500;600&family=Newsreader:opsz,wght@6..72,500;6..72,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#EEF1F8;--card:#FFFFFF;--card2:#F5F7FC;--ink:#14182B;--muted:#56607F;--line:#D3D9EA;--good:#12945A;--bad:#D4294B;--on:#FFFFFF;
+  --dots:rgba(90,100,160,.14);--shadow:rgba(20,24,43,.12);
+  --hf:'Outfit',system-ui,sans-serif;--bf:'Inter',system-ui,sans-serif;--rad:14px;
+  --acc:#6C5CE7;--acc2:#00A88F;--acc3:#F0693E;--gold:#F5B800;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#0C1020;--card:#151B33;--card2:#1B2342;--ink:#EEF1FF;--muted:#A5AED0;--line:#2A3459;--good:#4ADE80;--bad:#FF6B8A;--dots:rgba(165,174,208,.10);--shadow:rgba(0,0,0,.5);}
+}
+:root[data-theme="dark"]{--bg:#0C1020;--card:#151B33;--card2:#1B2342;--ink:#EEF1FF;--muted:#A5AED0;--line:#2A3459;--good:#4ADE80;--bad:#FF6B8A;--dots:rgba(165,174,208,.10);--shadow:rgba(0,0,0,.5);}
+[data-lv="e"]{--hf:'Baloo 2','Trebuchet MS',sans-serif;--bf:'Nunito',system-ui,sans-serif;--rad:20px;--acc:#FF5A87;--acc2:#2EC4A6;--acc3:#7B5CFF;--gold:#FFC93C}
+[data-lv="a"]{--hf:'Outfit',system-ui,sans-serif;--bf:'Inter',system-ui,sans-serif;--rad:14px;--acc:#7C6CFF;--acc2:#19D3B0;--acc3:#FF7A59;--gold:#FFC53D}
+[data-lv="s"]{--hf:'Newsreader',Georgia,serif;--bf:'IBM Plex Sans',system-ui,sans-serif;--rad:8px;--acc:#0E7C86;--acc2:#B8901E;--acc3:#B23A48;--gold:#D4A62A}
+html{height:100%;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--bf);font-size:16.5px;line-height:1.6}
+[data-lv="e"] body,body[data-lv="e"]{background-image:radial-gradient(circle,var(--dots) 1.6px,transparent 1.8px);background-size:24px 24px;font-weight:600}
+h1,h2,h3,h4{font-family:var(--hf);line-height:1.15;margin:0 0 .45em;font-weight:800}
+[data-lv="s"] h1,[data-lv="s"] h2,[data-lv="s"] h3{font-weight:700;letter-spacing:-.01em}
+h1{font-size:clamp(1.9rem,5vw,3rem)} h2{font-size:clamp(1.4rem,3.5vw,2rem)} h3{font-size:1.25rem}
+p{margin:.45em 0 .85em}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:8px}
+code,.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+.app{max-width:1020px;margin:0 auto;padding:0 16px 70px}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;margin:0 -16px 18px;padding:9px 16px;background:var(--bg);border-bottom:2px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:8px;background:none;border:0;padding:0;cursor:pointer;font-family:var(--hf);font-weight:800;font-size:1.15rem}
+.who{display:flex;align-items:center;gap:8px;margin-left:auto;font-size:.88rem}
+.xpbar{width:110px;height:12px;border-radius:99px;background:var(--line);overflow:hidden;border:1px solid var(--line)}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));width:0;transition:width .5s}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border-radius:99px;background:var(--card);border:1px solid var(--line);font-weight:700;font-size:.85rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);padding:20px;box-shadow:0 6px 22px var(--shadow)}
+[data-lv="e"] .card{border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink)}
+.card+.card{margin-top:16px}
+.btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;background:var(--acc);color:var(--on);border:1px solid transparent;border-radius:calc(var(--rad) - 4px);padding:.55em 1.2em;font-family:var(--hf);font-weight:800;font-size:1.02rem;transition:transform .08s,filter .15s}
+.btn:hover{filter:brightness(1.08);transform:translateY(-1px)} .btn:active{transform:translateY(1px)}
+[data-lv="e"] .btn{border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink)}
+[data-lv="e"] .btn:active{box-shadow:0 1px 0 var(--ink);transform:translateY(3px)}
+.btn.alt{background:var(--card);color:var(--ink);border-color:var(--line)}
+[data-lv="e"] .btn.alt{border-color:var(--ink)}
+.btn.g2{background:var(--acc2)} .btn.g3{background:var(--acc3)}
+.btn.sm{padding:.25em .8em;font-size:.88rem}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.on{outline:3px solid var(--gold)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}
+.levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-top:18px}
+.lvcard{cursor:pointer;text-align:left;padding:20px;border-radius:var(--rad);background:var(--card);border:2px solid var(--line);color:var(--ink);transition:transform .12s}
+.lvcard:hover{transform:translateY(-4px)}
+.lvcard .big{font-size:2.6rem;line-height:1}
+.lvcard h3{margin:.3em 0 .1em}
+.lvcard.e{border-color:#FF5A87;font-family:'Nunito',sans-serif} .lvcard.a{border-color:#7C6CFF;font-family:'Inter',sans-serif} .lvcard.s{border-color:#0E7C86;font-family:'IBM Plex Sans',sans-serif}
+.lvcard.e h3{font-family:'Baloo 2'} .lvcard.a h3{font-family:'Outfit'} .lvcard.s h3{font-family:'Newsreader',serif}
+.map{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.world{position:relative;text-align:left;cursor:pointer;background:var(--card);border:1px solid var(--line);border-radius:var(--rad);padding:14px 14px 12px;min-height:150px;display:flex;flex-direction:column;gap:3px;color:var(--ink);transition:transform .12s}
+[data-lv="e"] .world{border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink)}
+.world:hover{transform:translateY(-3px)}
+.world .em{font-size:2rem;line-height:1}
+.world .nm{font-family:var(--hf);font-weight:800;font-size:1.08rem;line-height:1.15;margin-top:4px}
+.world .ch{font-size:.78rem;color:var(--muted)}
+.world .st{margin-top:auto;letter-spacing:2px}
+.world.lock{opacity:.55;cursor:not-allowed}
+.world.next::after{content:"Next up";position:absolute;top:-10px;right:10px;background:var(--acc);color:var(--on);border-radius:99px;padding:0 10px;font-size:.78rem;font-weight:800;font-family:var(--hf)}
+.tabs{display:flex;gap:6px;margin:12px 0 16px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:var(--card);padding:6px 16px;border-radius:99px;cursor:pointer;font-family:var(--hf);font-weight:800}
+.tab.on{background:var(--acc);color:var(--on);border-color:transparent}
+.learn{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start}
+.learn .ic{font-size:3rem;line-height:1;background:var(--card2);border:1px solid var(--line);border-radius:var(--rad);padding:12px 14px}
+.learn h3{font-size:1.4rem}
+.learn p,.learn li{font-size:1.04rem}
+.tag{display:inline-block;font-size:.76rem;font-weight:700;color:var(--muted);border:1px dashed var(--muted);border-radius:99px;padding:0 10px;margin-bottom:6px}
+.formula{font-family:'IBM Plex Mono',monospace;background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:8px;padding:9px 12px;margin:8px 0;font-size:.92rem;overflow-x:auto;white-space:pre-wrap;font-weight:500}
+.dots{display:flex;gap:6px;justify-content:center;margin:14px 0 4px}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--line)} .dots i.on{background:var(--acc)}
+.hud{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.hearts{font-size:1.4rem;letter-spacing:2px}
+.qtext{font-size:1.2rem;font-family:var(--hf);font-weight:700;margin:6px 0 10px}
+[data-lv="s"] .qtext,[data-lv="a"] .qtext{font-family:var(--bf);font-weight:600}
+.data{font-family:'IBM Plex Mono',monospace;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0;font-size:.95rem;overflow-x:auto}
+.opts{display:grid;gap:9px;margin:10px 0}
+.opt{cursor:pointer;text-align:left;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;color:var(--ink);font-weight:600}
+[data-lv="e"] .opt{border:3px solid var(--ink);box-shadow:0 3px 0 var(--ink)}
+.opt:hover{filter:brightness(1.05)}
+.opt.right{background:var(--good);color:#06210F;border-color:var(--good)} .opt.wrong{background:var(--bad);color:#fff;border-color:var(--bad)}
+input.ans,select.sel{font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);width:11em;max-width:100%}
+[data-lv="e"] input.ans{border:3px solid var(--ink)}
+.fb{min-height:1.5em;margin:8px 0;font-weight:700}
+.fb.good{color:var(--good)} .fb.bad{color:var(--bad)}
+.why{background:var(--card2);border-radius:10px;padding:9px 12px;margin:8px 0;font-size:.95rem;border:1px dashed var(--line)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px;margin:10px 0}
+.kpi{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.kpi b{display:block;font-family:'IBM Plex Mono',monospace;font-size:1.2rem}
+.kpi span{font-size:.76rem;color:var(--muted)}
+.ctrl{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;margin:5px 0}
+.ctrl label{font-weight:700;font-size:.92rem}
+.ctrl output{font-family:'IBM Plex Mono',monospace;font-size:.9rem;min-width:3.6em;text-align:right}
+.ctrl input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--acc);height:26px}
+.ctrls{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2px 20px}
+.chart{width:100%;height:auto;display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;touch-action:none}
+.chart text{fill:var(--ink);font-family:var(--bf);font-size:11px}
+.chart .mut{fill:var(--muted)} .chart .gl{stroke:var(--line)} .chart .ax{stroke:var(--muted)}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.callout{border-radius:12px;padding:10px 14px;margin:12px 0;background:var(--card2);border-left:4px solid var(--acc)}
+.callout b.t{display:block;font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.win{text-align:center}
+.badge{display:inline-grid;place-items:center;width:130px;height:130px;border-radius:50%;background:var(--gold);color:#14182B;font-size:3.3rem;border:3px solid var(--ink);box-shadow:0 6px 0 var(--ink);margin:6px auto 10px;animation:pop .6s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(.2) rotate(-30deg)}}
+.stars{font-size:2rem;letter-spacing:4px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-weight:700;z-index:60;animation:rise .35s}
+@keyframes rise{from{transform:translate(-50%,20px);opacity:0}}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50}
+.confetti i{position:absolute;top:-20px;width:10px;height:16px;animation:fall 2.4s linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.badges{display:flex;flex-wrap:wrap;gap:10px}
+.bdg{width:92px;text-align:center;font-size:.76rem;line-height:1.2}
+.bdg .i{display:grid;place-items:center;width:58px;height:58px;margin:0 auto 4px;border-radius:50%;background:var(--card2);border:2px solid var(--line);font-size:1.7rem;filter:grayscale(1);opacity:.45}
+.bdg.got .i{filter:none;opacity:1;background:var(--gold);border-color:var(--ink)}
+.tbl{border-collapse:collapse;width:100%;font-size:.9rem}
+.tbl th,.tbl td{padding:5px 9px;border-bottom:1px solid var(--line);text-align:right}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.foot{margin-top:28px;text-align:center;color:var(--muted);font-size:.85rem}
+.linkbtn{background:none;border:0;padding:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit}
+@media (max-width:640px){.learn{grid-template-columns:1fr}.twocol{grid-template-columns:1fr}.xpbar{width:70px}.brand span.t{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app" class="app"><noscript><p style="padding:24px">Stats Quest needs JavaScript. Please enable it and reload.</p></noscript></div>
+<script>
+(function(){
+'use strict';
+const S=window.S={};
+S.rng=function(seed){let a=seed>>>0;return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};};
+S.R=Math.random;
+S.int=(a,b,r)=>a+Math.floor((r||S.R)()*(b-a+1));
+S.pick=(arr,r)=>arr[Math.floor((r||S.R)()*arr.length)];
+S.shuffle=(a,r)=>{a=a.slice();r=r||S.R;for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+S.norm01=r=>{r=r||S.R;let u=0,v=0;while(!u)u=r();while(!v)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+S.sum=a=>a.reduce((s,x)=>s+x,0);
+S.mean=a=>S.sum(a)/a.length;
+S.median=a=>{const b=a.slice().sort((x,y)=>x-y),n=b.length;return n%2?b[(n-1)/2]:(b[n/2-1]+b[n/2])/2;};
+S.mode=a=>{const c={};a.forEach(x=>c[x]=(c[x]||0)+1);let best=null,m=0;for(const k in c){if(c[k]>m){m=c[k];best=+k;}}const ties=Object.keys(c).filter(k=>c[k]===m).length;return {v:best,n:m,unique:ties===1};};
+S.vari=a=>{const m=S.mean(a);return S.sum(a.map(x=>(x-m)**2))/(a.length-1);};
+S.sd=a=>Math.sqrt(S.vari(a));
+S.quart=a=>{const b=a.slice().sort((x,y)=>x-y),n=b.length,h=Math.floor(n/2);const lo=b.slice(0,h),hi=b.slice(n%2?h+1:h);return {q1:S.median(lo),q3:S.median(hi)};};
+S.iqr=a=>{const q=S.quart(a);return q.q3-q.q1;};
+S.skew=a=>{const m=S.mean(a),s=Math.sqrt(S.sum(a.map(x=>(x-m)**2))/a.length);return s===0?0:S.sum(a.map(x=>((x-m)/s)**3))/a.length;};
+S.kurt=a=>{const m=S.mean(a),s2=S.sum(a.map(x=>(x-m)**2))/a.length;return s2===0?0:S.sum(a.map(x=>(x-m)**4))/a.length/(s2*s2)-3;};
+/* normal */
+S.erf=x=>{const s=Math.sign(x);x=Math.abs(x);const t=1/(1+0.3275911*x);const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;};
+S.cdf=z=>0.5*(1+S.erf(z/Math.SQRT2));
+S.pdf=z=>Math.exp(-z*z/2)/Math.sqrt(2*Math.PI);
+S.inv=p=>{if(p<=0)return -Infinity;if(p>=1)return Infinity;const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00],b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01],c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00],d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+  const pl=0.02425,ph=1-pl;let q,r;
+  if(p<pl){q=Math.sqrt(-2*Math.log(p));return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+  if(p<=ph){q=p-0.5;r=q*q;return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);}
+  q=Math.sqrt(-2*Math.log(1-p));return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);};
+/* gamma / beta */
+S.lgam=x=>{const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];let y=x,t=x+5.5;t-=(x+0.5)*Math.log(t);let s=1.000000000190015;for(let j=0;j<6;j++)s+=c[j]/++y;return -t+Math.log(2.5066282746310005*s/x);};
+S.betacf=(x,a,b)=>{const MAXIT=200,EPS=3e-12,FP=1e-300;let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;if(Math.abs(d)<FP)d=FP;d=1/d;let h=d;for(let m=1;m<=MAXIT;m++){const m2=2*m;let aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;h*=d*c;aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<EPS)break;}return h;};
+S.betai=(x,a,b)=>{if(x<=0)return 0;if(x>=1)return 1;const bt=Math.exp(S.lgam(a+b)-S.lgam(a)-S.lgam(b)+a*Math.log(x)+b*Math.log(1-x));return x<(a+1)/(a+b+2)?bt*S.betacf(x,a,b)/a:1-bt*S.betacf(1-x,b,a)/b;};
+S.tcdf=(t,df)=>{const x=df/(df+t*t),p=0.5*S.betai(x,df/2,0.5);return t>0?1-p:p;};
+S.tinv=(p,df)=>{let lo=-60,hi=60;for(let i=0;i<100;i++){const m=(lo+hi)/2;if(S.tcdf(m,df)<p)lo=m;else hi=m;}return (lo+hi)/2;};
+S.tp2=(t,df)=>2*(1-S.tcdf(Math.abs(t),df));
+S.gammaP=(a,x)=>{if(x<=0)return 0;const gln=S.lgam(a);if(x<a+1){let ap=a,sum=1/a,del=sum;for(let n=0;n<300;n++){ap++;del*=x/ap;sum+=del;if(Math.abs(del)<Math.abs(sum)*1e-14)break;}return sum*Math.exp(-x+a*Math.log(x)-gln);}let b=x+1-a,c=1/1e-300,d=1/b,h=d;for(let i=1;i<300;i++){const an=-i*(i-a);b+=2;d=an*d+b;if(Math.abs(d)<1e-300)d=1e-300;c=b+an/c;if(Math.abs(c)<1e-300)c=1e-300;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<1e-14)break;}return 1-Math.exp(-x+a*Math.log(x)-gln)*h;};
+S.chicdf=(x,df)=>S.gammaP(df/2,x/2);
+S.chip=(x,df)=>1-S.chicdf(x,df);
+S.chiinv=(p,df)=>{let lo=0,hi=500;for(let i=0;i<100;i++){const m=(lo+hi)/2;if(S.chicdf(m,df)<p)lo=m;else hi=m;}return (lo+hi)/2;};
+/* binomial */
+S.lchoose=(n,k)=>S.lgam(n+1)-S.lgam(k+1)-S.lgam(n-k+1);
+S.bpmf=(n,k,p)=>{if(k<0||k>n)return 0;if(p<=0)return k===0?1:0;if(p>=1)return k===n?1:0;return Math.exp(S.lchoose(n,k)+k*Math.log(p)+(n-k)*Math.log(1-p));};
+S.bcdf=(n,k,p)=>{let s=0;for(let i=0;i<=Math.floor(k);i++)s+=S.bpmf(n,i,p);return Math.min(1,s);};
+S.btwo=(n,k,p)=>{const pk=S.bpmf(n,k,p);let s=0;for(let i=0;i<=n;i++){const q=S.bpmf(n,i,p);if(q<=pk*(1+1e-9))s+=q;}return Math.min(1,s);};
+/* regression */
+S.ols=(x,y)=>{const n=x.length,mx=S.mean(x),my=S.mean(y);let sxx=0,sxy=0,syy=0;for(let i=0;i<n;i++){sxx+=(x[i]-mx)**2;sxy+=(x[i]-mx)*(y[i]-my);syy+=(y[i]-my)**2;}const b=sxy/sxx,a=my-b*mx,r=sxy/Math.sqrt(sxx*syy);let sse=0;for(let i=0;i<n;i++)sse+=(y[i]-a-b*x[i])**2;const s2=n>2?sse/(n-2):NaN,se=Math.sqrt(s2/sxx);return {a,b,r,r2:r*r,sse,se,t:b/se,df:n-2,n,mx,my};};
+S.welch=(a,b)=>{const m1=S.mean(a),m2=S.mean(b),v1=S.vari(a),v2=S.vari(b),n1=a.length,n2=b.length;const se=Math.sqrt(v1/n1+v2/n2),t=(m1-m2)/se;const df=(v1/n1+v2/n2)**2/((v1/n1)**2/(n1-1)+(v2/n2)**2/(n2-1));return {m1,m2,v1,v2,se,t,df,p:S.tp2(t,df),diff:m1-m2};};
+S.chisq2=(o)=>{const r1=o[0]+o[1],r2=o[2]+o[3],c1=o[0]+o[2],c2=o[1]+o[3],n=r1+r2;const e=[r1*c1/n,r1*c2/n,r2*c1/n,r2*c2/n];let x=0;for(let i=0;i<4;i++)x+=(o[i]-e[i])**2/e[i];return {e,chi:x,p:S.chip(x,1),n};};
+S.fmt=(x,d)=>{if(x==null||!isFinite(x))return '–';return Number(x).toLocaleString('en-US',{maximumFractionDigits:d==null?2:d,minimumFractionDigits:0});};
+S.f=(x,d)=>Number(x).toFixed(d);
+})();
+(function(){
+'use strict';
+const Q=window.Q={labs:{},worlds:[]};Q.S=window.S;
+const NS='http://www.w3.org/2000/svg';
+const el=Q.el=function(tag,attrs,...kids){const e=document.createElement(tag);if(attrs)for(const k in attrs){const v=attrs[k];if(k==='class')e.className=v;else if(k==='html')e.innerHTML=v;else if(k.slice(0,2)==='on')e.addEventListener(k.slice(2),v);else if(v!==false&&v!=null)e.setAttribute(k,v);}for(const c of kids.flat(2)){if(c==null||c===false)continue;e.append(c.nodeType?c:document.createTextNode(String(c)));}return e;};
+const sv=Q.sv=function(tag,attrs,...kids){const e=document.createElementNS(NS,tag);for(const k in attrs||{})e.setAttribute(k,attrs[k]);for(const c of kids.flat(2)){if(c==null)continue;e.append(c.nodeType?c:document.createTextNode(String(c)));}return e;};
+Q.slider=function(parent,o){const out=el('output',null,'');const id='s'+Math.random().toString(36).slice(2,8);const inp=el('input',{type:'range',id,min:o.min,max:o.max,step:o.step||1,value:o.value,'aria-label':o.label});
+  const show=()=>{out.textContent=(o.pre||'')+Number(inp.value).toLocaleString('en-US',{maximumFractionDigits:o.dec||0,minimumFractionDigits:o.dec||0})+(o.suf||'');};
+  inp.addEventListener('input',()=>{show();o.on&&o.on(+inp.value);});show();parent.append(el('div',{class:'ctrl'},el('label',{for:id},o.label),out,inp));return {get:()=>+inp.value,set:v=>{inp.value=v;show();}};};
+Q.toggle=function(parent,items,cur,on){const w=el('div',{class:'row'});const bs=[];items.forEach(it=>{const b=el('button',{class:'btn sm alt'+(it[0]===cur?' on':''),onclick:()=>{bs.forEach(x=>x.classList.remove('on'));b.classList.add('on');on(it[0]);}},it[1]);bs.push(b);w.append(b);});parent.append(w);return w;};
+Q.kpis=items=>el('div',{class:'kpis'},items.map(i=>el('div',{class:'kpi'},el('b',null,i[0]),el('span',null,i[1]))));
+Q.callout=(t,h)=>el('div',{class:'callout'},t?el('b',{class:'t'},t):null,el('div',{html:h}));
+function nice(lo,hi,n){n=n||5;if(hi===lo)hi=lo+1;const raw=(hi-lo)/n,mag=Math.pow(10,Math.floor(Math.log10(raw))),r=raw/mag,step=(r<1.5?1:r<3?2:r<7?5:10)*mag;const t=[];for(let v=Math.ceil(lo/step-1e-9)*step;v<=hi+1e-9;v+=step)t.push(+v.toFixed(10));return t;}
+Q.nice=nice;
+const svg=(W,H,label)=>sv('svg',{viewBox:'0 0 '+W+' '+H,class:'chart',role:'img','aria-label':label||'Chart'});
+const P={l:48,r:14,t:14,b:34};
+function axes(s,W,H,x0,x1,y0,y1,o){o=o||{};const X=x=>P.l+(x-x0)/(x1-x0)*(W-P.l-P.r),Y=y=>H-P.b-(y-y0)/(y1-y0)*(H-P.t-P.b);
+  if(y1!=null)nice(y0,y1,4).forEach(v=>{s.append(sv('line',{class:'gl',x1:P.l,x2:W-P.r,y1:Y(v),y2:Y(v)}),sv('text',{class:'mut',x:P.l-6,y:Y(v)+4,'text-anchor':'end'},o.yfmt?o.yfmt(v):String(v)));});
+  nice(x0,x1,o.xn||7).forEach(v=>s.append(sv('line',{class:'ax',x1:X(v),x2:X(v),y1:H-P.b,y2:H-P.b+4}),sv('text',{class:'mut',x:X(v),y:H-P.b+16,'text-anchor':'middle'},o.xfmt?o.xfmt(v):String(v))));
+  s.append(sv('line',{class:'ax',x1:P.l,x2:W-P.r,y1:H-P.b,y2:H-P.b}));
+  if(o.xl)s.append(sv('text',{x:(P.l+W-P.r)/2,y:H-3,'text-anchor':'middle'},o.xl));
+  if(o.yl)s.append(sv('text',{x:12,y:(P.t+H-P.b)/2,'text-anchor':'middle',transform:'rotate(-90 12 '+(P.t+H-P.b)/2+')'},o.yl));
+  return {X,Y};}
+Q.ch={};
+Q.ch.bars=function(data,o){o=o||{};const W=o.W||640,H=o.H||260;const s=svg(W,H,o.label||'Bar chart');const ymax=o.ymax||Math.max(...data.map(d=>d.v))*1.1||1;
+  const {X,Y}=axes(s,W,H,0,data.length,0,ymax,{xfmt:()=>'',yfmt:o.yfmt,yl:o.yl});const bw=(W-P.l-P.r)/data.length;
+  data.forEach((d,i)=>{const x=P.l+i*bw+bw*.12,w=bw*.76,y=Y(d.v);const r=sv('rect',{x,y,width:w,height:Math.max(0,Y(0)-y),rx:o.round===false?0:4,fill:d.c||'var(--acc)'});if(d.t)r.append(sv('title',{},d.t));s.append(r,sv('text',{class:'mut',x:x+w/2,y:H-P.b+15,'text-anchor':'middle'},d.l));if(o.vals)s.append(sv('text',{x:x+w/2,y:y-4,'text-anchor':'middle'},o.vf?o.vf(d.v):d.v));});
+  return s;};
+Q.ch.hist=function(vals,bins,o){o=o||{};bins=Math.max(1,Math.round(bins));const W=o.W||640,H=o.H||260;const lo=o.lo!=null?o.lo:Math.min(...vals),hi=o.hi!=null?o.hi:Math.max(...vals)+1e-9;const w=(hi-lo)/bins;const c=Array(bins).fill(0);vals.forEach(v=>{let i=Math.floor((v-lo)/w);if(i>=bins)i=bins-1;if(i<0)i=0;c[i]++;});
+  const s=svg(W,H,o.label||'Histogram');const ymax=Math.max(...c)*1.15||1;const {X,Y}=axes(s,W,H,lo,hi,0,ymax,{xl:o.xl,yl:'Frequency',xfmt:o.xfmt});
+  c.forEach((n,i)=>{const x=X(lo+i*w),x2=X(lo+(i+1)*w);s.append(sv('rect',{x:x+.5,y:Y(n),width:Math.max(0,x2-x-1),height:Y(0)-Y(n),fill:o.c||'var(--acc)',opacity:.88}));});
+  return {svg:s,counts:c};};
+/* dot plot; items [{v, c}] ; marks [{v,label,c,dash}] ; drag callback(i,newV) */
+Q.ch.dots=function(items,o){o=o||{};const W=o.W||640,H=o.H||190,lo=o.lo,hi=o.hi;const s=svg(W,H,o.label||'Dot plot');const {X}=axes(s,W,H,lo,hi,null,null,{xfmt:o.xfmt,xl:o.xl,xn:10});
+  (o.marks||[]).forEach(m=>{s.append(sv('line',{x1:X(m.v),x2:X(m.v),y1:12,y2:H-P.b,stroke:m.c,'stroke-width':2.4,'stroke-dasharray':m.dash||''}),sv('text',{x:X(m.v)+4,y:m.ty||22,style:'fill:'+m.c+';font-weight:700'},m.label));});
+  const stack={};const base=H-P.b-10;
+  items.forEach((it,i)=>{const key=Math.round(it.v*2)/2;stack[key]=(stack[key]||0)+1;const cy=base-(stack[key]-1)*(o.r||9)*2;const c=sv('circle',{cx:X(it.v),cy,r:o.r||9,fill:it.c||'var(--acc)',stroke:'var(--card)','stroke-width':1.5});
+    if(o.drag){c.style.cursor='ew-resize';c.addEventListener('pointerdown',ev=>{ev.preventDefault();try{c.setPointerCapture(ev.pointerId);}catch(e){}const rect=s.getBoundingClientRect();const mv=e2=>{const px=(e2.clientX-rect.left)/rect.width*W;let v=lo+(px-P.l)/(W-P.l-P.r)*(hi-lo);v=Math.max(lo,Math.min(hi,Math.round(v*2)/2));c.setAttribute('cx',X(v));o.drag(i,v);};const up=()=>{c.removeEventListener('pointermove',mv);c.removeEventListener('pointerup',up);o.dragEnd&&o.dragEnd();};c.addEventListener('pointermove',mv);c.addEventListener('pointerup',up);});}
+    s.append(c);});
+  return s;};
+Q.ch.curve=function(fns,x0,x1,o){o=o||{};const W=o.W||640,H=o.H||250;const s=svg(W,H,o.label||'Density curve');let ym=0;const N=240;const pts=fns.map(f=>{const a=[];for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N,y=f.fn(x);a.push([x,y]);ym=Math.max(ym,y);}return a;});ym*=1.12;
+  const {X,Y}=axes(s,W,H,x0,x1,0,ym,{xfmt:o.xfmt,yfmt:()=>'',xl:o.xl,xn:8});
+  (o.shade||[]).forEach(sh=>{const a=Math.max(x0,sh.a),b=Math.min(x1,sh.b);if(!(b>a))return;const f=fns[sh.i||0].fn;const p=[[a,0]];for(let i=0;i<=80;i++){const x=a+(b-a)*i/80;p.push([x,f(x)]);}p.push([b,0]);s.append(sv('polygon',{points:p.map(q=>X(q[0])+','+Y(q[1])).join(' '),fill:sh.c||'var(--acc)',opacity:.45}));});
+  fns.forEach((f,k)=>s.append(sv('polyline',{points:pts[k].map(q=>X(q[0]).toFixed(1)+','+Y(q[1]).toFixed(1)).join(' '),fill:'none',stroke:f.c||'var(--ink)','stroke-width':2.4,'stroke-dasharray':f.dash||''})));
+  (o.vlines||[]).forEach(v=>s.append(sv('line',{x1:X(v.x),x2:X(v.x),y1:P.t,y2:H-P.b,stroke:'var(--muted)','stroke-dasharray':'4 4'}),sv('text',{class:'mut',x:X(v.x)+3,y:P.t+10},v.l||'')));
+  return s;};
+Q.ch.scatter=function(pts,o){o=o||{};const W=o.W||640,H=o.H||300;const s=svg(W,H,o.label||'Scatter plot');const {X,Y}=axes(s,W,H,o.x0,o.x1,o.y0,o.y1,{xl:o.xl,yl:o.yl});
+  (o.lines||[]).forEach(l=>s.append(sv('line',{x1:X(o.x0),y1:Y(l.a+l.b*o.x0),x2:X(o.x1),y2:Y(l.a+l.b*o.x1),stroke:l.c||'var(--acc3)','stroke-width':2.6,'stroke-dasharray':l.dash||''})));
+  pts.forEach((p,i)=>{const c=sv('circle',{cx:X(p.x),cy:Y(p.y),r:o.r||7,fill:p.c||'var(--acc)',stroke:'var(--card)','stroke-width':1.5,opacity:.92});
+    if(o.drag){c.style.cursor='grab';c.addEventListener('pointerdown',ev=>{ev.preventDefault();try{c.setPointerCapture(ev.pointerId);}catch(e){}const rect=s.getBoundingClientRect();const mv=e2=>{const px=(e2.clientX-rect.left)/rect.width*W,py=(e2.clientY-rect.top)/rect.height*H;const x=o.x0+(px-P.l)/(W-P.l-P.r)*(o.x1-o.x0),y=o.y0+(H-P.b-py)/(H-P.t-P.b)*(o.y1-o.y0);const cx=Math.max(o.x0,Math.min(o.x1,x)),cy=Math.max(o.y0,Math.min(o.y1,y));c.setAttribute('cx',X(cx));c.setAttribute('cy',Y(cy));o.drag(i,cx,cy);};const up=()=>{c.removeEventListener('pointermove',mv);c.removeEventListener('pointerup',up);o.dragEnd&&o.dragEnd();};c.addEventListener('pointermove',mv);c.addEventListener('pointerup',up);});}
+    s.append(c);});
+  return s;};
+Q.ch.lines=function(series,o){o=o||{};const W=o.W||640,H=o.H||250;const s=svg(W,H,o.label||'Line chart');const xs=[],ys=[];series.forEach(a=>a.pts.forEach(p=>{xs.push(p[0]);ys.push(p[1]);}));
+  const x0=o.x0!=null?o.x0:Math.min(...xs),x1=o.x1!=null?o.x1:Math.max(...xs),y0=o.y0!=null?o.y0:0,y1=o.y1!=null?o.y1:Math.max(...ys)*1.08;
+  const {X,Y}=axes(s,W,H,x0,x1,y0,y1,{xl:o.xl,yl:o.yl,xfmt:o.xfmt,yfmt:o.yfmt});
+  series.forEach((a,k)=>{s.append(sv('polyline',{points:a.pts.map(p=>X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' '),fill:'none',stroke:a.c||'var(--acc)','stroke-width':2.6,'stroke-dasharray':a.dash||''}));if(a.dots)a.pts.forEach(p=>s.append(sv('circle',{cx:X(p[0]),cy:Y(p[1]),r:3.5,fill:a.c||'var(--acc)'})));if(a.name)s.append(sv('rect',{x:P.l+6+k*150,y:4,width:11,height:11,rx:3,fill:a.c||'var(--acc)'}),sv('text',{x:P.l+22+k*150,y:14},a.name));});
+  return s;};
+Q.confetti=function(){if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;const c=el('div',{class:'confetti','aria-hidden':'true'});const cols=['#FFC93C','#2EC4A6','#FF5A87','#7C6CFF','#19D3B0'];for(let i=0;i<60;i++){const p=el('i');p.style.left=Math.random()*100+'%';p.style.background=cols[i%5];p.style.animationDelay=Math.random()*.8+'s';c.append(p);}document.body.append(c);setTimeout(()=>c.remove(),3600);};
+Q.toast=function(msg){const t=el('div',{class:'toast',role:'status'},msg);document.body.append(t);setTimeout(()=>t.remove(),2200);};
+})();
+(function(){
+'use strict';
+const Q=window.Q,S=window.S,el=Q.el,L=Q.labs;
+const f=(x,d)=>S.f(x,d==null?2:d);
+
+/* ===== W1: fair sampling lab ===== */
+L.sample=function(root,lv,api){
+  const N=1000;let pop,truth,est=[],revealed=false,method='random',last=null;
+  const noun=lv==='e'?'red beans':'share who say “yes”';
+  function newPop(){const base=0.3+Math.random()*0.35;pop=Array.from({length:N},(_,i)=>Math.random()<Math.max(.03,Math.min(.97,base+0.5*(0.5-i/N)))?1:0);truth=S.mean(pop)*100;est=[];revealed=false;last=null;draw();}
+  const ctr=el('div',{class:'ctrls'});root.append(el('p',null,lv==='e'?'A giant jar holds 1,000 beans. Some are red. You cannot count them all, so you scoop a sample and guess the percent of red beans.':'A town has 1,000 people. A share of them say “yes” to a question. Draw samples and see how close the estimates get to the truth.'));
+  root.append(ctr);
+  const sz=Q.slider(ctr,{label:'Sample size n',min:5,max:400,step:5,value:30,on:()=>api.touch()});
+  Q.toggle(root,[['random','Random sample'],['door','Convenience: first people at the door']],'random',v=>{method=v;est=[];draw();api.touch();});
+  const row=el('div',{class:'row'});root.append(row);
+  const mk=(t,fn,cls)=>{const b=el('button',{class:'btn sm '+(cls||''),onclick:()=>{fn();api.touch();}},t);row.append(b);};
+  const kp=el('div'),ch=el('div');root.append(kp,ch);
+  function one(n){let idx;if(method==='random'){idx=S.shuffle(Array.from({length:N},(_,i)=>i)).slice(0,n);}else idx=Array.from({length:n},(_,i)=>i);const p=100*S.mean(idx.map(i=>pop[i]));return {p,n};}
+  function draw(){
+    kp.innerHTML='';ch.innerHTML='';
+    const k=[];
+    if(last){const ph=last.p/100,u=1.96*Math.sqrt(ph*(1-ph)/last.n)*100;
+      k.push([f(last.p,1)+'%','last estimate']);
+      if(lv!=='e')k.push(['± '+f(u,1),'margin 1.96√(p(1−p)/n)']);}
+    if(est.length>1){k.push([f(S.mean(est.map(e=>e.p)),1)+'%','average of '+est.length+' estimates']);k.push([f(S.sd(est.map(e=>e.p)),1),'spread of estimates (SD)']);
+      if(lv==='s'){const cov=est.filter(e=>{const ph=e.p/100,u=1.96*Math.sqrt(ph*(1-ph)/e.n)*100;return Math.abs(e.p-truth)<=u;}).length/est.length*100;k.push([f(cov,0)+'%','95% intervals that caught the truth']);}}
+    if(revealed)k.push([f(truth,1)+'%','TRUE value']);
+    kp.append(Q.kpis(k.length?k:[['–','draw a sample to start']]));
+    const vals=est.map(e=>e.p);
+    if(vals.length){const h=Q.ch.hist(vals,20,{lo:0,hi:100,label:'Estimates from your samples',xl:'Estimated '+noun+' (%)',xfmt:v=>v+'%'});
+      if(revealed){const sv=h.svg;const X=v=>48+(v/100)*(640-48-14);sv.append(Q.sv('line',{x1:X(truth),x2:X(truth),y1:10,y2:226,stroke:'var(--acc3)','stroke-width':3,'stroke-dasharray':'5 4'}),Q.sv('text',{x:X(truth)+4,y:20,style:'fill:var(--acc3);font-weight:700'},'truth'));}
+      ch.append(h.svg);}
+    else ch.append(el('div',{class:'callout'},el('div',null,'No samples yet.')));
+    ch.append(Q.callout('What to notice',method==='random'?'With random sampling the estimates cluster around the truth and get tighter as n grows. That wobble is <b>random error</b>.':'The door sample always gives the same wrong answer, however large it is, until it covers most of the town. That is <b>bias</b>: a bigger sample does not fix it.'));
+  }
+  mk('Draw 1 sample',()=>{last=one(sz.get());est.push(last);draw();});
+  mk('Draw 50 samples',()=>{for(let i=0;i<50;i++){last=one(sz.get());est.push(last);}draw();},'g2');
+  mk('Reveal the truth',()=>{revealed=true;draw();},'g3');
+  mk('New population',newPop,'alt');
+  newPop();
+};
+
+/* ===== W2: chart chooser + histogram bins ===== */
+L.charts=function(root,lv,api){
+  const SC={
+    e:[['How many kids like each pizza topping?','bar'],['Heights of 100 kids sorted into ranges','hist'],['How a day is shared: sleep, school, play','pie'],['Temperature every hour of one day','line'],['Do taller kids have bigger feet?','scatter'],['Number of pets owned by each friend (cat, dog, fish…)','bar']],
+    a:[['Customers per payment method','bar'],['Distribution of customer ages (grouped)','hist'],['Share of a budget by category','pie'],['Monthly sales across two years','line'],['Ad spend against sales for 40 stores','scatter'],['Weights of 200 packages, shown as frequencies of ranges','hist']],
+    s:[['Counts of respondents by ordinal satisfaction category','bar'],['Empirical distribution of a continuous measurement','hist'],['Composition of a total that sums to 100%','pie'],['A quantity observed at equally spaced dates','line'],['Association between two quantitative variables','scatter'],['Frequency of a continuous variable in class intervals of equal width','hist']]
+  }[lv];
+  const names={bar:'Bar chart',hist:'Histogram',pie:'Pie chart',line:'Line chart',scatter:'Scatter plot'};
+  let i=0,score=0;const box=el('div',{class:'card'},el('h3',null,'Chart chooser'));const q=el('div'),fb=el('div',{class:'fb'});box.append(q,fb);root.append(box);
+  const items=S.shuffle(SC);
+  function show(){q.innerHTML='';fb.textContent='';
+    if(i>=items.length){q.append(el('p',null,'Done! You matched '+score+' of '+items.length+' on the first try.'));api.touch();api.touch();return;}
+    const cur=items[i];let first=true,locked=false;
+    q.append(el('p',{class:'qtext'},cur[0]),el('div',{class:'row'},Object.keys(names).map(k=>el('button',{class:'btn sm alt',onclick:()=>{if(locked)return;if(k===cur[1]){locked=true;if(first)score++;fb.className='fb good';fb.textContent='Yes! '+names[k]+' is the best fit.';i++;api.touch();setTimeout(show,900);}else{first=false;fb.className='fb bad';fb.textContent='Not the best choice. Think about whether the data are categories, numbers, parts of a whole, time, or two linked numbers.';}}},names[k]))));}
+  show();
+  const hb=el('div',{class:'card'},el('h3',null,'Histogram: how many boxes?'),el('p',null,lv==='e'?'Each bar counts how many kids fall in a range. Change the number of bars and watch the picture change.':'The same 120 values drawn with different numbers of classes. The choice of class width changes what you see.'));
+  root.append(hb);
+  const r=S.rng(7);const data=[];for(let k=0;k<120;k++)data.push(r()<0.55?S.norm01(r)*6+40:S.norm01(r)*5+62);
+  const bn=Q.slider(hb,{label:'Number of bars',min:2,max:40,value:8,on:()=>{upd();api.touch();}});const hh=el('div'),tx=el('div');hb.append(hh,tx);
+  function upd(){hh.innerHTML='';const b=bn.get();const h=Q.ch.hist(data,b,{lo:20,hi:85,xl:lv==='e'?'Height (cm, shifted)':'Value'});hh.append(h.svg);tx.innerHTML='';tx.append(Q.callout('Reading it',b<5?'Too few bars: the two humps are hidden.':b>25?'Too many bars: it looks jagged and noisy.':'A good number of bars shows two groups with some noise smoothed out.'));if(lv!=='e')tx.append(el('p',{class:'mono'},'Class width = '+f(65/b,1)));}
+  upd();
+};
+
+/* ===== W3: centre and spread ===== */
+L.center=function(root,lv,api){
+  let vals=[4,6,7,7,8,9,10,12,13];const LO=0,HI=40;
+  root.append(el('p',null,lv==='e'?'Drag the dots along the line. Watch the average, the middle value and the most common value change.':'Drag the dots, add outliers, and watch location and spread measures react.'));
+  const ctr=el('div',{class:'row'});root.append(ctr);
+  const holder=el('div'),kp=el('div'),tip=el('div');root.append(holder,kp,tip);
+  const mk=(t,fn,c)=>ctr.append(el('button',{class:'btn sm '+(c||'alt'),onclick:()=>{fn();api.touch();render();}},t));
+  mk('Add a far-away dot',()=>vals.push(38),'g3');mk('Add a dot',()=>vals.push(Math.round(S.mean(vals))));mk('Remove last dot',()=>{if(vals.length>3)vals.pop();});mk('Reset',()=>{vals=[4,6,7,7,8,9,10,12,13];});
+  function stats(){const m=S.mean(vals),md=S.median(vals),mo=S.mode(vals);const o=[['Average '+f(m,1),m],['Median '+f(md,1),md]];return {m,md,mo};}
+  function readouts(){const m=S.mean(vals),md=S.median(vals),mo=S.mode(vals);const k=[[f(m,2),'average'],[f(md,2),'median'],[mo.unique?f(mo.v,1):'none','mode'],[f(Math.max(...vals)-Math.min(...vals),1),'range']];
+    if(lv!=='e'){k.push([f(S.sd(vals),2),'standard deviation s (÷ n−1)']);k.push([f(S.iqr(vals),2),'IQR (median of halves)']);}
+    if(lv==='s'){k.push([f(100*S.sd(vals)/m,1)+'%','CV = s ÷ mean']);k.push([f(S.skew(vals),2),'skewness']);}
+    kp.innerHTML='';kp.append(Q.kpis(k));}
+  function render(){const m=S.mean(vals),md=S.median(vals);holder.innerHTML='';
+    holder.append(Q.ch.dots(vals.map(v=>({v})),{lo:LO,hi:HI,marks:[{v:m,label:'average',c:'var(--acc3)',ty:22},{v:md,label:'median',c:'var(--acc2)',ty:38,dash:'5 4'}],drag:(i,v)=>{vals[i]=v;readouts();},dragEnd:()=>{api.touch();render();},label:'Dot plot of the data'}));
+    readouts();tip.innerHTML='';
+    tip.append(Q.callout('Try this',Math.abs(m-md)>1.2?'The average has been pulled toward the far-away dots while the median barely moved. This is why the median is the safer “typical value” for skewed data.':'Add a far-away dot and watch which line moves more: the average or the median.'));}
+  render();
+};
+
+/* ===== W4: normal distribution ===== */
+L.normal=function(root,lv,api){
+  const ctr=el('div',{class:'ctrls'});root.append(el('p',null,lv==='e'?'Most kids are near the average height; very tall and very short kids are rare. The bell shows that.':'Explore areas under the normal curve and how a confidence interval for a mean is built.'));root.append(ctr);
+  const mu=Q.slider(ctr,{label:lv==='e'?'Average height (cm)':'Mean μ',min:100,max:200,step:1,value:150,on:()=>{upd();api.touch();}});
+  const sg=Q.slider(ctr,{label:lv==='e'?'How spread out (cm)':'Standard deviation σ',min:3,max:25,step:1,value:10,on:()=>{upd();api.touch();}});
+  const lo=Q.slider(ctr,{label:'Lower limit a',min:60,max:240,step:1,value:140,on:()=>{upd();api.touch();}});
+  const hi=Q.slider(ctr,{label:'Upper limit b',min:60,max:240,step:1,value:160,on:()=>{upd();api.touch();}});
+  const row=el('div',{class:'row'});root.append(row);
+  [1,2,3].forEach(k=>row.append(el('button',{class:'btn sm alt',onclick:()=>{lo.set(mu.get()-k*sg.get());hi.set(mu.get()+k*sg.get());upd();api.touch();}},'μ ± '+k+'σ')));
+  const kp=el('div'),ch=el('div');root.append(kp,ch);
+  function upd(){const m=mu.get(),s=sg.get();let a=lo.get(),b=hi.get();if(a>b){const t=a;a=b;b=t;}
+    const pr=S.cdf((b-m)/s)-S.cdf((a-m)/s);
+    ch.innerHTML='';ch.append(Q.ch.curve([{fn:x=>S.pdf((x-m)/s)/s,c:'var(--ink)'}],m-4*s,m+4*s,{shade:[{a,b,c:'var(--acc)'}],vlines:[{x:m,l:'μ'}],label:'Normal curve with shaded area'}));
+    const k=[[f(100*pr,1)+'%','area between a and b']];
+    if(lv==='e')k.push([Math.round(100*pr)+' of 100','kids between a and b']);else{k.push([f((a-m)/s,2),'z for a = (a − μ)/σ']);k.push([f((b-m)/s,2),'z for b']);}
+    kp.innerHTML='';kp.append(Q.kpis(k));}
+  upd();
+  if(lv==='s'){
+    const c2=el('div',{class:'card'},el('h3',null,'Confidence interval for a mean: z versus t'));root.append(c2);
+    const cc=el('div',{class:'ctrls'});c2.append(cc);
+    const xb=Q.slider(cc,{label:'Sample mean x̄',min:100,max:200,value:152,on:()=>cu()});const ss=Q.slider(cc,{label:'Sample SD s',min:3,max:25,value:9,on:()=>cu()});const nn=Q.slider(cc,{label:'Sample size n',min:3,max:200,value:12,on:()=>cu()});const lev=Q.slider(cc,{label:'Confidence level',min:80,max:99,value:95,suf:'%',on:()=>cu()});
+    const out=el('div'),cv=el('div');c2.append(out,cv);
+    function cu(){const x=xb.get(),s=ss.get(),n=nn.get(),cl=lev.get()/100,se=s/Math.sqrt(n),z=S.inv(1-(1-cl)/2),t=S.tinv(1-(1-cl)/2,n-1);
+      out.innerHTML='';out.append(Q.kpis([[f(se,2),'standard error s/√n'],[f(z,3),'z critical'],[f(t,3),'t critical (df = '+(n-1)+')'],['['+f(x-z*se,1)+', '+f(x+z*se,1)+']','z interval'],['['+f(x-t*se,1)+', '+f(x+t*se,1)+']','t interval']]));
+      cv.innerHTML='';cv.append(Q.ch.curve([{fn:x=>S.pdf(x),c:'var(--ink)'},{fn:x=>{const d=n-1;return Math.exp(S.lgam((d+1)/2)-S.lgam(d/2))/Math.sqrt(d*Math.PI)*Math.pow(1+x*x/d,-(d+1)/2);},c:'var(--acc3)',dash:'6 4'}],-5,5,{label:'Standard normal (solid) and t distribution (dashed)',xl:'Dashed = t with n−1 degrees of freedom: heavier tails for small n'}));}
+    cu();
+  }
+};
+
+/* ===== W5: coin test and chi-square ===== */
+L.binom=function(root,lv,api){
+  root.append(el('p',null,lv==='e'?'Is this coin fair, or is it a cheater? Flip it many times, then see how surprising the result is.':'Test whether a coin is fair, then compare two groups with a 2×2 chi-squared test.'));
+  const ctr=el('div',{class:'ctrls'});root.append(ctr);
+  const nf=Q.slider(ctr,{label:'Number of flips n',min:10,max:200,step:10,value:40,on:()=>api.touch()});
+  const pt=Q.slider(ctr,{label:'Secret chance of heads',min:30,max:70,value:50,suf:'%',on:()=>api.touch()});
+  const row=el('div',{class:'row'});root.append(row);const kp=el('div'),ch=el('div');root.append(kp,ch);
+  row.append(el('button',{class:'btn sm',onclick:()=>{flip();api.touch();}},'Flip the coin'));
+  function flip(){const n=nf.get(),p=pt.get()/100;let k=0;for(let i=0;i<n;i++)if(Math.random()<p)k++;
+    const pv=S.btwo(n,k,0.5);const vs=[];for(let i=0;i<=n;i++)vs.push({l:(n<=40||i%Math.ceil(n/20)===0)?String(i):'',v:S.bpmf(n,i,0.5),c:i===k?'var(--acc3)':'var(--acc)',t:i+' heads'});
+    ch.innerHTML='';ch.append(Q.ch.bars(vs,{H:230,round:false,yfmt:v=>f(100*v,0)+'%',label:'Chances of each number of heads for a fair coin',yl:'chance'}));
+    const kk=[[k+' heads','you got'],[f(n/2,0),'expected if fair']];
+    if(lv==='e'){kk.push([f(100*pv,1)+' out of 100','fair coins would be this far from the middle or farther']);}else{kk.push([f(pv,4),'two-sided exact p-value']);kk.push([pv<0.05?'reject at 5%':'do not reject','decision at the 5% level']);if(lv==='s'){const ph=k/n,u=1.96*Math.sqrt(ph*(1-ph)/n);kk.push(['['+f(100*(ph-u),1)+'%, '+f(100*(ph+u),1)+'%]','normal-approx 95% CI for p']);kk.push([f(2*(1-S.cdf(Math.abs(k-n/2)/Math.sqrt(n/4))),4),'normal-approx p-value']);}}
+    kp.innerHTML='';kp.append(Q.kpis(kk));
+    kp.append(Q.callout(lv==='e'?'Lucky or cheating?':'Reading the test',pv<0.05?'That is a very unusual result for a fair coin, so we doubt the coin is fair.':'A fair coin could easily give this result, so there is no strong reason to doubt it.'));}
+  if(lv!=='e'){
+    const c2=el('div',{class:'card'},el('h3',null,'2×2 chi-squared test'),el('p',null,'Rows: group A and group B. Columns: yes and no. Enter observed counts.'));root.append(c2);
+    const cc=el('div',{class:'ctrls'});c2.append(cc);const o=[];
+    [['A yes',12],['A no',8],['B yes',5],['B no',15]].forEach(x=>o.push(Q.slider(cc,{label:x[0],min:1,max:60,value:x[1],on:()=>cq()})));
+    const out=el('div');c2.append(out);
+    function cq(){const v=o.map(s=>s.get()),r=S.chisq2(v);out.innerHTML='';out.append(Q.kpis([[r.e.map(x=>f(x,2)).join(' | '),'expected frequencies'],[f(r.chi,2),'χ² = Σ (O − E)²/E'],['1','degrees of freedom (2−1)(2−1)'],[f(r.p,4),'p-value'],[r.p<0.05?'groups differ':'no clear difference','at 5%']]));
+      if(lv==='s'){const p1=v[0]/(v[0]+v[1]),p2=v[2]/(v[2]+v[3]),se=Math.sqrt(p1*(1-p1)/(v[0]+v[1])+p2*(1-p2)/(v[2]+v[3]));out.append(Q.kpis([[f(100*(p1-p2),1)+' pp','difference p₁ − p₂'],['['+f(100*(p1-p2-1.96*se),1)+', '+f(100*(p1-p2+1.96*se),1)+']','95% CI for the difference']]));}}
+    cq();
+  }
+};
+
+/* ===== W6: planning sample size ===== */
+L.plan=function(root,lv,api){
+  root.append(el('p',null,lv==='e'?'How many kids must we ask to get a steady answer? Slide the crowd size and see how sure we can be.':'Plan the sample size for a target statistical uncertainty.'));
+  const ctr=el('div',{class:'ctrls'});root.append(ctr);
+  const n=Q.slider(ctr,{label:'Sample size n',min:25,max:3000,step:25,value:400,on:()=>{upd();api.touch();}});
+  let pr=null,Np=null,dd=null,sig=null,E=null;
+  if(lv!=='e')pr=Q.slider(ctr,{label:'Expected proportion p',min:5,max:95,step:5,value:50,suf:'%',on:()=>{upd();api.touch();}});
+  if(lv==='s'){Np=Q.slider(ctr,{label:'Population size N',min:500,max:100000,step:500,value:5000,on:()=>{upd();api.touch();}});dd=Q.slider(ctr,{label:'Design effect (clustering)',min:1,max:4,step:0.1,value:1,dec:1,on:()=>{upd();api.touch();}});}
+  const kp=el('div'),ch=el('div');root.append(kp,ch);
+  function u(nn,p){return 1.96*Math.sqrt(p*(1-p)/nn)*100;}
+  function upd(){const nn=n.get(),p=pr?pr.get()/100:0.5;let k=[];
+    if(lv==='e'){k=[['± '+f(100/Math.sqrt(nn),1)+' points','the guess could be off by about this much'],[f(nn,0),'kids asked']];}
+    else{const uu=u(nn,p);k=[['± '+f(uu,2)+' pts','u = 1.96√(p(1−p)/n)'],['± '+f(100/Math.sqrt(nn),2)+' pts','largest possible (p = 50%): 1/√n']];
+      if(lv==='s'){const fpc=Math.sqrt((Np.get()-nn)/(Np.get()-1));k.push([f(uu*Math.sqrt(dd.get())*Math.max(0,fpc),2)+' pts','with design effect and finite-population correction']);k.push([f(nn/dd.get(),0),'effective sample size n/deff']);}}
+    kp.innerHTML='';kp.append(Q.kpis(k));
+    const pts=[];for(let m=25;m<=3000;m+=25)pts.push([m,lv==='e'?100/Math.sqrt(m):u(m,p)]);
+    ch.innerHTML='';ch.append(Q.ch.lines([{pts,c:'var(--acc)'},{pts:[[nn,lv==='e'?100/Math.sqrt(nn):u(nn,p)]],c:'var(--acc3)',dots:true}],{x0:0,x1:3000,y0:0,xl:'Sample size n',yl:'± percentage points',label:'Uncertainty falls slowly as n grows'}));
+    ch.append(Q.callout('Square-root law','To halve the uncertainty you need <b>four times</b> as many people. Going from 400 to 1,600 halves it.'));
+    const tgt=el('div',{class:'row'},el('span',null,'Target uncertainty:'));
+    [10,5,3,2,1].forEach(t=>tgt.append(el('button',{class:'btn sm alt',onclick:()=>{n.set(Math.min(3000,Math.max(25,Math.ceil((100/t)**2/25)*25)));upd();api.touch();}},'± '+t+' pts → n = '+Math.ceil((100/t)**2))));ch.append(tgt);
+    if(lv==='s'){ch.append(Q.callout('Quantitative variable','To estimate a mean within ± E with standard deviation σ: n = (1.96·σ/E)². For σ = 12 and E = 2 that is '+Math.ceil((1.96*12/2)**2)+'.'));}
+  }
+  upd();
+};
+
+/* ===== W7: regression ===== */
+L.regress=function(root,lv,api){
+  const r=S.rng(11);const xs=[],ys=[];for(let i=0;i<12;i++){const x=125+i*6.5+r()*4;xs.push(x);ys.push(Math.max(25,0.9*(x-120)+28+S.norm01(r)*7));}
+  let pts=xs.map((x,i)=>({x,y:ys[i]}));const X0=110,X1=200,Y0=20,Y1=100;
+  root.append(el('p',null,lv==='e'?'Each dot is a kid: height across, weight up. Can you place the “best guess” line so the mistakes are as small as possible?':'Drag the points. The least-squares line, r and R² update live.'));
+  const holder=el('div'),kp=el('div'),ctr=el('div',{class:'ctrls'});
+  let at=null,sl=null,showBest=lv!=='e';
+  if(lv==='e'){root.append(ctr);at=Q.slider(ctr,{label:'Height of the line at 150 cm',min:20,max:100,step:1,value:50,on:()=>{draw();api.touch();}});sl=Q.slider(ctr,{label:'Slope (kg per cm)',min:0,max:1.5,step:0.05,value:0.3,dec:2,on:()=>{draw();api.touch();}});}
+  const row=el('div',{class:'row'});root.append(row);root.append(holder,kp);
+  const mk=(t,fn,c)=>row.append(el('button',{class:'btn sm '+(c||'alt'),onclick:()=>{fn();api.touch();draw();}},t));
+  if(lv==='e')mk('Show the best line',()=>{showBest=true;},'g2');
+  else{mk('Add an outlier',()=>pts.push({x:130,y:95}),'g3');mk('Reset',()=>{pts=xs.map((x,i)=>({x,y:ys[i]}));});mk('Remove last',()=>{if(pts.length>4)pts.pop();});}
+  function draw(){const o=S.ols(pts.map(p=>p.x),pts.map(p=>p.y));const lines=[];let k=[];
+    if(showBest)lines.push({a:o.a,b:o.b,c:'var(--acc2)'});
+    if(lv==='e'){const a=at.get()-sl.get()*150,b=sl.get();lines.push({a,b,c:'var(--acc3)',dash:'6 4'});const sse=pts.reduce((s,p)=>s+(p.y-a-b*p.x)**2,0);k=[[f(sse,0),'your mistake score (smaller is better)']];if(showBest){k.push([f(o.sse,0),'best possible score']);k.push([f(100*o.sse/sse,0)+'%','how close you are']);}}
+    else{k=[['y = '+f(o.a,1)+' + '+f(o.b,3)+'·x','least-squares line'],[f(o.r,3),'correlation r'],[f(100*o.r2,1)+'%','R² (share of variation explained)']];
+      if(lv==='s'){const tc=S.tinv(0.975,o.df);k.push([f(o.se,4),'SE of slope']);k.push([f(o.t,2),'t = b/SE, df = '+o.df]);k.push([f(S.tp2(o.t,o.df),4),'p-value for slope = 0']);k.push(['['+f(o.b-tc*o.se,3)+', '+f(o.b+tc*o.se,3)+']','95% CI for slope']);}}
+    holder.innerHTML='';holder.append(Q.ch.scatter(pts,{x0:X0,x1:X1,y0:Y0,y1:Y1,xl:'Height (cm)',yl:'Weight (kg)',lines,drag:lv==='e'?null:(i,x,y)=>{pts[i].x=x;pts[i].y=y;},dragEnd:()=>{api.touch();draw();},label:'Scatter plot of weight against height'}));
+    kp.innerHTML='';kp.append(Q.kpis(k));
+    if(lv!=='e')kp.append(Q.callout('Association is not causation','A strong r says the points hug a line. It does not say that height <i>causes</i> weight. Drag one point far away and watch r and the line react.'));}
+  draw();
+};
+
+/* ===== W8: comparing two groups ===== */
+L.duel=function(root,lv,api){
+  root.append(el('p',null,lv==='e'?'Two teams ran a race. Is the gap between their average times real, or just wiggle? Compare the gap with the wiggle.':'Simulate two groups and test for a difference in means.'));
+  const ctr=el('div',{class:'ctrls'});root.append(ctr);
+  const df=Q.slider(ctr,{label:lv==='e'?'True gap between teams (seconds)':'True difference in means',min:0,max:20,step:1,value:6,on:()=>{gen();api.touch();}});
+  const sd=Q.slider(ctr,{label:lv==='e'?'How much runners vary (seconds)':'Standard deviation within groups',min:2,max:20,step:1,value:8,on:()=>{gen();api.touch();}});
+  const nn=Q.slider(ctr,{label:lv==='e'?'Runners per team':'n per group',min:4,max:60,step:1,value:12,on:()=>{gen();api.touch();}});
+  const row=el('div',{class:'row'});root.append(row);row.append(el('button',{class:'btn sm',onclick:()=>{gen();api.touch();}},'Draw new data'));
+  let paired=false,rho=null;
+  if(lv==='s'){Q.toggle(root,[['u','Two independent groups'],['p','Paired (same subjects twice)']],'u',v=>{paired=v==='p';gen();});rho=Q.slider(ctr,{label:'Correlation between pairs',min:0,max:95,value:70,suf:'%',on:()=>gen()});}
+  const holder=el('div'),kp=el('div');root.append(holder,kp);
+  function gen(){const n=nn.get(),s=sd.get(),d=df.get();let A=[],B=[];
+    if(paired){const r=rho.get()/100;for(let i=0;i<n;i++){const z=S.norm01(),sub=S.norm01()*s;A.push(50+sub*Math.sqrt(r)+S.norm01()*s*Math.sqrt(1-r));B.push(50+d+sub*Math.sqrt(r)+S.norm01()*s*Math.sqrt(1-r));}}
+    else for(let i=0;i<n;i++){A.push(50+S.norm01()*s);B.push(50+d+S.norm01()*s);}
+    const items=A.map(v=>({v,c:'var(--acc)'})).concat(B.map(v=>({v,c:'var(--acc3)'})));
+    const lo=Math.floor(Math.min(...A,...B)-3),hi=Math.ceil(Math.max(...A,...B)+3);const w=S.welch(B,A);
+    holder.innerHTML='';holder.append(Q.ch.dots(items,{lo,hi,r:n>30?4.5:7,marks:[{v:w.m2,label:'A mean',c:'var(--acc)',ty:22},{v:w.m1,label:'B mean',c:'var(--acc3)',ty:38}],label:'Dots for group A and group B'}));
+    let k=[];
+    if(lv==='e'){k=[[f(w.diff,1)+' s','gap between averages'],[f(w.se,1)+' s','wiggle (size of random noise in the gap)'],[f(Math.abs(w.diff)/w.se,1)+'×','gap ÷ wiggle'],[Math.abs(w.diff)/w.se>2?'Looks real!':'Could be luck','verdict (more than 2× the wiggle ≈ real)']];}
+    else if(!paired){const tc=S.tinv(0.975,w.df);k=[[f(w.diff,2),'difference of means'],[f(w.se,2),'SE = √(s₁²/n₁ + s₂²/n₂)'],[f(w.t,2),'t = difference / SE'],[f(w.df,1),'degrees of freedom'],[f(w.p,4),'p-value (two-sided)'],['['+f(w.diff-tc*w.se,2)+', '+f(w.diff+tc*w.se,2)+']','95% CI for the difference']];}
+    else{const D=B.map((v,i)=>v-A[i]);const md=S.mean(D),sdd=S.sd(D),t=md/(sdd/Math.sqrt(n)),pp=S.tp2(t,n-1);k=[[f(md,2),'mean difference d̄'],[f(sdd,2),'SD of differences'],[f(t,2),'paired t = d̄/(s_d/√n)'],[f(pp,4),'paired p-value (df = '+(n-1)+')'],[f(w.p,4),'p-value if wrongly treated as independent']];}
+    kp.innerHTML='';kp.append(Q.kpis(k));
+    kp.append(Q.callout('Key idea',lv==='e'?'A big gap is only convincing when it is large compared with the wiggle. More runners shrink the wiggle.':paired?'Pairing removes subject-to-subject variation, so the paired test can detect smaller differences. Raise the correlation and compare the two p-values.':'The test statistic compares the observed difference with its standard error. With larger n or smaller σ the same true difference becomes easier to detect.'));}
+  gen();
+};
+})();
+(function(){
+'use strict';
+const Q=window.Q;
+const mc=(q,o,a,why)=>({q,o,a,why});
+const W=w=>Q.worlds.push(w);
+
+W({id:1,emoji:'🕵️',ch:'Book chapter 1',lab:'sample',
+name:{e:'Data Detectives',a:'Data Collection',s:'Data Collection and Survey Design'},
+tag:{e:'How do we learn about lots of people by asking only a few?',a:'Surveys, samples, experiments and the errors that creep in.',s:'Frames, estimators, questionnaire design and total survey error.'},
+cards:{
+e:[['Population and sample',`Imagine a huge pot of soup. You don\u2019t drink it all to check the taste. You <b>stir it and taste one spoon</b>. The pot is the <b>population</b>. The spoon is the <b>sample</b>. A good sample tells you about the whole pot.`,'🍲'],
+['Pick fairly',`If you want to know your school\u2019s favourite sport, don\u2019t ask only your friends. Pull names <b>from a hat</b> so everyone has the same chance. That is a <b>random sample</b>. Bigger fair samples give better guesses.`,'🎩'],
+['Ask good questions',`A good question is short, simple and asks <b>about one thing</b>. A bad question pushes you to answer a certain way (\u201cDon\u2019t you think pizza is the best?\u201d). Try your questions out on a few friends first. That is called a <b>pilot</b>.`,'❓']],
+a:[['Descriptive and analytical',`<b>Descriptive</b> statistics summarise the data you have (tables, charts, averages). <b>Analytical</b> statistics use probability to judge differences and relationships beyond your data. You need both. A <b>population</b> is everyone of interest; a <b>sample</b> is a smaller group used to <b>estimate</b> population values.`,'📊'],
+['Surveys, experiments, registers',`A <b>sample survey</b> asks people. An <b>experiment</b> changes one or more factors on purpose and measures the result. A <b>register</b> is existing records. A carefully planned sample can beat a badly planned survey of everyone, and it is faster and cheaper.`,'🧪'],
+['Questionnaires and errors',`Use closed questions, an \u201cOther\u201d option, and about 3 to 7 answer categories. Avoid leading questions and double questions (\u201cDo you shop alone or with others?\u201d). Add control questions, keep it short, and run a <b>pilot study</b>. Watch for <b>nonresponse</b> and honest-answer problems.`,'📝']],
+s:[['Framing the problem',`Let a <b>population</b> have an unknown parameter \u03b8 (a mean or a proportion). A sample yields an <b>estimate</b> \u03b8\u0302. Inference requires that the selection mechanism be known: <b>probability sampling</b> from a defined <b>sampling frame</b>. Experiments differ: the \u201cpopulation\u201d is the set of all possible repetitions.`,'🎯'],
+['Sources of data',`<b>Sample surveys</b>, <b>designed experiments</b> and <b>registers</b> each have a different error profile. Registers are cheap and complete but were collected for other purposes. Experiments allow causal conclusions when factors are randomised. Surveys generalise to a population but depend on frame quality and response.`,'🗂️'],
+['Total survey error',`Error has several parts: <b>coverage</b> (frame misses people), <b>sampling</b> (random), <b>nonresponse</b> (non-respondents differ), and <b>measurement</b> (wording, interviewer, social desirability). Control questions can reveal dishonest answers. Scale length is debated: 3 to 7 categories is common; an odd number invites the neutral middle. Always pilot.`,'⚖️']]},
+qs:{
+e:[mc(`You want to know the favourite sport of all 400 kids at school. You ask 25 kids picked by names from a hat. Those 25 kids are the\u2026`,[`sample`,`population`,`answer`,`graph`],0,`The small group you actually ask is the sample.`),
+mc(`Which way of choosing kids is fairest?`,[`Ask only your best friends`,`Pull names from a hat`,`Ask the first five kids you see`,`Ask kids who sit near you`],1,`With a hat, everyone has the same chance, so the sample is not tilted.`),
+mc(`Which is the better question?`,[`Don\u2019t you agree pizza is the best food?`,`Which food do you like best?`,`Pizza is great, isn\u2019t it?`,`You love pizza, right?`],1,`It does not push anyone toward an answer.`),
+mc(`A spoonful of soup tells you about the whole pot if you\u2026`,[`stir first`,`take only from the top`,`take only the burnt bits`,`take none`],0,`Stirring makes the spoonful representative, like a random sample.`),
+mc(`Why do we often ask a sample instead of everyone?`,[`It is faster and cheaper`,`A sample is always perfect`,`Everyone refuses to answer`,`Counting is forbidden`],0,`Samples save time and money, and a careful sample can be very accurate.`),
+mc(`If you ask every single kid in the school, you have done a\u2026`,[`total survey (everyone)`,`sample survey`,`pilot`,`guess`],0,`Asking the whole population is a total survey.`)],
+a:[mc(`A school has 1,200 students and a survey asks 120 of them. What is the population?`,[`The 120 asked`,`The 1,200 students`,`The school building`,`The answers collected`],1,`The population is everyone we want to learn about.`),
+mc(`Which question is a leading question?`,[`How many hours did you sleep last night?`,`Don\u2019t you think the new cafeteria is far better than the old one?`,`Which subject do you like best?`,`How old are you?`],1,`It steers respondents toward one answer.`),
+mc(`\u201cDo you shop alone, with others, or never?\u201d is a poor question because\u2026`,[`it mixes two issues (who buys, and company)`,`it has too many answers`,`it is too short`,`it is closed`],0,`Respondents interpret it differently, so the answers can\u2019t be compared. Ask one thing at a time.`),
+mc(`A pilot study is used to\u2026`,[`test the questionnaire on a few people before the main survey`,`replace the main survey`,`compute the margin of error`,`avoid sampling`],0,`It finds unclear questions before it is too late.`),
+mc(`Descriptive statistics mainly\u2026`,[`summarise the data in hand`,`prove causes`,`predict with certainty`,`remove errors`],0,`Analytical statistics go further and assess differences and relationships.`),
+mc(`A soft-drink maker tries different flavour mixes and records taste ratings. This is a\u2026`,[`planned experiment`,`register`,`total survey`,`pilot study of a questionnaire`],0,`The producer changes factors on purpose and measures the result.`)],
+s:[mc(`A telephone survey misses households without phones. This is mainly a\u2026`,[`coverage error`,`sampling error`,`rounding error`,`interviewer error`],0,`The sampling frame excludes part of the population.`),
+mc(`Random selection justifies inference because it\u2026`,[`makes the chance mechanism known, so uncertainty can be quantified`,`removes every error`,`makes the sample identical to the population`,`guarantees a high response rate`],0,`Known selection probabilities underpin standard errors and confidence intervals.`),
+mc(`Interviews are spread evenly over the year, yet 10% say they normally drink more than yesterday and 40% less. This suggests\u2026`,[`socially desirable under-reporting`,`a sample that is too small`,`a normal distribution`,`interviewer cheating`],0,`If rates were truthful the shares should be similar; people want to appear moderate.`),
+mc(`To support a causal claim you would prefer\u2026`,[`a randomised designed experiment`,`a convenience survey`,`a register`,`a quota sample`],0,`Randomisation breaks the link between treatment and confounders.`),
+mc(`Nonresponse is most harmful when\u2026`,[`non-respondents differ systematically from respondents on the measured variable`,`the response rate is 100%`,`the sample is large`,`questions are closed`],0,`Then the observed estimate is biased, not just noisy.`),
+mc(`The key feature that separates an experiment from an observational survey is that\u2026`,[`the investigator sets the factor levels (ideally at random)`,`it always has a larger n`,`it has no random error`,`it uses a questionnaire`],0,`Assigning treatments is what supports causal conclusions.`)]}});
+
+W({id:2,emoji:'📈',ch:'Book chapter 2',lab:'charts',
+name:{e:'Chart Studio',a:'Presentation of Data',s:'Graphical and Tabular Presentation'},
+tag:{e:'Turn numbers into pictures anyone can read.',a:'Choose the right chart, build clear tables, and use percentages well.',s:'Class intervals, scaling, percentages and what a graph can hide.'},
+cards:{
+e:[['Bars and histograms',`A <b>bar chart</b> counts categories (pizza, burgers, tacos). A <b>histogram</b> counts numbers sorted into ranges (heights 140\u2013149, 150\u2013159\u2026). Histogram bars touch because the ranges follow on from each other.`,'📊'],
+['Pie, line and dots',`A <b>pie chart</b> shows parts of a whole. A <b>line chart</b> shows change over time. A <b>scatter plot</b> has one dot per kid for two numbers, such as height and shoe size.`,'🥧'],
+['Tables and percentages',`A table lists numbers in rows and columns. A <b>percent</b> says \u201chow many out of 100\u201d. If 12 of 40 kids like tennis, that is 12 \u00f7 40 = 0.30, or <b>30%</b>.`,'🔢']],
+a:[['Match chart to data',`<b>Bar chart</b>: categories. <b>Histogram</b>: a quantitative variable grouped in classes. <b>Pie</b>: shares of a whole. <b>Line chart</b>: a trend over time. <b>Scatter plot</b>: two quantitative variables. <b>Bubble plot</b>: adds a third variable through bubble size.`,'🎨'],
+['Histograms and class width',`In a histogram the classes touch because the scale is continuous. The <b>class width</b> changes the look: too wide hides structure, too narrow looks noisy. Always label axes and units, and start bar-chart axes at zero.`,'📐'],
+['Tables and percentages',`A good table has a title, clear row and column labels, units and totals. Percentages need a <b>base</b>: row percent uses each row total as 100%, column percent uses each column total. State which one you use.`,'🧮']],
+s:[['Constructing histograms',`Choose class intervals that are equal and non-overlapping. With unequal widths use <b>density</b> (frequency per unit width) so area represents frequency. Class width affects apparent modality and skew; report your choice.`,'📏'],
+['Scatter and bubble plots',`Scatter plots reveal form, direction, strength and outliers. Curved patterns may need a transformation (for example a logarithm). Line charts connect observations ordered in time. A bubble plot encodes a third variable in area; avoid encoding by diameter.`,'🫧'],
+['Tables, bases and honesty',`Marginal, row and column percentages answer different questions. Compare groups using their own totals as base. Truncated axes, 3-D effects and cherry-picked intervals can mislead without any false number.`,'🧾']]},
+qs:{
+e:[mc(`Best chart for how many kids chose each of 4 pizza toppings?`,[`Bar chart`,`Line chart`,`Scatter plot`,`Histogram of heights`],0,`Toppings are categories.`),
+mc(`Histogram bars touch because\u2026`,[`the ranges follow on from each other`,`the artist ran out of space`,`they are all equal`,`they show categories`],0,`The numbers run on continuously.`),
+mc(`A pie chart shows\u2026`,[`parts of a whole`,`change over time`,`two numbers per kid`,`the middle value`],0,`Slices add up to 100%.`),
+mc(`To show a plant\u2019s height each week use a\u2026`,[`line chart`,`pie chart`,`bar chart of colours`,`table of names`],0,`Lines show change over time.`),
+mc(`To see if taller kids have longer arms use a\u2026`,[`scatter plot`,`pie chart`,`line chart`,`bar chart`],0,`Each kid is a dot with two numbers.`)],
+a:[mc(`In a survey of 40 people, 12 prefer tennis. What percent is that?`,[`30%`,`12%`,`40%`,`3.3%`],0,`12 \u00f7 40 = 0.30.`),
+mc(`Bar charts have gaps between bars and histograms do not because\u2026`,[`bars show separate categories, histogram classes form a continuous scale`,`histograms are always taller`,`bar charts use percentages`,`histograms show time`],0,`The gap signals separate categories.`),
+mc(`Which chart suits monthly sales over two years?`,[`Line chart`,`Pie chart`,`Bubble plot only`,`Histogram`],0,`It shows a trend over time.`),
+mc(`In a table of sex by answer, \u201crow percent\u201d means\u2026`,[`each row total is 100%`,`each column total is 100%`,`the grand total is 100%`,`the cell is shown in raw count`],0,`The base is the row total.`),
+mc(`Starting a bar chart\u2019s axis at 90 instead of 0 will\u2026`,[`exaggerate differences between bars`,`hide the data`,`make all bars equal`,`have no effect`],0,`The visual ratio of bars no longer matches the ratio of values.`)],
+s:[mc(`Two histograms use different class widths. To compare shapes fairly you should plot\u2026`,[`density (frequency per unit width)`,`raw counts`,`cumulative sums only`,`pie charts`],0,`Density makes area, not height, proportional to frequency.`),
+mc(`To compare how boys and girls differ in their answers, percentages should use\u2026`,[`each group\u2019s own total as the base`,`the grand total`,`the largest cell`,`the number of questions`],0,`Compare like with like: boys\u2019 distribution against girls\u2019 distribution.`),
+mc(`A bubble plot adds\u2026`,[`a third variable through bubble size`,`a time axis`,`a regression line`,`a histogram`],0,`Area typically encodes the third variable.`),
+mc(`A histogram with too few classes can mislead because it\u2026`,[`hides features such as two modes`,`makes the mean wrong`,`adds noise`,`changes the data`],0,`Over-smoothing conceals structure.`),
+mc(`A scatter plot shows a clear curve. A sensible first step is to\u2026`,[`consider a transformation (e.g. logarithm) or a non-linear model`,`report r as is`,`delete the curved points`,`draw a pie chart`],0,`Pearson r measures linear association only.`)]},
+gen:function(lv){const S=Q.S;
+  if(lv==='e'){const n=S.pick([20,25,40,50]),k=S.int(2,Math.floor(n/2));return {q:`${k} of ${n} kids picked tennis. What percent is that?`,type:'num',ans:100*k/n,tol:0.5,unit:'%',hint:`Divide ${k} by ${n}, then multiply by 100.`,why:`${k} \u00f7 ${n} \u00d7 100 = ${S.f(100*k/n,1)}%.`};}
+  const yb=S.int(6,20),nb=S.int(4,20),yg=S.int(6,20),ng=S.int(6,20);
+  const data=`${yb} of ${yb+nb} boys and ${yg} of ${yg+ng} girls answered \u201cyes\u201d.`;
+  if(lv==='s'&&Math.random()<0.5){const ans=100*yb/(yb+yg);return {q:`${data} What percent of all the \u201cyes\u201d answers came from boys? (a <b>column</b> percent)`,type:'num',ans,tol:0.2,unit:'%',hint:`Base = total yes answers (${yb+yg}).`,why:`${yb} \u00f7 ${yb+yg} \u00d7 100 = ${S.f(ans,1)}%.`};}
+  const base=S.pick(['boys','girls']);const n=base==='boys'?yb+nb:yg+ng,k=base==='boys'?yb:yg;
+  return {q:`${data} What percent of the <b>${base}</b> answered \u201cyes\u201d? (a <b>row</b> percent)`,type:'num',ans:100*k/n,tol:0.2,unit:'%',hint:`Use the ${base}\u2019 own total (${n}) as 100%.`,why:`${k} \u00f7 ${n} \u00d7 100 = ${S.f(100*k/n,1)}%.`};}});
+})();
+(function(){
+'use strict';
+const Q=window.Q;
+const mc=(q,o,a,why)=>({q,o,a,why});
+const W=w=>Q.worlds.push(w);
+const S=()=>Q.S;
+const fx=(x,d)=>Q.S.f(x,d);
+
+W({id:3,emoji:'🎯',ch:'Book chapter 3',lab:'center',
+name:{e:'Middle and Spread',a:'Description of Data',s:'Location and Dispersion'},
+tag:{e:'Find the typical value and see how spread out things are.',a:'Average, median, mode, range, standard deviation, IQR and CV.',s:'Choosing measures, robustness, variance estimation and data types.'},
+cards:{
+e:[['Three kinds of \u201ctypical\u201d',`The <b>average</b> adds everything up and shares it equally. The <b>median</b> is the middle one when you line numbers up in order. The <b>mode</b> is the value that shows up most often.`,'⚖️'],
+['Spread',`Two classes can have the same average age but one class has kids of very different ages. The <b>range</b> is the biggest number minus the smallest. It tells you how spread out the numbers are.`,'↔️'],
+['Watch out for giants',`If one kid has 500 stickers and everyone else has about 10, the average jumps up but the <b>median</b> stays near 10. The median is the stronger choice when numbers are lopsided.`,'🦖']],
+a:[['Measures of location',`<b>Average</b> x\u0304 = \u03a3x / n. <b>Median</b>: middle of the sorted values (average the two middle ones if n is even). <b>Mode</b>: most frequent value. The median is not sensitive to extreme values, so report it alongside the average.`,'📍'],
+['Measures of spread',`<b>Range</b> = max \u2212 min. <b>Standard deviation</b> s measures typical distance from the average: s = \u221a(\u03a3(x \u2212 x\u0304)\u00b2 / (n \u2212 1)). <b>IQR</b> = Q3 \u2212 Q1 (middle half of the data). <b>CV</b> = s / x\u0304, spread as a % of the average.`,'📏'],
+['Choosing measures',`Roughly symmetric data: average and SD. Skewed data or outliers: median and IQR. Compare groups with different units or sizes using the <b>CV</b>. Qualitative data have a mode and frequencies only.`,'🧰']],
+s:[['Systematic and random variation',`Observed values mix <b>systematic variation</b> (explained by factors) and <b>random variation</b> (unexplained). Descriptive measures summarise both. Statistical analysis tries to separate them.`,'🎲'],
+['Estimating dispersion',`Sample variance s\u00b2 = \u03a3(x\u1d62 \u2212 x\u0304)\u00b2/(n \u2212 1) is an unbiased estimator of \u03c3\u00b2 because x\u0304 is estimated from the same data (n \u2212 1 degrees of freedom). Quartiles can be computed by several conventions; state yours. CV = s/x\u0304 is scale-free.`,'🧮'],
+['Robustness and data types',`Mean and SD have breakdown point 0; median and IQR resist outliers. Right skew gives mean > median. Data types: nominal, ordinal, discrete, continuous. The valid summaries depend on type: only mode and frequencies for nominal data, median and quartiles for ordinal.`,'🧱']]},
+qs:{
+e:[mc(`Which is the \u201cmiddle value\u201d when numbers are sorted?`,[`Median`,`Mode`,`Range`,`Total`],0,`The median splits the sorted list in half.`),
+mc(`The value that appears most often is the\u2026`,[`mode`,`median`,`average`,`range`],0,`Mode = most frequent.`),
+mc(`One kid has 500 stickers, everyone else about 10. Which is a better \u201ctypical\u201d value?`,[`The median`,`The average`,`The range`,`The biggest number`],0,`The median is not pulled up by a single giant value.`)],
+a:[mc(`The standard deviation measures\u2026`,[`typical spread around the average`,`the middle value`,`the most common value`,`the total`],0,`Larger s means values lie farther from the average on the whole.`),
+mc(`The IQR is the difference between\u2026`,[`the upper and lower quartiles`,`the largest and smallest values`,`mean and median`,`mode and median`],0,`IQR = Q3 \u2212 Q1.`),
+mc(`Which measure of location is least affected by outliers?`,[`Median`,`Average`,`Range`,`Standard deviation`],0,`Extreme values barely move the median.`),
+mc(`The coefficient of variation is useful because\u2026`,[`it expresses spread relative to the average, without units`,`it is always below 1`,`it removes outliers`,`it equals the median`],0,`It lets you compare the variability of quantities measured on different scales.`)],
+s:[mc(`Why does the sample variance divide by n \u2212 1?`,[`x\u0304 is estimated from the same data, which would otherwise underestimate \u03c3\u00b2`,`to make s\u00b2 smaller`,`to remove outliers`,`because n is unknown`],0,`Dividing by n \u2212 1 gives an unbiased estimator of \u03c3\u00b2.`),
+mc(`For right-skewed data the relationship between mean and median is typically\u2026`,[`mean > median`,`mean < median`,`mean = median`,`undefined`],0,`The long right tail pulls the mean up.`),
+mc(`Adding 10 to every value changes the standard deviation by\u2026`,[`nothing`,`10`,`a factor of 10`,`\u221a10`],0,`Spread is unaffected by a shift.`),
+mc(`Multiplying all values by 3 changes the CV by\u2026`,[`nothing`,`a factor of 3`,`a factor of 9`,`\u22123`],0,`s and the mean both scale by 3, so the ratio is unchanged.`),
+mc(`Which summaries are meaningful for nominal data?`,[`mode and frequencies`,`mean and SD`,`median and IQR`,`variance only`],0,`Nominal categories have no order or distance.`)]},
+gen:function(lv){const S=Q.S,r=S.R;
+  const arr=(n,lo,hi)=>Array.from({length:n},()=>S.int(lo,hi));
+  if(lv==='e'){const t=S.pick(['mean','median','mode','range']);
+    if(t==='mean'){const n=S.pick([4,5,6]);let a=arr(n-1,2,12);let s=a.reduce((x,y)=>x+y,0);const target=Math.ceil((s+2)/n)*n;const last=target-s;a.push(last);a=S.shuffle(a);return {q:`Find the <b>average</b> of these numbers.`,data:a.join(',  '),type:'num',ans:S.mean(a),tol:0.01,hint:`Add them all up, then divide by ${n}.`,why:`Sum = ${S.sum(a)}, divided by ${n} = ${S.f(S.mean(a),2)}.`};}
+    if(t==='median'){const a=arr(S.pick([5,7]),1,20);const b=a.slice().sort((x,y)=>x-y);return {q:`Find the <b>median</b> (the middle number after sorting).`,data:a.join(',  '),type:'num',ans:S.median(a),tol:0.01,hint:`Sort from smallest to biggest first.`,why:`Sorted: ${b.join(', ')}. The middle one is ${S.median(a)}.`};}
+    if(t==='mode'){const v=S.int(2,15);const a=S.shuffle([v,v,v].concat(Array.from({length:4},()=>S.int(1,20)).filter(x=>x!==v)));const m=S.mode(a);return {q:`Which number is the <b>mode</b> (shows up most often)?`,data:a.join(',  '),type:'num',ans:m.v,tol:0.01,hint:`Count how many times each number appears.`,why:`${m.v} appears ${m.n} times.`};}
+    const a=arr(6,3,30);return {q:`Find the <b>range</b> (biggest minus smallest).`,data:a.join(',  '),type:'num',ans:Math.max(...a)-Math.min(...a),tol:0.01,hint:`Find the biggest and the smallest number.`,why:`${Math.max(...a)} \u2212 ${Math.min(...a)} = ${Math.max(...a)-Math.min(...a)}.`};}
+  if(lv==='a'){const t=S.pick(['mean','median','sd','iqr','cv']);
+    if(t==='mean'){const a=arr(6,10,40);return {q:`Compute the average (2 decimals).`,data:a.join(',  '),type:'num',ans:S.mean(a),tol:0.01,hint:`x\u0304 = \u03a3x / n`,why:`${S.sum(a)} \u00f7 6 = ${S.f(S.mean(a),2)}.`};}
+    if(t==='median'){const a=arr(8,5,50);const b=a.slice().sort((x,y)=>x-y);return {q:`Compute the median (n is even).`,data:a.join(',  '),type:'num',ans:S.median(a),tol:0.01,hint:`Average the 4th and 5th sorted values.`,why:`Sorted: ${b.join(', ')}; median = (${b[3]} + ${b[4]})/2 = ${S.median(a)}.`};}
+    if(t==='sd'){const a=arr(5,2,14);return {q:`Compute the standard deviation s (divide by n \u2212 1), 2 decimals.`,data:a.join(',  '),type:'num',ans:S.sd(a),tol:0.02,hint:`s = \u221a(\u03a3(x \u2212 x\u0304)\u00b2 / (n \u2212 1)); x\u0304 = ${S.f(S.mean(a),2)}`,why:`x\u0304 = ${S.f(S.mean(a),2)}; \u03a3(x \u2212 x\u0304)\u00b2 = ${S.f(S.vari(a)*4,2)}; s = \u221a(${S.f(S.vari(a),2)}) = ${S.f(S.sd(a),2)}.`};}
+    if(t==='iqr'){const a=arr(8,5,60);const b=a.slice().sort((x,y)=>x-y);const q=S.quart(a);return {q:`Compute the IQR using the <b>median-of-halves</b> method (Q1 = median of the lower 4 values, Q3 = median of the upper 4).`,data:a.join(',  '),type:'num',ans:q.q3-q.q1,tol:0.01,hint:`Sort, split into two halves of 4, take each half\u2019s median.`,why:`Sorted: ${b.join(', ')}. Q1 = ${q.q1}, Q3 = ${q.q3}, IQR = ${q.q3-q.q1}.`};}
+    const a=arr(6,20,60);return {q:`Compute the coefficient of variation CV = s \u00f7 average, as a percent (1 decimal).`,data:a.join(',  '),type:'num',ans:100*S.sd(a)/S.mean(a),tol:0.2,unit:'%',hint:`Find x\u0304 and s first.`,why:`x\u0304 = ${S.f(S.mean(a),2)}, s = ${S.f(S.sd(a),2)}, CV = ${S.f(100*S.sd(a)/S.mean(a),1)}%.`};}
+  const t=S.pick(['var','iqr','cv','shift']);
+  if(t==='var'){const a=arr(6,3,25);return {q:`Compute the sample variance s\u00b2 (divide by n \u2212 1).`,data:a.join(',  '),type:'num',ans:S.vari(a),tol:0.02,hint:`s\u00b2 = \u03a3(x \u2212 x\u0304)\u00b2/(n \u2212 1)`,why:`x\u0304 = ${S.f(S.mean(a),3)}; s\u00b2 = ${S.f(S.vari(a),3)}.`};}
+  if(t==='iqr'){const a=arr(10,5,80);const b=a.slice().sort((x,y)=>x-y);const q=S.quart(a);return {q:`Compute the IQR by the median-of-halves method (n = 10: two halves of 5).`,data:a.join(',  '),type:'num',ans:q.q3-q.q1,tol:0.01,hint:`Q1 and Q3 are the medians of the lower and upper five values.`,why:`Sorted: ${b.join(', ')}; Q1 = ${q.q1}, Q3 = ${q.q3}.`};}
+  if(t==='cv'){const a=arr(8,30,90);return {q:`Compute the CV (s/x\u0304) as a percent.`,data:a.join(',  '),type:'num',ans:100*S.sd(a)/S.mean(a),tol:0.2,unit:'%',hint:`Use s with n \u2212 1.`,why:`CV = ${S.f(S.sd(a),2)} / ${S.f(S.mean(a),2)} = ${S.f(100*S.sd(a)/S.mean(a),1)}%.`};}
+  const a=arr(6,3,20),c=S.int(3,9);return {q:`Data have s = ${S.f(S.sd(a),2)}. If you add ${c} to every value, what is the new standard deviation?`,type:'num',ans:S.sd(a),tol:0.02,hint:`Does shifting every value change the spread?`,why:`Adding a constant does not change spread, so s stays ${S.f(S.sd(a),2)}.`};
+}});
+
+W({id:4,emoji:'🔔',ch:'Book chapter 4',lab:'normal',
+name:{e:'Bell Curve Peak',a:'The Normal Distribution',s:'Normal and t Distributions; Confidence Intervals'},
+tag:{e:'Why most things are \u201cmiddle-sized\u201d and few are extreme.',a:'Standard deviations, z-scores, probabilities and your first confidence interval.',s:'Standardisation, fractiles, normality checks, t intervals and interval interpretation.'},
+cards:{
+e:[['The bell',`Measure the heights of lots of kids and draw the counts. You get a <b>bell shape</b>: most kids are near the average, and very tall or very short kids are rare. That bell is called the <b>normal curve</b>.`,'🔔'],
+['A magic rule',`About <b>68 out of 100</b> kids are within one \u201cstep\u201d (standard deviation) of the average. About <b>95 out of 100</b> are within two steps. Almost everyone (99.7) is within three.`,'🪄'],
+['Guessing the average',`If you measure only some kids, your average is a guess. A <b>confidence interval</b> gives a range that probably holds the true average. More kids measured means a narrower range.`,'🎯']],
+a:[['Mean, SD and the 68\u201395\u201399.7 rule',`A normal distribution is set by its mean \u03bc (centre) and standard deviation \u03c3 (spread). About <b>68%</b> of values lie within \u03bc \u00b1 \u03c3, <b>95%</b> within \u03bc \u00b1 2\u03c3 and <b>99.7%</b> within \u03bc \u00b1 3\u03c3. Areas under the curve are probabilities.`,'📐'],
+['Standardising: z-scores',`<b>z = (x \u2212 \u03bc) / \u03c3</b> converts any normal variable to the standard normal (mean 0, SD 1). A z of 2 is two SDs above the mean. Tables or spreadsheet functions (NORMDIST, NORMINV) turn z into probabilities and back.`,'🔄'],
+['Confidence interval for a mean',`The standard error of the average is <b>SE = s / \u221an</b>. A 95% confidence interval is <b>x\u0304 \u00b1 1.96 \u00b7 s/\u221an</b> (1.96 is the 97.5% fractile). More data (larger n) or less spread makes it narrower. For small samples use the t distribution.`,'📏']],
+s:[['Standardisation and fractiles',`If X ~ N(\u03bc, \u03c3\u00b2) then Z = (X \u2212 \u03bc)/\u03c3 ~ N(0, 1). The density is the bell curve; the distribution function \u03a6(x) gives P(X \u2264 x). The p-fractile x\u209a satisfies \u03a6(x\u209a) = p. For example z\u2080.\u2089\u2087\u2085 = 1.96 and z\u2080.\u2089 = 1.2816.`,'🧮'],
+['Checking normality',`Simple checks: histogram shape, mean \u2248 median, 68\u201395 percentages. <b>Skewness</b> measures asymmetry; <b>kurtosis</b> (excess) measures tail weight (0 for the normal). A <b>normal probability plot</b> should be roughly straight; curvature signals skew, steps or heavy tails.`,'🔍'],
+['t intervals and interpretation',`With unknown \u03c3 and small n use x\u0304 \u00b1 t\u2099\u208b\u2081 \u00b7 s/\u221an, where the t critical value has n \u2212 1 degrees of freedom. A confidence interval for \u03c3 uses the chi-squared distribution. A 95% CI does <b>not</b> mean a 95% chance that this interval holds \u03bc; it means the method captures \u03bc in 95% of repeated samples.`,'🧭']]},
+qs:{
+e:[mc(`What shape is a normal curve?`,[`A bell`,`A square`,`A zigzag`,`A flat line`],0,`Most values near the middle, few at the ends.`),
+mc(`In a bell curve of kids\u2019 heights, most kids are\u2026`,[`near the average`,`very tall`,`very short`,`exactly the same`],0,`That is why the curve peaks in the middle.`),
+mc(`What happens to a confidence interval if you measure more kids?`,[`It gets narrower`,`It gets wider`,`It disappears`,`Nothing`],0,`More information means a more precise guess.`)],
+a:[mc(`In a normal distribution about what percent of values lie within one SD of the mean?`,[`68%`,`50%`,`95%`,`99.7%`],0,`68\u201395\u201399.7 rule.`),
+mc(`A z-score of 2 means\u2026`,[`the value is 2 standard deviations above the mean`,`the value is 2 units above the mean`,`2% of values are larger`,`the mean is 2`],0,`z counts standard deviations from the mean.`),
+mc(`Which change makes a 95% confidence interval for a mean narrower?`,[`Larger sample size`,`Larger standard deviation`,`Smaller sample size`,`A lower sample mean`],0,`SE = s/\u221an falls as n grows.`),
+mc(`The 1.96 in x\u0304 \u00b1 1.96 \u00b7 s/\u221an is the\u2026`,[`97.5% fractile of the standard normal`,`mean of the data`,`SD of the data`,`median`],0,`It leaves 2.5% in each tail.`)],
+s:[mc(`Why use the t distribution rather than the normal for a small sample?`,[`s estimates \u03c3 with error, so tails must be heavier and intervals wider`,`the data are always skewed`,`t is easier`,`n is always 30`],0,`The extra uncertainty from estimating \u03c3 is reflected in t.`),
+mc(`A normal probability plot that bends away from the straight line suggests\u2026`,[`departure from normality (skewness or heavy tails)`,`a perfect normal sample`,`a large n`,`no outliers`],0,`Straightness indicates normality.`),
+mc(`An excess kurtosis well above 0 indicates\u2026`,[`heavier tails than the normal distribution`,`lighter tails`,`perfect symmetry`,`a bimodal shape`],0,`Positive excess kurtosis means heavy tails.`),
+mc(`Which is the correct interpretation of a 95% confidence interval?`,[`The procedure captures the true mean in 95% of repeated samples`,`There is a 95% probability the true mean is in this particular interval`,`95% of data lie in the interval`,`The sample mean is 95% accurate`],0,`The randomness is in the interval, not the fixed parameter.`)]},
+gen:function(lv){const S=Q.S;
+  if(lv==='e'){const k=S.pick([1,2,3]);const ans={1:68,2:95,3:99.7}[k];return {q:`The average height is ${S.pick([140,150,160])} cm and one \u201cstep\u201d (SD) is ${S.pick([5,8,10])} cm. About how many out of 100 kids are within <b>${k} step${k>1?'s':''}</b> of the average?`,type:'num',ans,tol:k===3?0.5:2,hint:`Remember 68, 95 and 99.7.`,why:`Within ${k} SD of the mean: about ${ans} out of 100.`};}
+  if(lv==='a'){const t=S.pick(['z','prob','ci']);
+    if(t==='z'){const mu=S.int(100,170),sd=S.int(5,15),k=S.pick([-2,-1,1,2,3]);const x=mu+k*sd;return {q:`Heights have mean ${mu} and SD ${sd}. Compute the z-score of x = ${x}.`,type:'num',ans:k,tol:0.01,hint:`z = (x \u2212 \u03bc)/\u03c3`,why:`(${x} \u2212 ${mu}) / ${sd} = ${k}.`};}
+    if(t==='prob'){const k=S.pick([-2,-1,0,1,2]);const ans=100*S.cdf(k);return {q:`For a normal variable, what is P(X &lt; \u03bc + ${k}\u03c3)? Give a percent (the standard normal table value for z = ${k}).`,type:'num',ans,tol:0.5,unit:'%',hint:`Use symmetry: \u03a6(\u2212z) = 1 \u2212 \u03a6(z). \u03a6(1) = 84.13%, \u03a6(2) = 97.72%.`,why:`\u03a6(${k}) = ${S.f(ans,1)}%.`};}
+    const xb=S.int(100,170),s=S.int(5,15),n=S.pick([36,49,64,100,144]);const hw=1.96*s/Math.sqrt(n);return {q:`A sample of n = ${n} has average ${xb} and s = ${s}. Compute the half-width (the \u00b1 number) of the 95% confidence interval for the mean (2 decimals).`,type:'num',ans:hw,tol:0.02,hint:`1.96 \u00d7 s / \u221an`,why:`1.96 \u00d7 ${s} / \u221a${n} = ${S.f(hw,2)}.`};}
+  const t=S.pick(['tci','prob','frac']);
+  if(t==='tci'){const n=S.int(8,20),s=S.int(4,14);const tc=S.tinv(0.975,n-1),hw=tc*s/Math.sqrt(n);return {q:`n = ${n}, s = ${s}. Compute the half-width of the 95% t-interval for the mean. (Use the t critical value with ${n-1} df = ${S.f(tc,3)}.)`,type:'num',ans:hw,tol:0.03,hint:`t \u00d7 s/\u221an`,why:`${S.f(tc,3)} \u00d7 ${s}/\u221a${n} = ${S.f(hw,2)}.`};}
+  if(t==='prob'){const mu=S.int(100,170),sd=S.int(5,15),a=mu+S.pick([-12,-7,3,5]),b=a+S.int(6,15);const p=S.cdf((b-mu)/sd)-S.cdf((a-mu)/sd);return {q:`X ~ N(${mu}, ${sd}\u00b2). Compute P(${a} &lt; X &lt; ${b}) as a percent (spreadsheet: NORMDIST).`,type:'num',ans:100*p,tol:0.4,unit:'%',hint:`P = \u03a6((b\u2212\u03bc)/\u03c3) \u2212 \u03a6((a\u2212\u03bc)/\u03c3)`,why:`z\u2090 = ${S.f((a-mu)/sd,2)}, z_b = ${S.f((b-mu)/sd,2)}; area = ${S.f(100*p,1)}%.`};}
+  const mu=S.int(100,170),sd=S.int(5,15);return {q:`X ~ N(${mu}, ${sd}\u00b2). Find the 90% fractile x such that P(X &lt; x) = 0.90 (spreadsheet: NORMINV). Use z\u2080.\u2089 = 1.2816.`,type:'num',ans:mu+1.2816*sd,tol:0.06,hint:`x = \u03bc + z\u2080.\u2089 \u00b7 \u03c3`,why:`${mu} + 1.2816 \u00d7 ${sd} = ${S.f(mu+1.2816*sd,2)}.`};
+}});
+})();
+(function(){
+'use strict';
+const Q=window.Q;
+const mc=(q,o,a,why)=>({q,o,a,why});
+const W=w=>Q.worlds.push(w);
+
+W({id:5,emoji:'🪙',ch:'Book chapter 5 and appendix',lab:'binom',
+name:{e:'Yes or No Valley',a:'Analysis of Qualitative Data',s:'Binomial Models, Tests and Frequency Tables'},
+tag:{e:'Coins, spinners and how to spot a cheater.',a:'Survey uncertainty, hypothesis tests and the chi-squared test.',s:'Exact and approximate tests, intervals for proportions and r \u00d7 c tables.'},
+cards:{
+e:[['Chance',`A fair coin lands heads about half the time, but not exactly. Flip it 10 times and you might get 4, 5 or 6 heads. Getting 9 or 10 heads would be a <b>surprise</b>.`,'🪙'],
+['Surprise meter',`Statisticians ask: \u201cIf the coin is fair, how often would we see something this odd?\u201d If the answer is <b>very rarely</b>, we start to doubt the coin. That idea is called a <b>test</b>.`,'📣'],
+['Sure about a survey?',`If 40 out of 100 kids say \u201cyes\u201d, the true share is probably near 40 but not exactly. Asking <b>more kids</b> makes the guess steadier. Surveys always come with a little wiggle.`,'📋']],
+a:[['Statistical uncertainty of a share',`When a share p of a sample says \u201cyes\u201d, the <b>statistical uncertainty</b> is <b>u = 1.96\u221a(p(1\u2212p)/n)</b>. It is largest at p = 50% and about <b>1/\u221an</b>. For n = 400 and p = 30%: u = 1.96\u221a(0.21/400) \u2248 4.5 points.`,'📋'],
+['Hypothesis tests',`Assume a <b>null hypothesis</b> (e.g. the coin is fair). The <b>p-value</b> is the probability of results at least this extreme if it were true. If p is below the <b>significance level</b> (usually 5%), reject it. The risk of rejecting a true hypothesis is the <b>type I error</b>. The normal approximation to the binomial is fine when np and n(1\u2212p) are both above 5.`,'⚖️'],
+['Chi-squared test',`For a frequency table compare observed with <b>expected</b> counts: E = (row total \u00d7 column total) / N. Then \u03c7\u00b2 = \u03a3(O \u2212 E)\u00b2/E. Large \u03c7\u00b2 is evidence against \u201cno difference\u201d. Degrees of freedom = (rows \u2212 1)(columns \u2212 1); a 2\u00d72 table has df = 1.`,'🧮']],
+s:[['Binomial model',`If trials are independent with success probability p, the count X ~ Bin(n, p), with P(X = k) = C(n,k)p\u1d4f(1\u2212p)\u207f\u207b\u1d4f, mean np and variance np(1\u2212p). For np and n(1\u2212p) above 5, X is approximately N(np, np(1\u2212p)). An exact two-sided p-value sums the probabilities of outcomes no more likely than the observed one.`,'🎲'],
+['Tests and intervals',`A 5% two-sided test rejects p\u2080 exactly when p\u2080 lies outside the 95% confidence interval (in the normal-approximation setting). The significance level is the type I error rate; failing to detect a real effect is a <b>type II error</b>. Intervals carry more information than a bare decision.`,'🔁'],
+['Frequency tables',`For an r \u00d7 c table the Pearson statistic \u03c7\u00b2 = \u03a3(O\u2212E)\u00b2/E has an approximate \u03c7\u00b2 distribution with (r\u22121)(c\u22121) df. It is unreliable when expected counts are small. For two proportions a confidence interval for p\u2081 \u2212 p\u2082 is (p\u0302\u2081 \u2212 p\u0302\u2082) \u00b1 1.96\u221a(p\u0302\u2081q\u0302\u2081/n\u2081 + p\u0302\u2082q\u0302\u2082/n\u2082).`,'📑']]},
+qs:{
+e:[mc(`A fair coin is flipped 10 times and lands heads 9 times. Is that surprising?`,[`Yes, quite unusual`,`No, it happens all the time`,`Impossible`,`Exactly what to expect`],0,`A fair coin would rarely give 9 of 10 heads.`),
+mc(`In a sample of 100 kids, 40 say \u201cyes\u201d. What percent is that?`,[`40%`,`4%`,`60%`,`100%`],0,`40 out of 100.`),
+mc(`How can you make a survey guess steadier?`,[`Ask more kids`,`Ask fewer kids`,`Ask only friends`,`Skip the question`],0,`More fair answers shrink the wiggle.`)],
+a:[mc(`A p-value of 0.03 at the 5% level means we\u2026`,[`reject the hypothesis`,`accept it as true`,`need a bigger coin`,`have proved it`],0,`0.03 &lt; 0.05: results this extreme are unusual if the hypothesis were true.`),
+mc(`The 5% significance level is the chance of\u2026`,[`rejecting a true hypothesis (type I error)`,`missing a real difference`,`the data being wrong`,`getting heads`],0,`That is the definition of type I error.`),
+mc(`The normal approximation to the binomial is reasonable when\u2026`,[`np and n(1\u2212p) are both larger than 5`,`n is below 5`,`p is exactly 0`,`the sample is biased`],0,`Both expected counts must be large enough.`),
+mc(`In a chi-squared test a large \u03c7\u00b2 value means\u2026`,[`observed counts are far from expected counts`,`the table is balanced`,`the groups are identical`,`the sample is small`],0,`Large \u03c7\u00b2 is evidence against the hypothesis of no difference.`)],
+s:[mc(`A two-sided 5% test of H\u2080: p = 0.5 rejects exactly when 0.5 is\u2026`,[`outside the 95% confidence interval`,`inside the interval`,`equal to the sample proportion`,`unrelated to the interval`],0,`Test and interval are two views of the same evidence.`),
+mc(`A very large \u03c7\u00b2 statistic means\u2026`,[`strong evidence against independence or equal proportions`,`strong evidence for it`,`the table has too few rows`,`nothing`],0,`Observed frequencies deviate from expected.`),
+mc(`Why is the \u03c7\u00b2 test cautious with small expected counts?`,[`the \u03c7\u00b2 approximation becomes poor`,`it always rejects`,`it requires n > 1000`,`it ignores the table`],0,`Use exact methods or merge categories.`),
+mc(`A type II error is\u2026`,[`failing to reject a false null hypothesis`,`rejecting a true null hypothesis`,`using the wrong table`,`a typing mistake`],0,`It is a missed detection; its probability depends on effect size and n.`)]},
+gen:function(lv){const S=Q.S;
+  if(lv==='e'){const t=S.pick([0,1,2]);if(t===0){return {q:`A spinner has 4 equal colours. If you spin it 100 times, about how many times should it land on red?`,type:'num',ans:25,tol:0.01,hint:`One out of four.`,why:`100 \u00f7 4 = 25.`};}
+    if(t===1){const n=S.pick([20,40,60]);return {q:`You flip a fair coin ${n} times. About how many heads should you expect?`,type:'num',ans:n/2,tol:0.01,hint:`Half of them.`,why:`${n} \u00f7 2 = ${n/2}.`};}
+    const k=S.int(10,40),n=S.pick([50,100]);return {q:`In a sample of ${n} kids, ${k} like swimming. What percent is that?`,type:'num',ans:100*k/n,tol:0.5,unit:'%',hint:`${k} \u00f7 ${n} \u00d7 100`,why:`${k} \u00f7 ${n} = ${S.f(100*k/n,1)}%.`};}
+  if(lv==='a'){const t=S.pick(['u','exp']);
+    if(t==='u'){const p=S.pick([0.2,0.3,0.4,0.5]),n=S.pick([100,200,400,900]);const u=196*Math.sqrt(p*(1-p)/n);return {q:`In a survey of n = ${n}, ${Math.round(p*100)}% answered \u201cyes\u201d. Compute the statistical uncertainty u = 1.96\u221a(p(1\u2212p)/n) in percentage points (2 decimals).`,type:'num',ans:u,tol:0.05,unit:'points',hint:`p = ${p}, so p(1\u2212p) = ${S.f(p*(1-p),2)}.`,why:`1.96 \u00d7 \u221a(${S.f(p*(1-p),2)}/${n}) = ${S.f(u/100,4)} = ${S.f(u,2)} points.`};}
+    const o=[S.int(8,30),S.int(8,30),S.int(8,30),S.int(8,30)];const N=o[0]+o[1]+o[2]+o[3];const E=(o[0]+o[1])*(o[0]+o[2])/N;
+    return {q:`Observed 2\u00d72 table (rows A, B; columns yes, no): A: ${o[0]}, ${o[1]}; B: ${o[2]}, ${o[3]}. Compute the <b>expected</b> frequency for the cell (A, yes) if there is no difference between A and B.`,type:'num',ans:E,tol:0.01,hint:`E = row total \u00d7 column total / N`,why:`Row A total = ${o[0]+o[1]}, column \u201cyes\u201d total = ${o[0]+o[2]}, N = ${N}; E = ${(o[0]+o[1])} \u00d7 ${(o[0]+o[2])} / ${N} = ${S.f(E,2)}.`};}
+  const t=S.pick(['bin','chi','df']);
+  if(t==='bin'){const n=S.pick([8,10,12]),k=S.int(3,Math.min(n,8)),p=S.pick([0.5,0.3]);return {q:`X ~ Bin(${n}, ${p}). Compute P(X = ${k}) (4 decimals).`,type:'num',ans:S.bpmf(n,k,p),tol:0.0006,hint:`C(${n},${k}) p^${k} (1\u2212p)^${n-k}`,why:`C(${n},${k}) = ${Math.round(Math.exp(S.lchoose(n,k)))}; P = ${S.f(S.bpmf(n,k,p),4)}.`};}
+  if(t==='chi'){const o=[S.int(8,25),S.int(8,25),S.int(8,25),S.int(8,25)];const r=S.chisq2(o);return {q:`2\u00d72 table (rows A, B; columns yes, no): A: ${o[0]}, ${o[1]}; B: ${o[2]}, ${o[3]}. Compute \u03c7\u00b2 = \u03a3(O\u2212E)\u00b2/E (2 decimals).`,type:'num',ans:r.chi,tol:0.03,hint:`First find the four expected counts, e.g. E\u2081\u2081 = row1 \u00d7 col1 / N.`,why:`Expected: ${r.e.map(x=>S.f(x,2)).join(', ')}; \u03c7\u00b2 = ${S.f(r.chi,2)} (p = ${S.f(r.p,3)}).`};}
+  const r=S.int(2,5),c=S.int(2,5);return {q:`A frequency table has ${r} rows and ${c} columns. How many degrees of freedom does the \u03c7\u00b2 test have?`,type:'num',ans:(r-1)*(c-1),tol:0.01,hint:`(rows \u2212 1)(columns \u2212 1)`,why:`(${r}\u22121)(${c}\u22121) = ${(r-1)*(c-1)}.`};
+}});
+
+W({id:6,emoji:'🏰',ch:'Book chapter 6',lab:'plan',
+name:{e:'Planning Fortress',a:'Error Sources and Planning',s:'Sample Size, Bias and Sampling Designs'},
+tag:{e:'How many kids do we need to ask, and who?',a:'Random error versus bias, sample size and sampling methods.',s:'Sample size formulas, design effects and selection mechanisms.'},
+cards:{
+e:[['Two kinds of mistakes',`<b>Wiggle</b> (random error) happens because a sample is only a part. Asking more kids shrinks it. <b>Tilt</b> (bias) happens when you choose unfairly. Asking more of the wrong kids does <b>not</b> fix a tilt.`,'⚖️'],
+['How many?',`A handy rule: if you want to be within about <b>10 points</b>, ask 100 kids. Within <b>5 points</b>, ask 400. To halve the wiggle you must ask <b>four times</b> as many!`,'🔢'],
+['Ways to pick',`<b>Random</b>: names in a hat. <b>Systematic</b>: every 10th kid in line. <b>Convenience</b>: whoever is nearby (easy but risky). Fair picking makes your guess trustworthy.`,'🎩']],
+a:[['Random error and bias',`<b>Random error</b> falls as n grows. <b>Bias</b> (systematic error) comes from the selection or definition of the sample and does not shrink with n. A <b>representative</b> sample resembles the population on what matters.`,'🎯'],
+['Sample size for a proportion',`The largest possible statistical uncertainty is <b>u \u2248 1/\u221an</b> (at p = 50%). So the sample size needed for uncertainty u is <b>n = 1/u\u00b2</b>. For u = 3% that is 1/0.0009 \u2248 1,112. To halve u, quadruple n.`,'🧮'],
+['Sampling methods',`<b>Simple random</b>: every individual equally likely. <b>Stratified</b>: sample within groups. <b>Cluster</b>: sample whole groups. <b>Systematic</b>: every k-th unit. <b>Quota</b>, <b>purposive</b> and <b>convenience</b> sampling are not random and can be biased.`,'🗂️']],
+s:[['Planning for precision',`For a proportion: u = 1.96\u221a(p(1\u2212p)/n) \u2264 1/\u221an, so n \u2265 1/u\u00b2. For a mean: n = (1.96\u03c3/E)\u00b2 for margin E. Correct for large sampling fractions with the finite-population factor \u221a((N\u2212n)/(N\u22121)). Clustering inflates variance by the design effect.`,'📏'],
+['Bias',`Selection bias (frame errors, self-selection), definition errors and measurement bias are not reduced by increasing n. A sample is representative only in a probabilistic sense: under random selection, estimates are unbiased on average.`,'🧲'],
+['Designs compared',`Stratification can reduce variance when strata are homogeneous and differ from each other; clustering usually increases variance (deff > 1) but cuts cost; systematic sampling behaves like SRS unless the list has periodicity. Quota and purposive designs lack known selection probabilities, so standard errors are not justified.`,'🧱']]},
+qs:{
+e:[mc(`Names pulled from a hat is a\u2026`,[`random sample`,`convenience sample`,`biased sample`,`census`],0,`Everyone has the same chance.`),
+mc(`Asking only kids who happen to stand near you is\u2026`,[`convenient but may be unfair`,`always perfectly fair`,`the same as a hat`,`impossible`],0,`It can tilt the answer.`),
+mc(`To halve the wiggle in a survey you need\u2026`,[`4 times as many kids`,`2 times as many`,`the same number`,`half as many`],0,`Uncertainty goes with 1/\u221an.`)],
+a:[mc(`Dividing people into groups (e.g. by sex) and sampling within each group is\u2026`,[`stratified sampling`,`systematic sampling`,`cluster sampling`,`convenience sampling`],0,`That is stratification.`),
+mc(`Sampling every 10th person on a list is\u2026`,[`systematic sampling`,`stratified sampling`,`quota sampling`,`purposive sampling`],0,`A fixed step through the list.`),
+mc(`Choosing whole schools at random and surveying all their students is\u2026`,[`cluster sampling`,`stratified sampling`,`systematic sampling`,`quota sampling`],0,`The whole group (cluster) is the unit.`),
+mc(`Bias differs from random error because bias\u2026`,[`does not shrink as the sample grows`,`shrinks with n`,`is always small`,`only occurs in experiments`],0,`Systematic errors persist however large n is.`)],
+s:[mc(`Quota sampling differs from stratified random sampling because\u2026`,[`selection within quotas is not random`,`quotas are never used`,`it ignores groups`,`it uses larger samples`],0,`Interviewers choose within quotas, so selection probabilities are unknown.`),
+mc(`Compared with simple random sampling of the same size, cluster sampling usually\u2026`,[`has larger variance (design effect above 1)`,`has smaller variance`,`has no sampling error`,`removes bias`],0,`Members of a cluster resemble each other.`),
+mc(`A sampling frame that omits part of the population causes\u2026`,[`coverage bias`,`a smaller standard error`,`no problem`,`normality`],0,`Omitted units have zero chance of selection.`),
+mc(`Purposive sampling is appropriate when\u2026`,[`you deliberately choose informative cases and do not need statistical generalisation`,`you want exact margins of error`,`n is huge`,`you need unbiased estimates`],0,`It supports insight, not probability-based inference.`)]},
+gen:function(lv){const S=Q.S;
+  if(lv==='e'){const u=S.pick([10,5,20]);const n=Math.round(10000/(u*u));return {q:`You want your survey guess to be within about <b>${u} points</b>. Use the rule <b>n = 1 \u00f7 u\u00b2</b> with u = ${u/100}. How many kids must you ask?`,type:'num',ans:n,tol:0.5,hint:`1 \u00f7 (${u/100} \u00d7 ${u/100})`,why:`1 \u00f7 ${(u/100)**2} = ${n} kids.`};}
+  if(lv==='a'){const u=S.pick([2,3,4,5,6]);const n=Math.ceil(1/((u/100)**2));return {q:`What minimum sample size gives a maximum statistical uncertainty of <b>${u}%</b>? (n = 1/u\u00b2, round up)`,type:'num',ans:n,tol:1.01,hint:`u = ${u/100}; n = 1/${(u/100)**2}`,why:`1/${(u/100)**2} = ${S.f(1/((u/100)**2),1)} \u2192 ${n}.`};}
+  const sg=S.int(6,20),E=S.int(1,4);const n=Math.ceil((1.96*sg/E)**2);return {q:`A quantitative variable has \u03c3 \u2248 ${sg}. What sample size gives a 95% margin of \u00b1${E}? Use n = (1.96\u03c3/E)\u00b2 and round up.`,type:'num',ans:n,tol:1.01,hint:`(1.96 \u00d7 ${sg} / ${E})\u00b2`,why:`(1.96 \u00d7 ${sg} / ${E})\u00b2 = ${S.f((1.96*sg/E)**2,1)} \u2192 ${n}.`};
+}});
+})();
+(function(){
+'use strict';
+const Q=window.Q;
+const mc=(q,o,a,why)=>({q,o,a,why});
+const W=w=>Q.worlds.push(w);
+
+W({id:7,emoji:'🔗',ch:'Book chapter 7',lab:'regress',
+name:{e:'Link Lab',a:'Assessment of Relationship',s:'Linear Regression and Correlation'},
+tag:{e:'Do two things go up together? Draw the best guess line.',a:'Scatter plots, the regression line, r and R\u00b2.',s:'Least squares, inference on the slope, extrapolation and multiple regression.'},
+cards:{
+e:[['Dots that go together',`Plot each kid as a dot: height across, weight up. If the dots climb from left to right, taller kids tend to weigh more. That is a <b>relationship</b>.`,'📈'],
+['The line of best guess',`Draw a straight line that stays as <b>close as possible to all the dots</b>. You can use it to guess the weight of a kid you haven\u2019t met. The smaller the \u201cgaps\u201d between line and dots, the better the line.`,'🧵'],
+['Careful!',`Two things moving together does not mean one <b>causes</b> the other. Ice cream sales and sunburns both rise in summer, but ice cream doesn\u2019t cause sunburn.`,'🍦']],
+a:[['Regression line',`The model is <b>Y = a + b\u00b7X + e</b>: a is the intercept, b the slope, e the random scatter. The line is found by the <b>method of least squares</b>, which minimises the sum of squared vertical distances. The slope b = S\u2093\u1d67 / S\u2093\u2093.`,'📐'],
+['Correlation r and R\u00b2',`<b>r</b> lies between \u22121 and 1. Near +1: strong rising line; near \u22121: strong falling line; near 0: no linear relationship. <b>R\u00b2 = r\u00b2</b> is the share of variation in Y explained by X. If the pattern is curved, a transformation (e.g. logarithm) may help.`,'📊'],
+['Using the line',`Predict Y for an X <i>inside</i> the data range. The slope says how much Y changes on average for one extra unit of X. A strong relationship does not prove cause and effect. <b>Multiple regression</b> uses several X variables at once.`,'🔮']],
+s:[['Least squares',`b = \u03a3(x\u1d62\u2212x\u0304)(y\u1d62\u2212\u0233)/\u03a3(x\u1d62\u2212x\u0304)\u00b2, a = \u0233 \u2212 b\u00b7x\u0304. The residual standard deviation is s = \u221a(SSE/(n\u22122)). Pearson r = S\u2093\u1d67/\u221a(S\u2093\u2093S\u1d67\u1d67); R\u00b2 = r\u00b2 = 1 \u2212 SSE/SST.`,'🧮'],
+['Inference on the slope',`SE(b) = s/\u221aS\u2093\u2093. Test H\u2080: \u03b2 = 0 with t = b/SE(b) on n \u2212 2 df; CI: b \u00b1 t\u2099\u208b\u2082\u00b7SE(b). A significant slope shows association, not causation, and R\u00b2 can be small even when the slope is significant.`,'🔬'],
+['Limits',`Extrapolation beyond the observed X range is unsafe. Outliers and high-leverage points can dominate the fit. Residual plots check linearity and constant variance. Multiple regression adjusts for several predictors; interpretation of each coefficient is conditional on the others.`,'⚠️']]},
+qs:{
+e:[mc(`If dots climb from the bottom left to the top right, the link is\u2026`,[`positive`,`negative`,`none`,`impossible`],0,`Both numbers rise together.`),
+mc(`A line of best fit tries to\u2026`,[`stay as close as possible to all the dots`,`go through the first dot`,`cut the picture in half`,`be as steep as possible`],0,`Small gaps mean a better line.`),
+mc(`Ice cream sales and sunburns rise together. Does ice cream cause sunburn?`,[`No, both rise in summer`,`Yes`,`Only on Mondays`,`Nobody knows`],0,`Moving together doesn\u2019t prove cause.`)],
+a:[mc(`r = \u22120.9 means\u2026`,[`a strong falling linear relationship`,`no relationship`,`a weak rising relationship`,`90% explained`],0,`Close to \u22121 means the points hug a downward line.`),
+mc(`R\u00b2 = 0.64 means\u2026`,[`64% of the variation in Y is explained by X`,`64% of dots are on the line`,`r = 0.64`,`the slope is 0.64`],0,`R\u00b2 is the share of variation explained.`),
+mc(`A slope of 0.8 kg per cm means\u2026`,[`each extra cm of height goes with 0.8 kg more weight on average`,`everyone weighs 0.8 kg`,`weight causes height`,`R\u00b2 = 0.8`],0,`Slope = change in Y per unit change in X.`)],
+s:[mc(`Extrapolating a regression line far outside the data range is risky because\u2026`,[`the linear relationship may not hold there`,`r becomes zero`,`the slope changes sign`,`n changes`],0,`The model is only supported by the observed range.`),
+mc(`Least squares chooses the line that minimises\u2026`,[`the sum of squared residuals`,`the sum of residuals`,`the largest residual`,`the number of points off the line`],0,`Squared vertical distances.`),
+mc(`A significant slope (p &lt; 0.05) shows\u2026`,[`evidence of association, not proof of causation`,`proof of causation`,`R\u00b2 is large`,`a curved relationship`],0,`Observational association is not causation.`),
+mc(`In multiple regression the coefficient of one predictor is interpreted\u2026`,[`holding the other predictors fixed`,`ignoring other predictors`,`as the correlation`,`as the intercept`],0,`Coefficients are conditional on the others.`)]},
+gen:function(lv){const S=Q.S;
+  if(lv==='e'){const b=S.pick([0.5,0.6,0.8]),a=S.pick([-30,-40,-20]),x=S.pick([140,150,160,170]);const y=a+b*x;return {q:`A line of best guess says <b>weight = ${a} + ${b} \u00d7 height</b>. What weight does it guess for a kid who is ${x} cm tall?`,type:'num',ans:y,tol:0.1,unit:'kg',hint:`Multiply ${b} by ${x}, then add ${a}.`,why:`${a} + ${b} \u00d7 ${x} = ${S.f(y,1)} kg.`};}
+  if(lv==='a'){const t=S.pick(['slope','r2']);
+    if(t==='slope'){const x=[1,2,3,4,5];const y=x.map(v=>S.int(2,14));const o=S.ols(x,y);return {q:`Find the least-squares <b>slope</b> b = S\u2093\u1d67 / S\u2093\u2093 for these points (x = 1, 2, 3, 4, 5). y values:`,data:y.join(',  '),type:'num',ans:o.b,tol:0.02,hint:`With x = 1..5: x\u0304 = 3 and S\u2093\u2093 = 10. S\u2093\u1d67 = \u03a3(x \u2212 3)(y \u2212 \u0233).`,why:`\u0233 = ${S.f(o.my,2)}; S\u2093\u1d67 = ${S.f(o.b*10,2)}; b = ${S.f(o.b*10,2)} / 10 = ${S.f(o.b,2)}.`};}
+    const r=S.pick([0.5,0.6,0.7,0.8,0.9,-0.6,-0.8]);return {q:`The correlation is r = ${r}. What is R\u00b2 as a percent?`,type:'num',ans:100*r*r,tol:0.2,unit:'%',hint:`Square r.`,why:`${r}\u00b2 = ${S.f(r*r,2)} \u2192 ${S.f(100*r*r,0)}%.`};}
+  const t=S.pick(['t','df','pred']);
+  if(t==='t'){const b=S.pick([0.4,0.6,0.8,1.2]),se=S.pick([0.1,0.2,0.3,0.4]);return {q:`A regression slope is b = ${b} with standard error ${se}. Compute the t statistic.`,type:'num',ans:b/se,tol:0.02,hint:`t = b / SE(b)`,why:`${b} / ${se} = ${S.f(b/se,2)}.`};}
+  if(t==='df'){const n=S.int(8,40);return {q:`A simple linear regression uses n = ${n} points. How many degrees of freedom does the t test for the slope have?`,type:'num',ans:n-2,tol:0.01,hint:`Two parameters (a and b) are estimated.`,why:`n \u2212 2 = ${n-2}.`};}
+  const a=S.int(-60,-20),b=S.pick([0.5,0.7,0.9]),x=S.pick([145,155,165]);return {q:`Fitted line: \u0177 = ${a} + ${b}x. Predict y at x = ${x}.`,type:'num',ans:a+b*x,tol:0.1,hint:`Substitute x.`,why:`${a} + ${b}\u00d7${x} = ${S.f(a+b*x,1)}.`};
+}});
+
+W({id:8,emoji:'⚔️',ch:'Book chapter 8',lab:'duel',
+name:{e:'Duel Arena',a:'Comparing Two Groups',s:'Paired and Two-Sample t Tests'},
+tag:{e:'Which team is really faster?',a:'Paired and two-group comparisons with the t test.',s:'Welch, pooled and paired tests, variance tests and planning.'},
+cards:{
+e:[['Gap and wiggle',`Team A\u2019s average race time is 31 seconds and Team B\u2019s is 34. Is B really slower? Compare the <b>gap</b> (3 seconds) with the <b>wiggle</b> (how much times bounce around). A gap much bigger than the wiggle is probably real.`,'🏃'],
+['Same kids, twice',`Test the same kids <b>before</b> and <b>after</b> practice. Look at each kid\u2019s change. Because each kid is compared with themselves, it is a fair test.`,'🔁'],
+['More is better',`With only a few runners the wiggle is big. With more runners the wiggle shrinks, so smaller gaps become believable.`,'👥']],
+a:[['Paired t-test',`For <b>matched pairs</b> (the same subjects twice) take the difference d for each pair. With mean d\u0304 and standard deviation s_d: <b>t = d\u0304 / (s_d/\u221an)</b>, degrees of freedom n \u2212 1.`,'🔁'],
+['Two groups',`The difference of two means has <b>SE = \u221a(s\u2081\u00b2/n\u2081 + s\u2082\u00b2/n\u2082)</b>. Then <b>t = (x\u0304\u2081 \u2212 x\u0304\u2082)/SE</b>. A small p-value (below 5%) suggests a real difference. A 95% confidence interval for the difference that includes 0 means no clear difference.`,'⚔️'],
+['Planning',`Bigger groups and smaller spread make real differences easier to detect. Decide the size of the experiment in advance. Check the normality assumption and consider an F-test for equal variances.`,'📐']],
+s:[['Paired design',`Pairing removes between-subject variability: d\u1d62 = y\u1d62 \u2212 x\u1d62, t = d\u0304/(s_d/\u221an) with n \u2212 1 df. When pairs are positively correlated the paired test is more powerful than the independent-samples test, because Var(d) = \u03c3\u2081\u00b2 + \u03c3\u2082\u00b2 \u2212 2\u03c1\u03c3\u2081\u03c3\u2082.`,'🔁'],
+['Two independent samples',`Welch: t = (x\u0304\u2081\u2212x\u0304\u2082)/\u221a(s\u2081\u00b2/n\u2081+s\u2082\u00b2/n\u2082) with Satterthwaite df. The pooled test assumes \u03c3\u2081 = \u03c3\u2082, checked with an F-test on s\u2081\u00b2/s\u2082\u00b2; Welch is a safe default. A 95% CI is (x\u0304\u2081\u2212x\u0304\u2082) \u00b1 t\u00b7SE.`,'⚔️'],
+['Planning and interpretation',`Required n per group grows with \u03c3\u00b2 and with 1/\u03b4\u00b2 for detectable difference \u03b4. A non-significant result is not evidence of no effect; look at the interval. Always report effect size, interval and assumptions.`,'🧭']]},
+qs:{
+e:[mc(`To decide if a gap between two teams is real, compare it with\u2026`,[`the wiggle (how much times bounce around)`,`the biggest number`,`the colour of the shirts`,`nothing`],0,`A gap is meaningful only compared with natural variation.`),
+mc(`More runners per team makes the wiggle in the average\u2026`,[`smaller`,`bigger`,`the same`,`impossible to measure`],0,`Averages of more values are steadier.`),
+mc(`Testing the same kids before and after practice is called\u2026`,[`a paired comparison`,`a pie chart`,`a mode`,`guessing`],0,`Each kid is compared with themselves.`)],
+a:[mc(`A paired t-test is used when\u2026`,[`the same subjects are measured twice or matched in pairs`,`the groups are unrelated`,`there is only one group`,`data are categories`],0,`Differences within pairs are analysed.`),
+mc(`A p-value of 0.20 when comparing two means suggests\u2026`,[`the difference could easily be due to chance`,`a definite difference`,`a calculation error`,`a perfect match`],0,`0.20 is well above 0.05.`),
+mc(`A 95% confidence interval for a difference that contains 0 means\u2026`,[`we cannot conclude a difference at the 5% level`,`the difference is exactly 0`,`the groups are equal`,`the test is wrong`],0,`0 is a plausible value for the true difference.`)],
+s:[mc(`Why does pairing often increase power?`,[`it removes between-subject variation from the comparison`,`it increases n`,`it changes the mean`,`it assumes equal variances`],0,`Var(d) shrinks when pairs are positively correlated.`),
+mc(`Prefer Welch\u2019s t-test to the pooled test when\u2026`,[`group variances may differ`,`n is tiny`,`the data are paired`,`data are qualitative`],0,`Welch does not assume equal variances.`),
+mc(`A test for equal variances in two groups uses\u2026`,[`an F ratio of the two variances`,`a z-score of the means`,`a chi-squared table of means`,`a paired difference`],0,`F = s\u2081\u00b2/s\u2082\u00b2 under equal variances.`),
+mc(`The sample size needed per group rises when\u2026`,[`\u03c3 is larger or the difference to detect is smaller`,`\u03c3 is smaller`,`the difference is larger`,`n is fixed`],0,`Both make the signal harder to detect.`)]},
+gen:function(lv){const S=Q.S;
+  if(lv==='e'){const A=Array.from({length:4},()=>S.int(25,40)),B=Array.from({length:4},()=>S.int(28,45));const d=S.mean(B)-S.mean(A);return {q:`Team A times (seconds): ${A.join(', ')}. Team B times: ${B.join(', ')}. How much bigger is Team B\u2019s <b>average</b> than Team A\u2019s? (negative if smaller)`,type:'num',ans:d,tol:0.05,unit:'s',hint:`Find each team\u2019s average first.`,why:`A average = ${S.f(S.mean(A),2)}, B average = ${S.f(S.mean(B),2)}; B \u2212 A = ${S.f(d,2)}.`};}
+  if(lv==='a'){const t=S.pick(['dbar','se']);
+    if(t==='dbar'){const d=Array.from({length:5},()=>S.int(-2,9));return {q:`Five subjects were measured before and after training; the differences (after \u2212 before) are shown. Compute the mean difference d\u0304.`,data:d.join(',  '),type:'num',ans:S.mean(d),tol:0.01,hint:`Add them and divide by 5.`,why:`${S.sum(d)} \u00f7 5 = ${S.f(S.mean(d),2)}.`};}
+    const s1=S.int(3,9),s2=S.int(3,9),n1=S.pick([9,16,25]),n2=S.pick([9,16,25]);const se=Math.sqrt(s1*s1/n1+s2*s2/n2);return {q:`Group 1: s = ${s1}, n = ${n1}. Group 2: s = ${s2}, n = ${n2}. Compute the standard error of the difference of means, \u221a(s\u2081\u00b2/n\u2081 + s\u2082\u00b2/n\u2082).`,type:'num',ans:se,tol:0.02,hint:`Compute each s\u00b2/n separately, add, then take the square root.`,why:`${S.f(s1*s1/n1,3)} + ${S.f(s2*s2/n2,3)} = ${S.f(s1*s1/n1+s2*s2/n2,3)}; \u221a = ${S.f(se,2)}.`};}
+  const t=S.pick(['pt','t2']);
+  if(t==='pt'){const d=Array.from({length:6},()=>S.int(0,10));const t0=S.mean(d)/(S.sd(d)/Math.sqrt(6));return {q:`Paired differences (n = 6) are shown. Compute the paired t statistic t = d\u0304/(s_d/\u221an).`,data:d.join(',  '),type:'num',ans:t0,tol:0.03,hint:`Find d\u0304 and s_d (divide by n \u2212 1).`,why:`d\u0304 = ${S.f(S.mean(d),2)}, s_d = ${S.f(S.sd(d),2)}; t = ${S.f(t0,2)} on 5 df.`};}
+  const m1=S.int(20,40),m2=m1+S.int(1,8),s1=S.int(3,9),s2=S.int(3,9),n1=S.pick([9,16,25]),n2=S.pick([9,16,25]);const se=Math.sqrt(s1*s1/n1+s2*s2/n2);const t0=(m2-m1)/se;return {q:`Group 1: mean ${m1}, s = ${s1}, n = ${n1}. Group 2: mean ${m2}, s = ${s2}, n = ${n2}. Compute the two-sample t statistic (x\u0304\u2082 \u2212 x\u0304\u2081)/SE with SE = \u221a(s\u2081\u00b2/n\u2081 + s\u2082\u00b2/n\u2082).`,type:'num',ans:t0,tol:0.03,hint:`SE first, then divide the difference of means.`,why:`SE = ${S.f(se,3)}; t = ${m2-m1} / ${S.f(se,3)} = ${S.f(t0,2)}.`};
+}});
+})();
+(function(){
+'use strict';
+const Q=window.Q,S=window.S,el=Q.el;
+const KEY='statsquest_v1';
+const LV={
+ e:{key:'e',name:'Explorer',age:'ages 9 to 12',emoji:'🧭',hearts:5,blurb:'Pictures, stories and gentle puzzles. No formulas needed.',ranks:['Cadet','Detective','Chart Ranger','Number Ninja','Data Hero','Stats Wizard'],big:'🧭'},
+ a:{key:'a',name:'Analyst',age:'senior high',emoji:'📊',hearts:4,blurb:'Real formulas, real data, and calculations you can check.',ranks:['Intern','Junior Analyst','Analyst','Senior Analyst','Lead Analyst','Chief Data Officer'],big:'📊'},
+ s:{key:'s',name:'Scholar',age:'university',emoji:'🎓',hearts:3,blurb:'Assumptions, distributions and inference, with the details.',ranks:['Student','Researcher','Methodologist','Associate','Professor','Fellow'],big:'🎓'}
+};
+const XP_PER=140;
+const BADGES=[
+ {id:'first',e:'🚀',n:'First Quest'},{id:'perfect',e:'💯',n:'Perfect Run'},{id:'fire',e:'🔥',n:'On Fire (6 in a row)'},{id:'nohurt',e:'🛡️',n:'Untouched'},
+ {id:'lab',e:'🧪',n:'Lab Rat (3 labs)'},{id:'half',e:'🌗',n:'Halfway (4 worlds)'},{id:'all',e:'🏆',n:'All worlds mastered'},{id:'boss',e:'🐉',n:'Boss Slayer'},{id:'streak',e:'📅',n:'3-day streak'}
+];
+const state=Q.state={name:'',avatar:'🦊',lv:null,p:{e:null,a:null,s:null}};
+try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);if(o)Object.assign(state,o);}}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}};
+function P(lv){lv=lv||state.lv;if(!state.p[lv])state.p[lv]={xp:0,w:{},badges:[],labs:{},boss:0,streak:{last:'',n:0},best:0};return state.p[lv];}
+const app=document.getElementById('app');
+const lvl=()=>LV[state.lv];
+function rank(p){const i=Math.min(LV[state.lv].ranks.length-1,Math.floor(p.xp/XP_PER));return {i,name:LV[state.lv].ranks[i],into:p.xp-i*XP_PER,need:XP_PER};}
+function award(id){const p=P();if(!p.badges.includes(id)){p.badges.push(id);const b=BADGES.find(x=>x.id===id);Q.toast('Badge unlocked: '+b.e+' '+b.n);save();}}
+function addXP(n){const p=P();const before=rank(p).i;p.xp+=n;const after=rank(p).i;save();if(after>before){Q.confetti();Q.toast('Rank up! You are now a '+LV[state.lv].ranks[after]);}}
+function today(){return new Date().toISOString().slice(0,10);}
+function touchStreak(){const p=P();const t=today();if(p.streak.last===t)return;const y=new Date(Date.now()-864e5).toISOString().slice(0,10);p.streak.n=p.streak.last===y?p.streak.n+1:1;p.streak.last=t;if(p.streak.n>=3)award('streak');save();}
+
+/* ---------- screens ---------- */
+function topbar(){
+  const t=el('div',{class:'top'},el('button',{class:'brand',onclick:()=>go('home')},el('span',null,'🎲'),el('span',{class:'t'},'Stats Quest')));
+  if(state.lv){const p=P(),r=rank(p);const i=el('i');i.style.width=Math.round(100*r.into/r.need)+'%';
+    t.append(el('div',{class:'who'},el('span',{class:'chip'},state.avatar+' '+(state.name||'Player')),el('span',{class:'chip'},LV[state.lv].emoji+' '+r.name),el('div',{class:'xpbar',role:'img','aria-label':r.into+' of '+r.need+' XP to next rank'},i),el('span',{class:'chip'},'⭐ '+p.xp+' XP'),p.streak.n>1?el('span',{class:'chip'},'🔥 '+p.streak.n+' days'):null));}
+  return t;
+}
+function shell(content){app.innerHTML='';document.documentElement.removeAttribute('data-lv');if(state.lv)app.setAttribute('data-lv',state.lv);else app.removeAttribute('data-lv');document.body.setAttribute('data-lv',state.lv||'');if(state.lv)document.documentElement.setAttribute('data-lv',state.lv);app.append(topbar(),content);window.scrollTo(0,0);}
+let view={v:'home'};
+function go(v,a,b){view={v,a,b};
+  if(v==='home')shell(home());else if(v==='map')shell(map());else if(v==='world')shell(world(a,b));else if(v==='boss')shell(boss());else if(v==='me')shell(me());}
+Q.go=go;
+
+function home(){
+  const w=el('div');
+  const nm=el('input',{class:'ans',style:'width:14em',placeholder:'Your name',value:state.name||'','aria-label':'Your name'});
+  nm.addEventListener('input',()=>{state.name=nm.value;save();});
+  const av=el('div',{class:'row'},['🦊','🐼','🦉','🐙','🦄','🚀','🐲','🌟'].map(a=>el('button',{class:'btn sm alt'+(state.avatar===a?' on':''),'aria-label':'Avatar '+a,onclick:ev=>{state.avatar=a;save();go('home');}},a)));
+  w.append(el('div',{class:'card'},el('h1',null,'Stats Quest'),
+    el('p',null,'A game of data in 8 worlds, one for each chapter of Birger Madsen\u2019s ',el('i',null,'Statistics for Non-Statisticians'),'. Learn, play with live labs, beat quests, earn XP and badges, then face the Boss Arena.'),
+    el('p',null,'Choose your name and avatar, then pick the level that fits you. You can switch levels at any time; each keeps its own progress.'),
+    el('div',{class:'row'},nm),av));
+  w.append(el('div',{class:'levels'},Object.keys(LV).map(k=>{const l=LV[k];const p=state.p[k];const done=p?Object.values(p.w).filter(x=>x.done).length:0;
+    return el('button',{class:'lvcard '+k,onclick:()=>{state.lv=k;P();save();touchStreak();go('map');}},el('div',{class:'big'},l.big),el('h3',null,l.name),el('div',{style:'font-size:.85rem;opacity:.75'},l.age),el('p',{style:'margin:.5em 0 0'},l.blurb),el('p',{style:'margin:.4em 0 0;font-weight:700'},p?('Worlds mastered: '+done+' / 8 · '+p.xp+' XP'):'Start here'));})));
+  w.append(el('div',{class:'foot'},'Based on the structure of the book. All examples, data and questions here are original and generated fresh each play.'));
+  return w;
+}
+function mastered(p){return Object.values(p.w).filter(x=>x.done).length;}
+function map(){
+  const p=P(),L=lvl(),w=el('div');
+  const next=Q.worlds.find(x=>!(p.w[x.id]&&p.w[x.id].done));
+  w.append(el('div',{class:'row'},el('h2',{style:'margin:0'},L.name+' map'),el('span',{style:'flex:1'}),el('button',{class:'btn sm alt',onclick:()=>go('me')},'Profile and badges'),el('button',{class:'btn sm alt',onclick:()=>{state.lv=null;save();go('home');}},'Switch level')));
+  w.append(el('div',{class:'map'},Q.worlds.map(x=>{const st=p.w[x.id]||{};const stars=st.stars||0;
+    return el('button',{class:'world'+(next&&next.id===x.id?' next':''),onclick:()=>go('world',x.id,'learn')},el('span',{class:'em'},x.emoji),el('span',{class:'nm'},x.name[state.lv]),el('span',{class:'ch'},x.ch),el('span',{style:'font-size:.82rem;color:var(--muted)'},x.tag[state.lv]),el('span',{class:'st'},st.done?'⭐'.repeat(stars)+'☆'.repeat(3-stars):'☆☆☆'));}),
+    (()=>{const open=mastered(p)>=3;return el('button',{class:'world'+(open?'':' lock'),onclick:()=>{if(open)go('boss');else Q.toast('Master 3 worlds to unlock the Boss Arena');}},el('span',{class:'em'},'🐉'),el('span',{class:'nm'},'Boss Arena'),el('span',{class:'ch'},open?'Unlocked':'Master 3 worlds to unlock'),el('span',{style:'font-size:.82rem;color:var(--muted)'},'Mixed questions from every world you have mastered.'),el('span',{class:'st'},p.boss?'Best: '+p.boss+'%':''));})()));
+  w.append(el('div',{class:'foot'},'Master a world by scoring 70% or more on its quest.'));
+  return w;
+}
+function me(){
+  const p=P(),w=el('div'),r=rank(p);
+  w.append(el('div',{class:'row'},el('button',{class:'btn sm alt',onclick:()=>go('map')},'\u2190 Map')),el('div',{class:'card'},el('h2',null,state.avatar+' '+(state.name||'Player')+' · '+LV[state.lv].name),
+    Q.kpis([[p.xp,'total XP'],[r.name,'rank'],[mastered(p)+' / 8','worlds mastered'],[p.boss?p.boss+'%':'–','best Boss score'],[p.streak.n+' days','current streak']]),
+    el('h3',null,'Badges'),el('div',{class:'badges'},BADGES.map(b=>el('div',{class:'bdg'+(p.badges.includes(b.id)?' got':'')},el('div',{class:'i'},b.e),b.n)))));
+  w.append(el('div',{class:'row'},el('button',{class:'btn sm alt',onclick:()=>{if(confirm('Erase progress for this level?')){state.p[state.lv]=null;P();save();go('me');}}},'Reset this level')));
+  return w;
+}
+
+/* ---------- world ---------- */
+function world(id,tab){
+  const wd=Q.worlds.find(x=>x.id===id),p=P(),lv=state.lv,w=el('div');
+  const rec=p.w[id]||(p.w[id]={});
+  w.append(el('div',{class:'row'},el('button',{class:'btn sm alt',onclick:()=>go('map')},'\u2190 Map'),el('span',{class:'chip'},wd.ch)),el('h1',null,wd.emoji+' '+wd.name[lv]));
+  const tabs=el('div',{class:'tabs'}),body=el('div');
+  [['learn','1 Learn'],['play','2 Play'],['quest','3 Quest']].forEach(t=>{const b=el('button',{class:'tab'+(tab===t[0]?' on':''),onclick:()=>go('world',id,t[0])},t[1]);tabs.append(b);});
+  w.append(tabs,body);
+  if(tab==='learn')learn(wd,body,rec,id);
+  if(tab==='play')play(wd,body,rec,id);
+  if(tab==='quest')quest(wd,body,rec,id);
+  return w;
+}
+function learn(wd,body,rec,id){
+  const cards=wd.cards[state.lv];let i=0;const card=el('div',{class:'card'});body.append(card);
+  function show(){card.innerHTML='';const c=cards[i];
+    card.append(el('div',{class:'learn'},el('div',{class:'ic','aria-hidden':'true'},c[2]||wd.emoji),el('div',null,i===0?el('span',{class:'tag'},'From the book: '+wd.ch):null,el('h3',null,c[0]),el('p',{html:c[1]}))),
+      el('div',{class:'dots'},cards.map((_,k)=>el('i',{class:k===i?'on':''}))),
+      el('div',{class:'row',style:'justify-content:space-between'},el('button',{class:'btn alt sm',disabled:i===0,onclick:()=>{i--;show();}},'\u2190 Back'),
+        el('button',{class:'btn'+(i===cards.length-1?' g2':''),onclick:()=>{if(i<cards.length-1){i++;show();}else{if(!rec.learned){rec.learned=true;addXP(10);}save();go('world',id,'play');}}},i===cards.length-1?'To the lab \u2192':'Next \u2192')));}
+  show();
+}
+function play(wd,body,rec,id){
+  const p=P();let touches=0;
+  const api={touch:()=>{touches++;if(touches===4&&!(p.labs[id])){p.labs[id]=true;addXP(15);Q.toast('Lab bonus: +15 XP');if(Object.keys(p.labs).length>=3)award('lab');save();}}};
+  const c=el('div',{class:'card'});body.append(c);
+  try{Q.labs[wd.lab](c,state.lv,api);}catch(e){c.append(el('p',null,'Lab error: '+e.message));console.error(e);}
+  body.append(el('div',{class:'row'},el('button',{class:'btn',onclick:()=>go('world',id,'quest')},'Start the quest \u2192')));
+}
+function build(wd,lv,n){
+  const out=[];const stat=(wd.qs[lv]||[]).map(q=>({q:q.q,type:'mcq',o:q.o,a:q.a,why:q.why}));
+  const pool=S.shuffle(stat);const useGen=wd.gen?Math.ceil(n/2):0;
+  for(let i=0;i<useGen;i++){try{const g=wd.gen(lv);if(g)out.push(g);}catch(e){console.error(e);}}
+  while(out.length<n&&pool.length)out.push(pool.pop());
+  while(out.length<n&&wd.gen){try{out.push(wd.gen(lv));}catch(e){break;}}
+  return S.shuffle(out).slice(0,n);
+}
+function runner(qs,opts,done){
+  const L=lvl();let hearts=opts.hearts,idx=0,score=0,streak=0,bestStreak=0,lost=0,xp=0;
+  const box=el('div',{class:'card'});
+  function hud(){return el('div',{class:'hud'},el('span',{class:'chip'},'Question '+(idx+1)+' / '+qs.length),el('span',{class:'hearts','aria-label':hearts+' hearts'},'❤️'.repeat(hearts)+'🖤'.repeat(Math.max(0,opts.hearts-hearts))),streak>1?el('span',{class:'chip'},'🔥 '+streak+' in a row'):null,el('span',{class:'chip'},'+'+xp+' XP'));}
+  function finish(win){const pct=Math.round(100*score/qs.length);done({score,pct,win,bestStreak,lost,xp,total:qs.length});}
+  function ask(){
+    if(idx>=qs.length||hearts<=0){finish(hearts>0);return;}
+    const q=qs[idx];box.innerHTML='';box.append(hud(),el('div',{class:'qtext',html:q.q}));
+    if(q.data)box.append(el('div',{class:'data'},q.data));
+    const fb=el('div',{class:'fb',role:'status','aria-live':'polite'});let answered=false,hintUsed=false;
+    const nextBtn=el('button',{class:'btn',style:'display:none',onclick:()=>{idx++;ask();}},idx===qs.length-1?'Finish \u2192':'Next \u2192');
+    const why=el('div',{class:'why',style:'display:none'});
+    function result(ok,detail){if(answered)return;answered=true;
+      if(ok){score++;streak++;bestStreak=Math.max(bestStreak,streak);const g=10+Math.min(streak-1,5)*2-(hintUsed?2:0);xp+=g;fb.className='fb good';fb.textContent='Correct! +'+g+' XP';if(streak===6)award('fire');}
+      else{streak=0;hearts--;lost++;fb.className='fb bad';fb.textContent='Not quite. You lost a heart.';box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');}
+      why.style.display='';why.innerHTML=(detail||'')+(q.why?'<br>'+q.why:'');nextBtn.style.display='';nextBtn.focus();const h=box.querySelector('.hearts');if(h){h.textContent='❤️'.repeat(hearts)+'🖤'.repeat(Math.max(0,opts.hearts-hearts));}
+      if(hearts<=0){nextBtn.textContent='See result \u2192';}}
+    if(q.type==='mcq'){const order=S.shuffle(q.o.map((t,i)=>({t,i})));box.append(el('div',{class:'opts'},order.map(o=>el('button',{class:'opt',onclick:ev=>{if(answered)return;const ok=o.i===q.a;ev.currentTarget.classList.add(ok?'right':'wrong');if(!ok)box.querySelectorAll('.opt').forEach((b,k)=>{if(order[k].i===q.a)b.classList.add('right');});result(ok);}},o.t))));}
+    else{const inp=el('input',{class:'ans',type:'number',step:'any',placeholder:q.unit?('answer in '+q.unit):'your answer','aria-label':'Your answer'});
+      const go2=()=>{if(inp.value===''||answered)return;const v=+inp.value;const ok=Math.abs(v-q.ans)<=q.tol;result(ok,ok?'':'The answer was <b>'+S.f(q.ans,Math.abs(q.ans)<10?3:2)+(q.unit?' '+q.unit:'')+'</b>.');};
+      inp.addEventListener('keydown',e=>{if(e.key==='Enter')go2();});
+      const hb=q.hint?el('button',{class:'btn sm alt',onclick:()=>{if(hintUsed||answered)return;hintUsed=true;hintBox.style.display='';hintBox.textContent='Hint: '+q.hint;hb.disabled=true;}},'Hint (\u22122 XP)'):null;
+      const hintBox=el('div',{class:'why',style:'display:none'});
+      box.append(el('div',{class:'row'},inp,el('button',{class:'btn',onclick:go2},'Check'),hb),hintBox);}
+    box.append(fb,why,nextBtn);
+  }
+  ask();return box;
+}
+function quest(wd,body,rec,id){
+  const p=P(),L=lvl();
+  const intro=el('div',{class:'card'},el('h3',null,'Quest: '+wd.name[state.lv]),el('p',null,'6 questions. You start with '+L.hearts+' hearts. Each correct answer earns XP and streaks earn a bonus. Score 70% or more to master this world.'),el('button',{class:'btn',onclick:start},'Begin quest'));
+  body.append(intro);
+  function start(){
+    body.innerHTML='';const qs=build(wd,state.lv,6);
+    body.append(runner(qs,{hearts:L.hearts},r=>{
+      body.innerHTML='';
+      if(!p.firstQuest){p.firstQuest=true;award('first');}
+      const stars=r.pct>=90?3:r.pct>=70?2:r.pct>=50?1:0;
+      addXP(r.xp+(r.pct>=70?30:0));
+      const was=!!rec.done;
+      if(r.pct>=70){rec.done=true;rec.stars=Math.max(rec.stars||0,stars);Q.confetti();}
+      if(r.pct===100)award('perfect');if(r.lost===0&&r.pct===100)award('nohurt');
+      if(mastered(p)>=4)award('half');if(mastered(p)>=8)award('all');
+      save();
+      const win=r.pct>=70;
+      body.append(el('div',{class:'card win'},win?el('div',{class:'badge'},wd.emoji):el('div',{style:'font-size:3rem'},'💪'),el('h2',null,win?'World mastered!':'Good try. Let\u2019s go again.'),
+        win?el('div',{class:'stars'},'⭐'.repeat(stars)+'☆'.repeat(3-stars)):null,
+        el('p',null,r.score+' of '+r.total+' correct ('+r.pct+'%). You earned '+(r.xp+(win?30:0))+' XP'+(win?' (includes a 30 XP mastery bonus)':'')+'.'),
+        el('div',{class:'row',style:'justify-content:center'},el('button',{class:'btn alt',onclick:()=>go('world',id,'learn')},'Review lessons'),el('button',{class:'btn g2',onclick:()=>go('world',id,'quest')},'Play again'),el('button',{class:'btn',onclick:()=>go('map')},'Back to map'))));
+    }));
+  }
+}
+function boss(){
+  const p=P(),L=lvl(),w=el('div');
+  const ids=Q.worlds.filter(x=>p.w[x.id]&&p.w[x.id].done);
+  w.append(el('div',{class:'row'},el('button',{class:'btn sm alt',onclick:()=>go('map')},'\u2190 Map')),el('h1',null,'🐉 Boss Arena'));
+  const card=el('div',{class:'card'},el('p',null,'The Data Dragon asks 8 mixed questions from the worlds you have mastered. You have '+(L.hearts-1)+' hearts. Defeat it with 75% or more.'),el('button',{class:'btn g3',onclick:start},'Fight!'));
+  w.append(card);
+  function start(){
+    const qs=[];for(let i=0;i<8;i++){const wd=S.pick(ids);const q=build(wd,state.lv,1)[0];if(q)qs.push(q);}
+    const holder=el('div');w.append(holder);card.remove();
+    holder.append(runner(qs,{hearts:Math.max(2,L.hearts-1)},r=>{holder.innerHTML='';const win=r.pct>=75&&r.win;addXP(r.xp+(win?60:0));
+      if(r.pct>p.boss){p.boss=r.pct;}if(win){award('boss');Q.confetti();}save();
+      holder.append(el('div',{class:'card win'},el('div',{style:'font-size:4rem'},win?'🏆':'🐉'),el('h2',null,win?'You defeated the Data Dragon!':'The dragon survives\u2026 this time.'),el('p',null,r.score+' of 8 correct ('+r.pct+'%). +'+(r.xp+(win?60:0))+' XP.'),el('div',{class:'row',style:'justify-content:center'},el('button',{class:'btn',onclick:()=>go('boss')},'Fight again'),el('button',{class:'btn alt',onclick:()=>go('map')},'Back to map'))));}));
+  }
+  return w;
+}
+Q._build=build;
+Q.start=()=>go("home");
+})();
+window.Q.start();
+</script>
+</body>
+</html>
