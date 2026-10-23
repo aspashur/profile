@@ -822,9 +822,9 @@ applyTheme();
    Until a URL is set, the game works exactly as before and sends nothing. */
 const SHEET_ENDPOINT='https://script.google.com/macros/s/AKfycbzs0uauZyv_640Toro9UYEG_S7U-FZ_9AxDFoW2CIVHvRyC3I2j7Fx8e1LJrKFp6Dhf/exec';
 function logToSheet(event){if(!SHEET_ENDPOINT||!state.email)return;
-  try{const prog=state.p[state.lv],done=prog?Object.values(prog.w).filter(x=>x.done).length:0,t=(state.t&&state.t[state.lv])||{};
-    const body=JSON.stringify({event:event,email:state.email||'',name:state.name||'',avatar:state.avatar||'',level:state.lv?LV[state.lv].name:'',worlds:done,ms:(t.finish&&t.start)?t.finish-t.start:'',ts:new Date().toISOString()});
-    fetch(SHEET_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:body});
+  try{const d={event:event,email:state.email||'',name:state.name||'',avatar:state.avatar||'',ts:new Date().toISOString()};
+    ['e','a','s'].forEach(lv=>{const prog=state.p[lv];const t=(state.t&&state.t[lv])||{};const done=prog?Object.values(prog.w).filter(x=>x.done).length:0;d[lv+'_worlds']=done;d[lv+'_ms']=(t.finish&&t.start)?(t.finish-t.start):'';d[lv+'_fin']=t.finish?1:0;});
+    fetch(SHEET_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(d)});
   }catch(e){}}
 function P(lv){lv=lv||state.lv;if(!state.p[lv])state.p[lv]={xp:0,w:{},badges:[],labs:{},boss:0,streak:{last:'',n:0},best:0};return state.p[lv];}
 /* ---------- per-user profiles, timing, league ---------- */
@@ -872,37 +872,57 @@ function go(v,a,b){view={v,a,b};
   if(v==='home')shell(home());else if(v==='map')shell(map());else if(v==='world')shell(world(a,b));else if(v==='boss')shell(boss());else if(v==='me')shell(me());else if(v==='league')shell(league());}
 Q.go=go;
 
-function leaguePlayers(){
-  const arr=[];
-  for(const key in DB.players){const pl=DB.players[key];if(!pl||!pl.p)continue;
-    const cells={};let active=false,fin=0,best=null;
-    for(const lv of ['e','a','s']){const prog=pl.p[lv];const t=(pl.t&&pl.t[lv])||{};const done=prog?Object.values(prog.w).filter(x=>x.done).length:0;const ms=(t.finish&&t.start)?t.finish-t.start:null;cells[lv]={done,ms,finished:!!t.finish,started:!!t.start};if(done>0||t.start)active=true;if(t.finish){fin++;if(best==null||ms<best)best=ms;}}
-    if(!active)continue;
-    arr.push({key,me:key===DB.current,name:pl.name||(pl.email?pl.email.split('@')[0]:'Player'),avatar:pl.avatar||'🙂',cells,fin,best});}
-  arr.sort((a,b)=>{if(b.fin!==a.fin)return b.fin-a.fin;if(a.best!=null&&b.best!=null)return a.best-b.best;if(a.best!=null)return -1;if(b.best!=null)return 1;return 0;});
-  return arr;
+function cellsFromLocal(pl){const cells={};for(const lv of ['e','a','s']){const prog=pl.p&&pl.p[lv];const t=(pl.t&&pl.t[lv])||{};const done=prog?Object.values(prog.w).filter(x=>x.done).length:0;const ms=(t.finish&&t.start)?t.finish-t.start:null;cells[lv]={done,ms,finished:!!t.finish,started:!!t.start};}return cells;}
+function localPlayers(){const arr=[];for(const key in DB.players){const pl=DB.players[key];if(!pl||!pl.p)continue;const cells=cellsFromLocal(pl);let active=false;for(const lv of ['e','a','s'])if(cells[lv].done>0||cells[lv].started)active=true;if(!active)continue;arr.push({email:(pl.email||'').toLowerCase(),me:key===DB.current,name:pl.name||(pl.email?pl.email.split('@')[0]:'Player'),avatar:pl.avatar||'🙂',cells});}return arr;}
+function remotePlayers(rows){const arr=[];(rows||[]).forEach(r=>{const email=(r.email||'').toString().toLowerCase();const cells={};['e','a','s'].forEach(lv=>{const done=parseInt(r[lv+'_worlds'],10)||0;const msR=r[lv+'_ms'];const ms=(msR!==''&&msR!=null&&!isNaN(+msR))?+msR:null;const fin=(parseInt(r[lv+'_fin'],10)===1)||ms!=null;cells[lv]={done,ms:fin?ms:null,finished:fin,started:done>0||fin};});if(!email&&!r.name)return;arr.push({email,me:false,name:r.name||(email?email.split('@')[0]:'Player'),avatar:r.avatar||'🙂',cells});});return arr;}
+function mergeByEmail(lists){const map={};let anon=0;
+  for(const list of lists){for(const p of list){
+    const k=p.email||('name:'+(p.name||'').toLowerCase())||('anon'+(anon++));
+    if(!map[k])map[k]={email:p.email,name:p.name,avatar:p.avatar,me:!!p.me,cells:{e:{done:0,ms:null,finished:false,started:false},a:{done:0,ms:null,finished:false,started:false},s:{done:0,ms:null,finished:false,started:false}}};
+    const m=map[k];if(p.me)m.me=true;if(p.name&&p.name!=='Player')m.name=p.name;if(p.avatar)m.avatar=p.avatar;
+    for(const lv of ['e','a','s']){const a=m.cells[lv],b=p.cells[lv];a.done=Math.max(a.done,b.done);a.started=a.started||b.started;if(b.finished){a.finished=true;if(b.ms!=null&&(a.ms==null||b.ms<a.ms))a.ms=b.ms;}}
+  }}
+  return Object.keys(map).map(k=>map[k]);}
+function rankPlayers(players){players.forEach(p=>{let fin=0,best=null;['e','a','s'].forEach(lv=>{const c=p.cells[lv];if(c.finished){fin++;if(c.ms!=null&&(best==null||c.ms<best))best=c.ms;}});p.fin=fin;p.best=best;});
+  players.sort((a,b)=>{if(b.fin!==a.fin)return b.fin-a.fin;if(a.best!=null&&b.best!=null)return a.best-b.best;if(a.best!=null)return -1;if(b.best!=null)return 1;return (b.cells.e.done+b.cells.a.done+b.cells.s.done)-(a.cells.e.done+a.cells.a.done+a.cells.s.done);});return players;}
+function fetchRemote(cb){if(!SHEET_ENDPOINT){cb(null);return;}
+  const name='__sqcb_'+Math.random().toString(36).slice(2);const s=document.createElement('script');
+  const done=ok=>{try{delete window[name];}catch(e){window[name]=undefined;}clearTimeout(tm);if(s.parentNode)s.remove();cb(ok);};
+  const tm=setTimeout(()=>done(null),9000);
+  window[name]=function(data){done(data&&data.players?data.players:[]);};
+  s.onerror=()=>done(null);
+  s.src=SHEET_ENDPOINT+(SHEET_ENDPOINT.indexOf('?')>=0?'&':'?')+'callback='+name+'&t='+Date.now();
+  document.body.appendChild(s);}
+function leagueTable(players){
+  if(!players.length)return el('div',{class:'card'},el('p',null,'No runs yet. Pick a level and start mastering worlds — times will appear here.'));
+  const t=el('table',{class:'tbl'});const head=el('tr',null,el('th',null,'#'),el('th',null,'Player'));
+  ['e','a','s'].forEach(lv=>head.append(el('th',null,LV[lv].emoji+' '+LV[lv].name)));t.append(head);
+  let fi=0;players.forEach(pl=>{const medal=pl.fin>0?(['🥇','🥈','🥉'][fi]||String(fi+1)):'–';if(pl.fin>0)fi++;
+    const tr=el('tr',pl.me?{style:'background:var(--card2);font-weight:700'}:null,el('td',null,medal),el('td',null,pl.avatar+' '+pl.name+(pl.me?' (you)':'')));
+    ['e','a','s'].forEach(lv=>{const c=pl.cells[lv];let cell;
+      if(c.finished&&c.ms!=null)cell=el('span',null,'✅ '+fmtDur(c.ms));
+      else if(c.finished)cell=el('span',null,'✅');
+      else if(c.done>0||c.started)cell=el('span',{style:'color:var(--muted)'},'⏳ '+c.done+'/'+Q.worlds.length);
+      else cell=el('span',{style:'color:var(--muted)'},'–');
+      tr.append(el('td',null,cell));});t.append(tr);});
+  return el('div',{class:'card',style:'overflow-x:auto'},t);
 }
 function league(){
   const w=el('div');
-  w.append(el('div',{class:'row'},el('button',{class:'btn sm alt',onclick:()=>go(state.lv?'map':'home')},'← Back'),el('h1',{style:'margin:0'},'🏁 League table')));
-  w.append(el('div',{class:'card'},el('p',{style:'margin:0'},'Who finishes fastest? The clock starts when you begin a level and stops when you master all ',Q.worlds.length,' of its worlds. One row per player; each level is a column, showing the finish time or worlds mastered so far.')));
-  const players=leaguePlayers();
-  if(!players.length){w.append(el('div',{class:'card'},el('p',null,'No runs yet. Pick a level and start mastering worlds — your time will appear here.')));return w;}
-  const t=el('table',{class:'tbl'});
-  const head=el('tr',null,el('th',null,'#'),el('th',null,'Player'));
-  ['e','a','s'].forEach(lv=>head.append(el('th',null,LV[lv].emoji+' '+LV[lv].name)));
-  t.append(head);
-  let fi=0;
-  players.forEach(pl=>{const medal=pl.fin>0?(['🥇','🥈','🥉'][fi]||String(fi+1)):'–';if(pl.fin>0)fi++;
-    const tr=el('tr',pl.me?{style:'background:var(--card2);font-weight:700'}:null,el('td',null,medal),el('td',null,pl.avatar+' '+pl.name+(pl.me?' (you)':'')));
-    ['e','a','s'].forEach(lv=>{const c=pl.cells[lv];let cell;
-      if(c.finished)cell=el('span',null,'✅ '+fmtDur(c.ms));
-      else if(c.done>0||c.started)cell=el('span',{style:'color:var(--muted)'},'⏳ '+c.done+'/'+Q.worlds.length);
-      else cell=el('span',{style:'color:var(--muted)'},'–');
-      tr.append(el('td',null,cell));});
-    t.append(tr);});
-  w.append(el('div',{class:'card',style:'overflow-x:auto'},t));
-  w.append(el('div',{class:'foot'},'✅ is a finish time; ⏳ is worlds mastered so far. Players are ranked by levels completed, then best time.'));
+  const refresh=el('button',{class:'btn sm alt','aria-label':'Refresh league from the sheet',title:'Reload players from the shared sheet'},'↻ Refresh');
+  w.append(el('div',{class:'row'},el('button',{class:'btn sm alt',onclick:()=>go(state.lv?'map':'home')},'← Back'),el('h1',{style:'margin:0;flex:1'},'🏁 League table'),refresh));
+  w.append(el('div',{class:'card'},el('p',{style:'margin:0'},'Who finishes fastest? One row per player; each level is a column, showing the finish time or worlds mastered so far. Ranked by levels completed, then best time.')));
+  const holder=el('div');const status=el('div',{class:'foot',style:'margin:6px 0'});
+  w.append(holder,status);
+  const render=players=>{holder.innerHTML='';holder.append(leagueTable(players));};
+  render(rankPlayers(mergeByEmail([localPlayers()])));
+  function doSync(manual){
+    if(!SHEET_ENDPOINT){status.textContent='Showing players on this device only. Connect the Google Sheet (setup notes at the end of this file) to show everyone who plays.';refresh.style.display='none';return;}
+    refresh.disabled=true;status.textContent=(manual?'↻ Refreshing':'↻ Loading')+' every player from the shared sheet…';
+    fetchRemote(function(rows){refresh.disabled=false;if(rows){status.textContent='Showing every player from the shared sheet. ✅ is a finish time; ⏳ is worlds mastered so far.';render(rankPlayers(mergeByEmail([remotePlayers(rows),localPlayers()])));}else{status.textContent='Could not reach the sheet right now — showing players on this device. Tap Refresh to try again.';}});
+  }
+  refresh.onclick=function(){doSync(true);};
+  doSync(false);
   return w;
 }
 function home(){
@@ -1118,38 +1138,66 @@ window.Q.start();
  4. In this file, set   const SHEET_ENDPOINT = 'PASTE_THE_URL_HERE';
     (it is near the top of the <script>, just under applyTheme();).
 
- After that, each time a player saves their email the game POSTs a row. The
- script keeps ONE row per email (it updates that row on return visits and when a
- course is completed). Columns: Timestamp, Email, Username, Avatar, Level, Worlds,
- Time(ms), Event.
+ After that: each time a player saves their email the game POSTs their progress
+ (doPost keeps ONE row per email). The League table reads every player back with
+ doGet via a JSONP callback, so players on OTHER devices appear too. Columns:
+ Timestamp, Email, Username, Avatar, then per level E/A/S: worlds, time-ms, fin,
+ and Last event.
 
- -------- paste this into Apps Script (Code.gs) --------
+ NOTE: if you already created a 'Players' tab with the earlier columns, delete
+ that tab first so the new header row is written. If you deploy a NEW version of
+ the script after changing it, use Deploy -> Manage deployments -> edit (pencil)
+ -> Version: New version, so the same URL keeps working.
+
+ -------- paste ALL of this into Apps Script (Code.gs) --------
+ function sheet_(){
+   var ss = SpreadsheetApp.getActiveSpreadsheet();
+   var sh = ss.getSheetByName('Players') || ss.insertSheet('Players');
+   if (sh.getLastRow() === 0) sh.appendRow(['Timestamp','Email','Username','Avatar','E_worlds','E_ms','E_fin','A_worlds','A_ms','A_fin','S_worlds','S_ms','S_fin','Last event']);
+   return sh;
+ }
+ function findEmail_(sh, email){
+   if (!email || sh.getLastRow() < 2) return -1;
+   var col = sh.getRange(2,2,sh.getLastRow()-1,1).getValues();
+   for (var i=0;i<col.length;i++){ if ((col[i][0]||'').toString().trim().toLowerCase()===email) return i+2; }
+   return -1;
+ }
+ function num_(x){ var n = parseInt(x,10); return isNaN(n)?0:n; }
  function doPost(e){
-   var lock = LockService.getScriptLock();
-   lock.waitLock(30000);
+   var lock = LockService.getScriptLock(); lock.waitLock(30000);
    try {
      var d = JSON.parse(e.postData.contents);
-     var ss = SpreadsheetApp.getActiveSpreadsheet();
-     var sh = ss.getSheetByName('Players') || ss.insertSheet('Players');
-     if (sh.getLastRow() === 0) {
-       sh.appendRow(['Timestamp','Email','Username','Avatar','Level','Worlds','Time(ms)','Event']);
-     }
+     var sh = sheet_();
      var email = (d.email || '').toString().trim().toLowerCase();
-     var row = [new Date(), email, d.name || '', d.avatar || '', d.level || '', d.worlds || '', d.ms || '', d.event || ''];
-     var found = -1;
-     if (email && sh.getLastRow() > 1) {
-       var col = sh.getRange(2, 2, sh.getLastRow() - 1, 1).getValues();
-       for (var i = 0; i < col.length; i++) {
-         if ((col[i][0] || '').toString().trim().toLowerCase() === email) { found = i + 2; break; }
-       }
-     }
-     if (found > 0) { sh.getRange(found, 1, 1, row.length).setValues([row]); }
-     else { sh.appendRow(row); }
+     var row = [new Date(), email, d.name||'', d.avatar||'',
+       num_(d.e_worlds), d.e_ms||'', num_(d.e_fin),
+       num_(d.a_worlds), d.a_ms||'', num_(d.a_fin),
+       num_(d.s_worlds), d.s_ms||'', num_(d.s_fin), d.event||''];
+     var r = findEmail_(sh, email);
+     if (r > 0) sh.getRange(r,1,1,row.length).setValues([row]);
+     else sh.appendRow(row);
      return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
    } catch (err) {
      return ContentService.createTextOutput(JSON.stringify({ok:false, error:String(err)})).setMimeType(ContentService.MimeType.JSON);
-   } finally {
-     lock.releaseLock();
+   } finally { lock.releaseLock(); }
+ }
+ function doGet(e){
+   try {
+     var sh = sheet_(); var players = [];
+     if (sh.getLastRow() > 1) {
+       var v = sh.getRange(2,1,sh.getLastRow()-1,14).getValues();
+       players = v.map(function(r){ return {
+         ts:r[0], email:r[1], name:r[2], avatar:r[3],
+         e_worlds:r[4], e_ms:r[5], e_fin:r[6],
+         a_worlds:r[7], a_ms:r[8], a_fin:r[9],
+         s_worlds:r[10], s_ms:r[11], s_fin:r[12] }; });
+     }
+     var out = JSON.stringify({ok:true, players:players});
+     var cb = e && e.parameter && e.parameter.callback;
+     if (cb) return ContentService.createTextOutput(cb + '(' + out + ')').setMimeType(ContentService.MimeType.JAVASCRIPT);
+     return ContentService.createTextOutput(out).setMimeType(ContentService.MimeType.JSON);
+   } catch (err) {
+     return ContentService.createTextOutput(JSON.stringify({ok:false, error:String(err)})).setMimeType(ContentService.MimeType.JSON);
    }
  }
  -------------------------------------------------------
