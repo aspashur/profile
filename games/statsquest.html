@@ -929,7 +929,8 @@ function home(){
   const w=el('div');
   const nm=el('input',{class:'ans',style:'width:14em',placeholder:'Your name',value:state.name||'','aria-label':'Your name'});
   nm.addEventListener('input',()=>{state.name=nm.value;save();});
-  const av=el('div',{class:'row'},['🦊','🐼','🦉','🐙','🦄','🚀','🐲','🌟'].map(a=>el('button',{class:'btn sm alt'+(state.avatar===a?' on':''),'aria-label':'Avatar '+a,onclick:ev=>{state.avatar=a;save();go('home');}},a)));
+  nm.addEventListener('change',()=>{state.name=nm.value;save();logToSheet('update');});
+  const av=el('div',{class:'row'},['🦊','🐼','🦉','🐙','🦄','🚀','🐲','🌟'].map(a=>el('button',{class:'btn sm alt'+(state.avatar===a?' on':''),'aria-label':'Avatar '+a,onclick:ev=>{state.avatar=a;save();logToSheet('update');go('home');}},a)));
   const em=el('input',{class:'ans',type:'email',style:'width:15em',placeholder:'you@email.com',value:state.email||'',autocomplete:'email','aria-label':'Your email'});
   em.addEventListener('change',()=>{if(commitEmail(em.value))go('home');});
   const rm=el('input',{type:'checkbox',id:'remindbox',style:'width:18px;height:18px;accent-color:var(--acc)'});
