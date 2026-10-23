@@ -1095,6 +1095,7 @@ function quest(wd,body,rec,id){
       if(r.pct===100)award('perfect');if(r.lost===0&&r.pct===100)award('nohurt');
       if(mastered(p)>=4)award('half');if(mastered(p)>=8)award('all');
       save();finishCheck(state.lv);
+      if(r.pct>=70&&!was)logToSheet('progress');
       const win=r.pct>=70;
       body.append(el('div',{class:'card win'},win?el('div',{class:'badge'},wd.emoji):el('div',{style:'font-size:3rem'},'💪'),el('h2',null,win?'World mastered!':'Good try. Let\u2019s go again.'),
         win?el('div',{class:'stars'},'⭐'.repeat(stars)+'☆'.repeat(3-stars)):null,
