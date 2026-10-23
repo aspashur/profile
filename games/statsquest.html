@@ -796,10 +796,58 @@ const BADGES=[
  {id:'first',e:'🚀',n:'First Quest'},{id:'perfect',e:'💯',n:'Perfect Run'},{id:'fire',e:'🔥',n:'On Fire (6 in a row)'},{id:'nohurt',e:'🛡️',n:'Untouched'},
  {id:'lab',e:'🧪',n:'Lab Rat (3 labs)'},{id:'half',e:'🌗',n:'Halfway (4 worlds)'},{id:'all',e:'🏆',n:'All worlds mastered'},{id:'boss',e:'🐉',n:'Boss Slayer'},{id:'streak',e:'📅',n:'3-day streak'}
 ];
-const state=Q.state={name:'',avatar:'🦊',lv:null,p:{e:null,a:null,s:null}};
-try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);if(o)Object.assign(state,o);}}catch(e){}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}};
+const KEY2='statsquest_v2';
+function blankP(email){return {email:email||'',name:'',avatar:'🦊',remind:false,lv:null,p:{e:null,a:null,s:null},t:{e:{},a:{},s:{}},created:Date.now()};}
+const DB=Q.DB={current:'guest',players:{}};
+(function(){
+  try{const r=localStorage.getItem(KEY2);if(r){const o=JSON.parse(r);if(o&&o.players){DB.current=o.current||'guest';DB.players=o.players;DB.theme=o.theme||null;}}}catch(e){}
+  if(!DB.players||typeof DB.players!=='object')DB.players={};
+  if(!Object.keys(DB.players).length){
+    try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);if(o){const pl=blankP('');pl.name=o.name||'';pl.avatar=o.avatar||'🦊';pl.lv=o.lv||null;pl.p=o.p||{e:null,a:null,s:null};DB.players.guest=pl;}}}catch(e){}
+  }
+  if(!DB.players[DB.current])DB.players[DB.current]=blankP('');
+})();
+let state=Q.state=DB.players[DB.current];
+const save=()=>{try{localStorage.setItem(KEY2,JSON.stringify(DB));}catch(e){}};
+function sysDark(){return window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches;}
+function effDark(){return DB.theme==='dark'||(DB.theme!=='light'&&sysDark());}
+function applyTheme(){const d=document.documentElement;if(DB.theme==='dark')d.setAttribute('data-theme','dark');else if(DB.theme==='light')d.setAttribute('data-theme','light');else d.removeAttribute('data-theme');}
+function toggleTheme(){DB.theme=effDark()?'light':'dark';applyTheme();save();}
+applyTheme();
+/* ---- Google Sheet logging ----
+   Paste the Web App URL of the Apps Script bound to your sheet below.
+   Setup: open the sheet → Extensions → Apps Script → paste the code from
+   the SHEET-SETUP comment at the bottom of this file → Deploy → New deployment
+   → type "Web app" → Execute as "Me", Who has access "Anyone" → copy the URL here.
+   Until a URL is set, the game works exactly as before and sends nothing. */
+const SHEET_ENDPOINT='https://script.google.com/macros/s/AKfycbzs0uauZyv_640Toro9UYEG_S7U-FZ_9AxDFoW2CIVHvRyC3I2j7Fx8e1LJrKFp6Dhf/exec';
+function logToSheet(event){if(!SHEET_ENDPOINT||!state.email)return;
+  try{const prog=state.p[state.lv],done=prog?Object.values(prog.w).filter(x=>x.done).length:0,t=(state.t&&state.t[state.lv])||{};
+    const body=JSON.stringify({event:event,email:state.email||'',name:state.name||'',avatar:state.avatar||'',level:state.lv?LV[state.lv].name:'',worlds:done,ms:(t.finish&&t.start)?t.finish-t.start:'',ts:new Date().toISOString()});
+    fetch(SHEET_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:body});
+  }catch(e){}}
 function P(lv){lv=lv||state.lv;if(!state.p[lv])state.p[lv]={xp:0,w:{},badges:[],labs:{},boss:0,streak:{last:'',n:0},best:0};return state.p[lv];}
+/* ---------- per-user profiles, timing, league ---------- */
+function tOf(lv){if(!state.t)state.t={e:{},a:{},s:{}};if(!state.t[lv])state.t[lv]={};return state.t[lv];}
+function beginTimer(lv){if(!lv)return;const t=tOf(lv);if(!t.start){t.start=Date.now();save();}}
+function finishCheck(lv){if(!lv)return;const p=P(lv),t=tOf(lv);const done=Object.values(p.w).filter(x=>x.done).length;if(done>=Q.worlds.length&&!t.finish){if(!t.start)t.start=state.created||Date.now();t.finish=Date.now();save();logToSheet('complete');Q.confetti();Q.toast('🎓 Course complete! Your time is on the league table.');}}
+function commitEmail(raw){const email=(raw||'').trim().toLowerCase();if(!email)return false;
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){Q.toast('That email looks off — please check it.');return false;}
+  if(DB.players[email]&&email!==DB.current){DB.current=email;state=Q.state=DB.players[email];save();logToSheet('return');Q.toast('Welcome back, '+(state.name||'player')+'!');return true;}
+  if(email!==DB.current){const pl=state;pl.email=email;delete DB.players[DB.current];DB.players[email]=pl;DB.current=email;}else{state.email=email;}
+  save();logToSheet('signup');Q.toast('Saved. Progress is linked to '+email);return true;}
+function signOut(){DB.current='guest';if(!DB.players.guest)DB.players.guest=blankP('');state=Q.state=DB.players.guest;save();}
+function pending(){for(const lv of ['s','a','e']){const prog=state.p[lv];if(!prog)continue;const done=Object.values(prog.w).filter(x=>x.done).length;const t=(state.t&&state.t[lv])||{};if(done>0&&done<Q.worlds.length&&!t.finish)return {lv,done};}return null;}
+function fmtDur(ms){if(ms==null)return '—';let s=Math.round(ms/1000);const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60),ss=s%60;const parts=[];if(d)parts.push(d+'d');if(h)parts.push(h+'h');if(m)parts.push(m+'m');if(!d&&!h)parts.push(ss+'s');return parts.join(' ')||'0s';}
+function leagueRows(){const rows=[];for(const key in DB.players){const pl=DB.players[key];if(!pl||!pl.p)continue;for(const lv of ['e','a','s']){const prog=pl.p[lv];if(!prog)continue;const done=Object.values(prog.w).filter(x=>x.done).length;const t=(pl.t&&pl.t[lv])||{};if(!t.start&&done===0)continue;rows.push({key,me:key===DB.current,name:pl.name||(pl.email?pl.email.split('@')[0]:'Player'),avatar:pl.avatar||'🙂',lv,done,ms:(t.finish&&t.start)?t.finish-t.start:null,finished:!!t.finish});}}
+  rows.sort((a,b)=>{if(a.ms!=null&&b.ms!=null)return a.ms-b.ms;if(a.ms!=null)return -1;if(b.ms!=null)return 1;return b.done-a.done;});return rows;}
+/* smooth serpentine path + label wrapping for the milestone trail */
+function smoothPath(pts){if(pts.length<2)return pts.length?('M'+pts[0][0]+','+pts[0][1]):'';let d='M'+pts[0][0]+','+pts[0][1];
+  for(let i=0;i<pts.length-1;i++){const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||pts[i+1];
+    const c1x=p1[0]+(p2[0]-p0[0])/6,c1y=p1[1]+(p2[1]-p0[1])/6,c2x=p2[0]-(p3[0]-p1[0])/6,c2y=p2[1]-(p3[1]-p1[1])/6;
+    d+=' C'+c1x.toFixed(1)+','+c1y.toFixed(1)+' '+c2x.toFixed(1)+','+c2y.toFixed(1)+' '+p2[0]+','+p2[1];}
+  return d;}
+function wrapLines(s,max,maxLines){const w=String(s).split(' ');const L=[];let c='';for(const x of w){if((c+' '+x).trim().length>max&&c){L.push(c);c=x;}else c=(c?c+' ':'')+x;}if(c)L.push(c);if(L.length>maxLines){const k=L.slice(0,maxLines);k[maxLines-1]+='…';return k;}return L;}
 const app=document.getElementById('app');
 const lvl=()=>LV[state.lv];
 function rank(p){const i=Math.min(LV[state.lv].ranks.length-1,Math.floor(p.xp/XP_PER));return {i,name:LV[state.lv].ranks[i],into:p.xp-i*XP_PER,need:XP_PER};}
@@ -813,45 +861,135 @@ function topbar(){
   const t=el('div',{class:'top'},el('button',{class:'brand',onclick:()=>go('home')},el('span',null,'🎲'),el('span',{class:'t'},'Stats Quest')));
   if(state.lv){const p=P(),r=rank(p);const i=el('i');i.style.width=Math.round(100*r.into/r.need)+'%';
     t.append(el('div',{class:'who'},el('span',{class:'chip'},state.avatar+' '+(state.name||'Player')),el('span',{class:'chip'},LV[state.lv].emoji+' '+r.name),el('div',{class:'xpbar',role:'img','aria-label':r.into+' of '+r.need+' XP to next rank'},i),el('span',{class:'chip'},'⭐ '+p.xp+' XP'),p.streak.n>1?el('span',{class:'chip'},'🔥 '+p.streak.n+' days'):null));}
+  const tb=el('button',{class:'btn sm alt','aria-label':effDark()?'Switch to light mode':'Switch to dark mode',title:'Toggle theme',onclick:()=>toggleTheme()},effDark()?'☀️':'🌙');
+  if(!state.lv)tb.style.marginLeft='auto';
+  t.append(tb);
   return t;
 }
 function shell(content){app.innerHTML='';document.documentElement.removeAttribute('data-lv');if(state.lv)app.setAttribute('data-lv',state.lv);else app.removeAttribute('data-lv');document.body.setAttribute('data-lv',state.lv||'');if(state.lv)document.documentElement.setAttribute('data-lv',state.lv);app.append(topbar(),content);window.scrollTo(0,0);}
 let view={v:'home'};
 function go(v,a,b){view={v,a,b};
-  if(v==='home')shell(home());else if(v==='map')shell(map());else if(v==='world')shell(world(a,b));else if(v==='boss')shell(boss());else if(v==='me')shell(me());}
+  if(v==='home')shell(home());else if(v==='map')shell(map());else if(v==='world')shell(world(a,b));else if(v==='boss')shell(boss());else if(v==='me')shell(me());else if(v==='league')shell(league());}
 Q.go=go;
 
+function leaguePlayers(){
+  const arr=[];
+  for(const key in DB.players){const pl=DB.players[key];if(!pl||!pl.p)continue;
+    const cells={};let active=false,fin=0,best=null;
+    for(const lv of ['e','a','s']){const prog=pl.p[lv];const t=(pl.t&&pl.t[lv])||{};const done=prog?Object.values(prog.w).filter(x=>x.done).length:0;const ms=(t.finish&&t.start)?t.finish-t.start:null;cells[lv]={done,ms,finished:!!t.finish,started:!!t.start};if(done>0||t.start)active=true;if(t.finish){fin++;if(best==null||ms<best)best=ms;}}
+    if(!active)continue;
+    arr.push({key,me:key===DB.current,name:pl.name||(pl.email?pl.email.split('@')[0]:'Player'),avatar:pl.avatar||'🙂',cells,fin,best});}
+  arr.sort((a,b)=>{if(b.fin!==a.fin)return b.fin-a.fin;if(a.best!=null&&b.best!=null)return a.best-b.best;if(a.best!=null)return -1;if(b.best!=null)return 1;return 0;});
+  return arr;
+}
+function league(){
+  const w=el('div');
+  w.append(el('div',{class:'row'},el('button',{class:'btn sm alt',onclick:()=>go(state.lv?'map':'home')},'← Back'),el('h1',{style:'margin:0'},'🏁 League table')));
+  w.append(el('div',{class:'card'},el('p',{style:'margin:0'},'Who finishes fastest? The clock starts when you begin a level and stops when you master all ',Q.worlds.length,' of its worlds. One row per player; each level is a column, showing the finish time or worlds mastered so far.')));
+  const players=leaguePlayers();
+  if(!players.length){w.append(el('div',{class:'card'},el('p',null,'No runs yet. Pick a level and start mastering worlds — your time will appear here.')));return w;}
+  const t=el('table',{class:'tbl'});
+  const head=el('tr',null,el('th',null,'#'),el('th',null,'Player'));
+  ['e','a','s'].forEach(lv=>head.append(el('th',null,LV[lv].emoji+' '+LV[lv].name)));
+  t.append(head);
+  let fi=0;
+  players.forEach(pl=>{const medal=pl.fin>0?(['🥇','🥈','🥉'][fi]||String(fi+1)):'–';if(pl.fin>0)fi++;
+    const tr=el('tr',pl.me?{style:'background:var(--card2);font-weight:700'}:null,el('td',null,medal),el('td',null,pl.avatar+' '+pl.name+(pl.me?' (you)':'')));
+    ['e','a','s'].forEach(lv=>{const c=pl.cells[lv];let cell;
+      if(c.finished)cell=el('span',null,'✅ '+fmtDur(c.ms));
+      else if(c.done>0||c.started)cell=el('span',{style:'color:var(--muted)'},'⏳ '+c.done+'/'+Q.worlds.length);
+      else cell=el('span',{style:'color:var(--muted)'},'–');
+      tr.append(el('td',null,cell));});
+    t.append(tr);});
+  w.append(el('div',{class:'card',style:'overflow-x:auto'},t));
+  w.append(el('div',{class:'foot'},'✅ is a finish time; ⏳ is worlds mastered so far. Players are ranked by levels completed, then best time.'));
+  return w;
+}
 function home(){
   const w=el('div');
   const nm=el('input',{class:'ans',style:'width:14em',placeholder:'Your name',value:state.name||'','aria-label':'Your name'});
   nm.addEventListener('input',()=>{state.name=nm.value;save();});
   const av=el('div',{class:'row'},['🦊','🐼','🦉','🐙','🦄','🚀','🐲','🌟'].map(a=>el('button',{class:'btn sm alt'+(state.avatar===a?' on':''),'aria-label':'Avatar '+a,onclick:ev=>{state.avatar=a;save();go('home');}},a)));
+  const em=el('input',{class:'ans',type:'email',style:'width:15em',placeholder:'you@email.com',value:state.email||'',autocomplete:'email','aria-label':'Your email'});
+  em.addEventListener('change',()=>{if(commitEmail(em.value))go('home');});
+  const rm=el('input',{type:'checkbox',id:'remindbox',style:'width:18px;height:18px;accent-color:var(--acc)'});
+  if(state.remind)rm.checked=true;
+  rm.addEventListener('change',()=>{state.remind=rm.checked;save();});
+  const pend=(state.remind&&state.email)?pending():null;
+  if(pend)w.append(el('div',{class:'card',style:'border-left:5px solid var(--acc)'},
+    el('p',{style:'margin:0 0 .3em'},'\ud83d\udc4b Welcome back, ',el('b',null,state.name||'friend'),'. You are partway through ',el('b',null,LV[pend.lv].name),' \u2014 ',el('b',null,pend.done+' / '+Q.worlds.length),' worlds mastered. Finish the course to lock in your time!'),
+    el('button',{class:'btn sm',onclick:()=>{state.lv=pend.lv;P();save();beginTimer(pend.lv);touchStreak();go('map');}},'Continue where I left off \u2192')));
   w.append(el('div',{class:'card'},el('h1',null,'Stats Quest'),
     el('p',null,'A game of data in 8 worlds, one for each chapter of Birger Madsen\u2019s ',el('i',null,'Statistics for Non-Statisticians'),'. Learn, play with live labs, beat quests, earn XP and badges, then face the Boss Arena.'),
     el('p',null,'Choose your name and avatar, then pick the level that fits you. You can switch levels at any time; each keeps its own progress.'),
-    el('div',{class:'row'},nm),av));
+    el('div',{class:'row'},nm,av),
+    el('div',{class:'row'},el('span',{style:'font-weight:700'},'Email'),em),
+    el('label',{for:'remindbox',class:'row',style:'cursor:pointer;gap:9px;font-size:.96rem;margin:4px 0'},rm,el('span',null,'Remind me about my level and nudge me to finish the game.')),
+    el('p',{class:'foot',style:'margin:.2em 0 0;text-align:left'},'Your email and progress are saved on this device, so the league can time your run. Reminders appear here when you return.'),
+    state.email?el('div',{class:'row',style:'margin-top:6px'},el('span',{class:'chip'},'\ud83d\udce7 '+state.email),el('button',{class:'linkbtn',onclick:()=>{signOut();go('home');}},'switch player')):null));
   w.append(el('div',{class:'levels'},Object.keys(LV).map(k=>{const l=LV[k];const p=state.p[k];const done=p?Object.values(p.w).filter(x=>x.done).length:0;
-    return el('button',{class:'lvcard '+k,onclick:()=>{state.lv=k;P();save();touchStreak();go('map');}},el('div',{class:'big'},l.big),el('h3',null,l.name),el('div',{style:'font-size:.85rem;opacity:.75'},l.age),el('p',{style:'margin:.5em 0 0'},l.blurb),el('p',{style:'margin:.4em 0 0;font-weight:700'},p?('Worlds mastered: '+done+' / 8 · '+p.xp+' XP'):'Start here'));})));
+    return el('button',{class:'lvcard '+k,onclick:()=>{state.lv=k;P();save();touchStreak();beginTimer(k);go('map');}},el('div',{class:'big'},l.big),el('h3',null,l.name),el('div',{style:'font-size:.85rem;opacity:.75'},l.age),el('p',{style:'margin:.5em 0 0'},l.blurb),el('p',{style:'margin:.4em 0 0;font-weight:700'},p?('Worlds mastered: '+done+' / 8 · '+p.xp+' XP'):'Start here'));})));
+  w.append(el('div',{class:'row',style:'justify-content:center;margin-top:18px'},el('button',{class:'btn alt',onclick:()=>go('league')},'🏁 League table')));
   w.append(el('div',{class:'foot'},'Based on the structure of the book. All examples, data and questions here are original and generated fresh each play.'));
   return w;
 }
 function mastered(p){return Object.values(p.w).filter(x=>x.done).length;}
 function map(){
-  const p=P(),L=lvl(),w=el('div');
+  const p=P(),L=lvl(),w=el('div'),sv=Q.sv;
+  beginTimer(state.lv);
   const next=Q.worlds.find(x=>!(p.w[x.id]&&p.w[x.id].done));
-  w.append(el('div',{class:'row'},el('h2',{style:'margin:0'},L.name+' map'),el('span',{style:'flex:1'}),el('button',{class:'btn sm alt',onclick:()=>go('me')},'Profile and badges'),el('button',{class:'btn sm alt',onclick:()=>{state.lv=null;save();go('home');}},'Switch level')));
-  w.append(el('div',{class:'map'},Q.worlds.map(x=>{const st=p.w[x.id]||{};const stars=st.stars||0;
-    return el('button',{class:'world'+(next&&next.id===x.id?' next':''),onclick:()=>go('world',x.id,'learn')},el('span',{class:'em'},x.emoji),el('span',{class:'nm'},x.name[state.lv]),el('span',{class:'ch'},x.ch),el('span',{style:'font-size:.82rem;color:var(--muted)'},x.tag[state.lv]),el('span',{class:'st'},st.done?'⭐'.repeat(stars)+'☆'.repeat(3-stars):'☆☆☆'));}),
-    (()=>{const open=mastered(p)>=3;return el('button',{class:'world'+(open?'':' lock'),onclick:()=>{if(open)go('boss');else Q.toast('Master 3 worlds to unlock the Boss Arena');}},el('span',{class:'em'},'🐉'),el('span',{class:'nm'},'Boss Arena'),el('span',{class:'ch'},open?'Unlocked':'Master 3 worlds to unlock'),el('span',{style:'font-size:.82rem;color:var(--muted)'},'Mixed questions from every world you have mastered.'),el('span',{class:'st'},p.boss?'Best: '+p.boss+'%':''));})()));
-  w.append(el('div',{class:'foot'},'Master a world by scoring 70% or more on its quest.'));
+  const mast=mastered(p);
+  w.append(el('div',{class:'row'},el('h2',{style:'margin:0'},L.emoji+' '+L.name+' trail'),el('span',{style:'flex:1'}),
+    el('button',{class:'btn sm alt',onclick:()=>go('league')},'🏁 League'),
+    el('button',{class:'btn sm alt',onclick:()=>go('me')},'Profile'),
+    el('button',{class:'btn sm alt',onclick:()=>{state.lv=null;save();go('home');}},'Switch level')));
+  const bar=el('i');bar.style.width=Math.round(100*mast/Q.worlds.length)+'%';
+  w.append(el('div',{class:'row'},el('span',{class:'chip'},'Beginner'),el('div',{class:'xpbar',style:'flex:1;width:auto'},bar),el('span',{class:'chip'},'Advanced'),el('span',{class:'chip'},mast+' / '+Q.worlds.length+' mastered')));
+  const cols=3,colX=[180,500,820],topY=120,rowGap=210;
+  const nodes=Q.worlds.map(x=>({world:x})).concat([{boss:true}]);
+  const rows=Math.ceil(nodes.length/cols);
+  const H=topY+(rows-1)*rowGap+150;
+  const pts=nodes.map((_,i)=>{const row=Math.floor(i/cols),k=i%cols,col=row%2===0?k:cols-1-k;return [colX[col],topY+row*rowGap];});
+  const s=sv('svg',{viewBox:'0 0 1000 '+H,class:'chart',style:'height:auto;background:var(--card)','aria-label':L.name+' milestone trail from beginner to advanced',role:'group'});
+  s.append(sv('path',{d:smoothPath(pts),fill:'none',stroke:'var(--line)','stroke-width':'30','stroke-linecap':'round','stroke-linejoin':'round'}));
+  s.append(sv('path',{d:smoothPath(pts),fill:'none',stroke:'var(--acc)','stroke-width':'4','stroke-linecap':'round','stroke-dasharray':'3 20',opacity:'.85'}));
+  s.append(sv('text',{x:pts[0][0],y:pts[0][1]-74,'text-anchor':'middle',style:'font-size:22px;font-weight:800;fill:var(--muted);letter-spacing:2px'},'START'));
+  nodes.forEach((nd,i)=>{const x=pts[i][0],y=pts[i][1];
+    if(nd.world){const x0=nd.world,st=p.w[x0.id]||{},done=!!st.done,isNext=next&&next.id===x0.id,stars=st.stars||0;
+      const g=sv('g',{});g.style.cursor='pointer';g.setAttribute('tabindex','0');g.setAttribute('role','button');g.setAttribute('aria-label',(done?'Completed, ':isNext?'Next up, ':'')+x0.name[state.lv]+', '+stars+' of 3 stars');
+      const act=()=>go('world',x0.id,'learn');g.addEventListener('click',act);g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();act();}});
+      if(isNext)g.append(sv('circle',{cx:x,cy:y,r:'53',fill:'none',stroke:'var(--acc)','stroke-width':'3',opacity:'.55'}));
+      g.append(sv('circle',{cx:x,cy:y,r:'44',fill:done?'var(--acc2)':isNext?'var(--acc)':'var(--card)',stroke:'var(--ink)','stroke-width':'4'}));
+      g.append(sv('text',{x:x,y:y+13,'text-anchor':'middle',style:'font-size:36px'},x0.emoji));
+      g.append(sv('circle',{cx:x+34,cy:y-34,r:'17',fill:'var(--gold)',stroke:'var(--ink)','stroke-width':'3'}));
+      g.append(sv('text',{x:x+34,y:y-28,'text-anchor':'middle',style:'font-size:18px;font-weight:800;fill:#14182B'},x0.id));
+      const lines=wrapLines(x0.name[state.lv],18,2);
+      const nmT=sv('text',{x:x,y:y+72,'text-anchor':'middle',style:'font-size:19px;font-weight:700;fill:var(--ink)'});
+      lines.forEach((ln,li)=>nmT.append(sv('tspan',{x:x,dy:li===0?'0':'20'},ln)));g.append(nmT);
+      g.append(sv('text',{x:x,y:y+72+lines.length*20+5,'text-anchor':'middle',style:'font-size:18px;letter-spacing:2px'},done?'⭐'.repeat(stars)+'☆'.repeat(3-stars):'☆☆☆'));
+      s.append(g);
+    }else{const open=mast>=3;const g=sv('g',{});g.style.cursor=open?'pointer':'not-allowed';g.setAttribute('tabindex','0');g.setAttribute('role','button');g.setAttribute('aria-label',open?'Boss Arena, unlocked':'Boss Arena, locked. Master 3 worlds to unlock');
+      const act=()=>{if(open)go('boss');else Q.toast('Master 3 worlds to unlock the Boss Arena');};g.addEventListener('click',act);g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();act();}});
+      g.append(sv('circle',{cx:x,cy:y,r:'50',fill:open?'var(--acc3)':'var(--card2)',stroke:'var(--ink)','stroke-width':'4','stroke-dasharray':open?'':'7 7'}));
+      g.append(sv('text',{x:x,y:y+15,'text-anchor':'middle',style:'font-size:40px'},open?'🐉':'🔒'));
+      g.append(sv('text',{x:x,y:y+82,'text-anchor':'middle',style:'font-size:20px;font-weight:800;fill:var(--ink)'},'Boss Arena'));
+      g.append(sv('text',{x:x,y:y+104,'text-anchor':'middle',style:'font-size:15px;fill:var(--muted)'},p.boss?('Best '+p.boss+'%'):(open?'Unlocked':'Locked')));
+      s.append(g);}
+  });
+  s.append(sv('text',{x:pts[pts.length-1][0],y:pts[pts.length-1][1]+128,'text-anchor':'middle',style:'font-size:22px;font-weight:800;fill:var(--muted);letter-spacing:2px'},'FINISH'));
+  w.append(el('div',{class:'card',style:'padding:12px'},s));
+  w.append(el('div',{class:'foot'},'Follow the trail from beginner to advanced. Light up a world by scoring 70% or more on its quest; master all '+Q.worlds.length+' to log your time on the league table.'));
   return w;
 }
 function me(){
-  const p=P(),w=el('div'),r=rank(p);
-  w.append(el('div',{class:'row'},el('button',{class:'btn sm alt',onclick:()=>go('map')},'\u2190 Map')),el('div',{class:'card'},el('h2',null,state.avatar+' '+(state.name||'Player')+' · '+LV[state.lv].name),
-    Q.kpis([[p.xp,'total XP'],[r.name,'rank'],[mastered(p)+' / 8','worlds mastered'],[p.boss?p.boss+'%':'–','best Boss score'],[p.streak.n+' days','current streak']]),
+  const p=P(),w=el('div'),r=rank(p),t=(state.t&&state.t[state.lv])||{},done=mastered(p);
+  const timeLbl=t.finish?'course time':(t.start?'time so far':'time');
+  const timeVal=t.finish?fmtDur(t.finish-t.start):(t.start?fmtDur(Date.now()-t.start):'\u2013');
+  w.append(el('div',{class:'row'},el('button',{class:'btn sm alt',onclick:()=>go('map')},'\u2190 Map'),el('button',{class:'btn sm alt',onclick:()=>go('league')},'\ud83c\udfc1 League')),el('div',{class:'card'},el('h2',null,state.avatar+' '+(state.name||'Player')+' · '+LV[state.lv].name),
+    state.email?el('p',{style:'margin:.2em 0'},el('span',{class:'chip'},'📧 '+state.email),state.remind?el('span',{class:'chip'},'🔔 reminders on'):null):el('p',{class:'foot',style:'text-align:left;margin:.2em 0'},'Add your email on the home screen to save progress and join the league.'),
+    Q.kpis([[p.xp,'total XP'],[r.name,'rank'],[done+' / '+Q.worlds.length,'worlds mastered'],[timeVal,timeLbl],[p.boss?p.boss+'%':'–','best Boss score'],[p.streak.n+' days','current streak']]),
     el('h3',null,'Badges'),el('div',{class:'badges'},BADGES.map(b=>el('div',{class:'bdg'+(p.badges.includes(b.id)?' got':'')},el('div',{class:'i'},b.e),b.n)))));
-  w.append(el('div',{class:'row'},el('button',{class:'btn sm alt',onclick:()=>{if(confirm('Erase progress for this level?')){state.p[state.lv]=null;P();save();go('me');}}},'Reset this level')));
+  w.append(el('div',{class:'row'},el('button',{class:'btn sm alt',onclick:()=>{if(confirm('Erase progress for this level?')){state.p[state.lv]=null;if(state.t)state.t[state.lv]={};P();save();go('me');}}},'Reset this level')));
   return w;
 }
 
@@ -935,7 +1073,7 @@ function quest(wd,body,rec,id){
       if(r.pct>=70){rec.done=true;rec.stars=Math.max(rec.stars||0,stars);Q.confetti();}
       if(r.pct===100)award('perfect');if(r.lost===0&&r.pct===100)award('nohurt');
       if(mastered(p)>=4)award('half');if(mastered(p)>=8)award('all');
-      save();
+      save();finishCheck(state.lv);
       const win=r.pct>=70;
       body.append(el('div',{class:'card win'},win?el('div',{class:'badge'},wd.emoji):el('div',{style:'font-size:3rem'},'💪'),el('h2',null,win?'World mastered!':'Good try. Let\u2019s go again.'),
         win?el('div',{class:'stars'},'⭐'.repeat(stars)+'☆'.repeat(3-stars)):null,
@@ -960,9 +1098,61 @@ function boss(){
   return w;
 }
 Q._build=build;
-Q.start=()=>go("home");
+Q.start=()=>{go("home");const pd=(state.remind&&state.email)?pending():null;if(pd)setTimeout(()=>Q.toast('🔔 '+(state.name||'Hey')+', finish '+LV[pd.lv].name+': '+pd.done+'/'+Q.worlds.length+' worlds done'),700);};
 })();
 window.Q.start();
 </script>
+<!-- ======================================================================
+ SHEET-SETUP: send player emails + usernames to your Google Sheet
+ Target sheet: https://docs.google.com/spreadsheets/d/1gBx7oCr1qwKf7zEkcUuro79n3-EOtz4pHFVAK1GDCEw/edit
+
+ One-time setup (runs under YOUR Google account; it cannot be automated from here):
+ 1. Open that sheet.
+ 2. Extensions -> Apps Script. Delete any starter code and paste the script below.
+ 3. Click Deploy -> New deployment -> gear icon -> "Web app".
+    - Description: StatsQuest
+    - Execute as: Me
+    - Who has access: Anyone
+    Click Deploy and authorise when prompted. Copy the Web app URL it gives you
+    (it looks like https://script.google.com/macros/s/XXXX/exec).
+ 4. In this file, set   const SHEET_ENDPOINT = 'PASTE_THE_URL_HERE';
+    (it is near the top of the <script>, just under applyTheme();).
+
+ After that, each time a player saves their email the game POSTs a row. The
+ script keeps ONE row per email (it updates that row on return visits and when a
+ course is completed). Columns: Timestamp, Email, Username, Avatar, Level, Worlds,
+ Time(ms), Event.
+
+ -------- paste this into Apps Script (Code.gs) --------
+ function doPost(e){
+   var lock = LockService.getScriptLock();
+   lock.waitLock(30000);
+   try {
+     var d = JSON.parse(e.postData.contents);
+     var ss = SpreadsheetApp.getActiveSpreadsheet();
+     var sh = ss.getSheetByName('Players') || ss.insertSheet('Players');
+     if (sh.getLastRow() === 0) {
+       sh.appendRow(['Timestamp','Email','Username','Avatar','Level','Worlds','Time(ms)','Event']);
+     }
+     var email = (d.email || '').toString().trim().toLowerCase();
+     var row = [new Date(), email, d.name || '', d.avatar || '', d.level || '', d.worlds || '', d.ms || '', d.event || ''];
+     var found = -1;
+     if (email && sh.getLastRow() > 1) {
+       var col = sh.getRange(2, 2, sh.getLastRow() - 1, 1).getValues();
+       for (var i = 0; i < col.length; i++) {
+         if ((col[i][0] || '').toString().trim().toLowerCase() === email) { found = i + 2; break; }
+       }
+     }
+     if (found > 0) { sh.getRange(found, 1, 1, row.length).setValues([row]); }
+     else { sh.appendRow(row); }
+     return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
+   } catch (err) {
+     return ContentService.createTextOutput(JSON.stringify({ok:false, error:String(err)})).setMimeType(ContentService.MimeType.JSON);
+   } finally {
+     lock.releaseLock();
+   }
+ }
+ -------------------------------------------------------
+====================================================================== -->
 </body>
 </html>
