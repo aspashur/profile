@@ -1154,7 +1154,9 @@ window.Q.start();
  function sheet_(){
    var ss = SpreadsheetApp.getActiveSpreadsheet();
    var sh = ss.getSheetByName('Players') || ss.insertSheet('Players');
-   if (sh.getLastRow() === 0) sh.appendRow(['Timestamp','Email','Username','Avatar','E_worlds','E_ms','E_fin','A_worlds','A_ms','A_fin','S_worlds','S_ms','S_fin','Last event']);
+   var header = ['Timestamp','Email','Username','Avatar','E_worlds','E_ms','E_fin','A_worlds','A_ms','A_fin','S_worlds','S_ms','S_fin','Last event'];
+   var first = sh.getRange(1,1,1,header.length).getValues()[0];
+   if (first[0] !== 'Timestamp' || first[4] !== 'E_worlds') { sh.getRange(1,1,1,header.length).setValues([header]); }
    return sh;
  }
  function findEmail_(sh, email){
